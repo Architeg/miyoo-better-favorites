@@ -1,0 +1,43 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build output
+build/*
+!build/.gitkeep
+
+dist/
+out/
+
+# Compiled binaries
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+
+# Logs / temp files
+*.log
+*.tmp
+*.bak
+
+# Local Miyoo / SD test folders
+sdcard/
+sdcard-test/
+sdcard-staging/
+local-backups/
+
+# Third-party downloaded binaries/libraries
+third_party/bin/
+third_party/cache/
+
+# Packaging output
+packaging/output/

@@ -1,29 +1,55 @@
-#include <SDL.h>
-#include <json.h>
+#include "favorites_parser.h"
+#include "navigation.h"
+#include "ui_row.h"
+#include "ui_rows.h"
 
 #include <iostream>
 
 int main()
 {
-    const char* text =
-        "{\"label\":\"Tetris\",\"launch\":\"/mnt/SDCARD/Emu/GB/launch.sh\"}";
+    FavoritesParser parser("/mnt/SDCARD");
 
-    json_object* root = json_tokener_parse(text);
+    const auto favorites =
+        parser.loadFavorites(
+            "/mnt/SDCARD/Roms/favourite.json"
+        );
 
-    if (!root) {
-        std::cerr << "JSON parse failed" << std::endl;
-        return 1;
+    const auto groups =
+        parser.groupFavorites(favorites);
+
+    const auto rows =
+        buildUiRows(groups);
+
+    const std::size_t first =
+        firstSelectableRow(rows);
+
+    std::cout
+        << "First selectable row: "
+        << first
+        << std::endl;
+
+    if (first >= rows.size()) {
+        std::cout << "No selectable favorites." << std::endl;
+        return 0;
     }
 
-    json_object* label = nullptr;
+    std::size_t current = first;
 
-    if (json_object_object_get_ex(root, "label", &label)) {
-        std::cout << "Parsed label: "
-                  << json_object_get_string(label)
-                  << std::endl;
+    for (int step = 0; step < 35; ++step) {
+        const UiRow& row = rows[current];
+
+        std::cout
+            << "Step "
+            << step
+            << ": row "
+            << current
+            << " -> "
+            << row.text
+            << std::endl;
+
+        current =
+            nextSelectableRow(rows, current);
     }
-
-    json_object_put(root);
 
     return 0;
 }

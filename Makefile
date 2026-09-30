@@ -2,7 +2,11 @@ CXX := $(CROSS_COMPILE)g++
 
 TARGET := build/better-favorites
 
-SRC := src/main.cpp
+SRC := \
+	src/main.cpp \
+	src/favorites_parser.cpp \
+	src/ui_rows.cpp \
+	src/navigation.cpp
 
 SDL_ROOT := third_party/sdl2_miyoo
 SDL_INC := $(SDL_ROOT)/sdl2/include

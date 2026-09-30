@@ -6,13 +6,19 @@ SRC := \
 	src/main.cpp \
 	src/favorites_parser.cpp \
 	src/ui_rows.cpp \
-	src/navigation.cpp
+	src/navigation.cpp \
+	src/theme_loader.cpp
 
 SDL_ROOT := third_party/sdl2_miyoo
 SDL_INC := $(SDL_ROOT)/sdl2/include
 SDL_LIB_DIR := $(SDL_ROOT)/prebuilt/mini
 SDL_LIB := $(SDL_LIB_DIR)/libSDL2-2.0.so.0
 JSONC_LIB := $(SDL_ROOT)/examples/libjson-c.so.5
+
+SDL_TTF_INC := third_party/sdl2_ttf/include
+SDL_TTF_LIB := $(SDL_ROOT)/examples/libSDL2_ttf-2.0.so.0
+SDL_IMAGE_INC := third_party/sdl2_image/include
+SDL_IMAGE_LIB := $(SDL_ROOT)/examples/libSDL2_image-2.0.so.0
 
 CXXFLAGS := \
 	-std=c++17 \
@@ -21,10 +27,14 @@ CXXFLAGS := \
 	-Wextra \
 	-Iinclude \
 	-I$(SDL_INC) \
-	-Ithird_party/json-c/include
+	-Ithird_party/json-c/include \
+	-I$(SDL_TTF_INC) \
+	-I$(SDL_IMAGE_INC)
 
 LDFLAGS := \
 	$(SDL_LIB) \
+	$(SDL_TTF_LIB) \
+	$(SDL_IMAGE_LIB) \
 	$(JSONC_LIB) \
 	-Wl,-rpath,'$$ORIGIN'
 

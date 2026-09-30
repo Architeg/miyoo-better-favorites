@@ -11,6 +11,11 @@ JSONC_INCLUDE="$JSONC_DIR/include"
 SDL_REPO="https://github.com/Rparadise-Team/sdl2_miyoo_new.git"
 SDL_COMMIT="3c68ed01fee7feffd4ea338b1cc5018a455e2be9"
 
+SDL_TTF_DIR="$ROOT_DIR/third_party/sdl2_ttf"
+SDL_TTF_INCLUDE="$SDL_TTF_DIR/include"
+SDL_IMAGE_DIR="$ROOT_DIR/third_party/sdl2_image"
+SDL_IMAGE_INCLUDE="$SDL_IMAGE_DIR/include"
+
 echo "==> Preparing Better Favorites dependencies"
 
 # ----------------------------------------------------------------------
@@ -82,5 +87,54 @@ cat > "$JSONC_INCLUDE/json_config.h" <<'EOF'
 EOF
 
 echo "==> json-c headers ready"
+
+# ----------------------------------------------------------------------
+# SDL2_ttf headers
+# ----------------------------------------------------------------------
+
+SDL_TTF_ARCHIVE="$SDL_DIR/sdl2/dependency/SDL2_ttf-2.20.2.tar.gz"
+
+if [ ! -f "$SDL_TTF_ARCHIVE" ]; then
+    echo "ERROR: SDL2_ttf archive not found:"
+    echo "$SDL_TTF_ARCHIVE"
+    exit 1
+fi
+
+echo "==> Preparing SDL2_ttf 2.20.2 headers"
+
+rm -rf "$SDL_TTF_DIR"
+mkdir -p "$SDL_TTF_INCLUDE"
+
+tar -xzf "$SDL_TTF_ARCHIVE" \
+    --strip-components=1 \
+    -C "$SDL_TTF_INCLUDE" \
+    SDL2_ttf-2.20.2/SDL_ttf.h
+
+echo "==> SDL2_ttf headers ready"
+
+# ----------------------------------------------------------------------
+# SDL2_image headers
+# ----------------------------------------------------------------------
+
+SDL_IMAGE_ARCHIVE="$SDL_DIR/sdl2/dependency/SDL2_image-2.8.1.tar.gz"
+
+if [ ! -f "$SDL_IMAGE_ARCHIVE" ]; then
+    echo "ERROR: SDL2_image archive not found:"
+    echo "$SDL_IMAGE_ARCHIVE"
+    exit 1
+fi
+
+echo "==> Preparing SDL2_image 2.8.1 headers"
+
+rm -rf "$SDL_IMAGE_DIR"
+mkdir -p "$SDL_IMAGE_INCLUDE"
+
+tar -xzf "$SDL_IMAGE_ARCHIVE" \
+    --strip-components=2 \
+    -C "$SDL_IMAGE_INCLUDE" \
+    SDL2_image-2.8.1/include/SDL_image.h
+
+echo "==> SDL2_image headers ready"
+
 echo
 echo "Dependencies successfully prepared."

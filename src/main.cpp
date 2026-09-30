@@ -1,55 +1,68 @@
-#include "favorites_parser.h"
-#include "navigation.h"
-#include "ui_row.h"
-#include "ui_rows.h"
+#include "theme_loader.h"
 
 #include <iostream>
 
 int main()
 {
-    FavoritesParser parser("/mnt/SDCARD");
+    ThemeLoader loader("/mnt/SDCARD");
 
-    const auto favorites =
-        parser.loadFavorites(
-            "/mnt/SDCARD/Roms/favourite.json"
-        );
-
-    const auto groups =
-        parser.groupFavorites(favorites);
-
-    const auto rows =
-        buildUiRows(groups);
-
-    const std::size_t first =
-        firstSelectableRow(rows);
+    const Theme theme = loader.load();
 
     std::cout
-        << "First selectable row: "
-        << first
+        << "Theme root: "
+        << theme.rootPath
         << std::endl;
 
-    if (first >= rows.size()) {
-        std::cout << "No selectable favorites." << std::endl;
-        return 0;
-    }
+    std::cout
+        << "Background: "
+        << theme.backgroundPath
+        << std::endl;
 
-    std::size_t current = first;
+    std::cout
+        << "Title background: "
+        << theme.titleBackgroundPath
+        << std::endl;
 
-    for (int step = 0; step < 35; ++step) {
-        const UiRow& row = rows[current];
+    std::cout
+        << "Footer background: "
+        << theme.footerBackgroundPath
+        << std::endl;
 
-        std::cout
-            << "Step "
-            << step
-            << ": row "
-            << current
-            << " -> "
-            << row.text
-            << std::endl;
+    std::cout
+        << "Selected item: "
+        << theme.selectedItemPath
+        << std::endl;
 
-        current =
-            nextSelectableRow(rows, current);
-    }
+    std::cout
+        << "Normal item: "
+        << theme.normalItemPath
+        << std::endl;
+
+    std::cout
+        << "Divider: "
+        << theme.horizontalDividerPath
+        << std::endl;
+
+    std::cout
+        << "Title font: "
+        << theme.title.fontPath
+        << " size="
+        << theme.title.size
+        << std::endl;
+
+    std::cout
+        << "List font: "
+        << theme.list.fontPath
+        << " size="
+        << theme.list.size
+        << std::endl;
+
+    std::cout
+        << "Hint font: "
+        << theme.hint.fontPath
+        << " size="
+        << theme.hint.size
+        << std::endl;
 
     return 0;
 }

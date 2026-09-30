@@ -44,7 +44,8 @@ all: $(TARGET)
 
 $(TARGET): $(SRC) $(SDL_LIB)
 	mkdir -p build
-	$(CXX) $(CXXFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
+	@echo "🔨 CXX  $(TARGET)"
+	@$(CXX) $(CXXFLAGS) $(SRC) -o $(TARGET) $(LDFLAGS)
 
 clean:
 	rm -f $(TARGET)

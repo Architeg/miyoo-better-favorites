@@ -19,6 +19,9 @@ struct Theme
     // /mnt/SDCARD/Themes/Some Theme/
     std::string rootPath;
 
+    bool hideIcons = false;
+    bool hideHints = false;
+
     // Common Onion skin assets.
     std::string backgroundPath;
     std::string titleBackgroundPath;
@@ -26,6 +29,9 @@ struct Theme
 
     std::string selectedItemPath;
     std::string normalItemPath;
+
+    std::string listSmallPath;
+    std::string listLargePath;
 
     std::string horizontalDividerPath;
 
@@ -36,6 +42,13 @@ struct Theme
     ThemeTextStyle title;
     ThemeTextStyle list;
     ThemeTextStyle hint;
+
+    /*
+     * Console section headers.
+     * Defaults are derived from the active list style later,
+     * so themes do not need a new config key.
+     */
+    ThemeTextStyle section;
 
     int selectedRed = 208;
     int selectedGreen = 208;

@@ -41,3 +41,7 @@ third_party/cache/
 
 # Packaging output
 packaging/output/
+
+# External/generated development dependencies
+third_party/sdl2_miyoo/
+third_party/json-c/

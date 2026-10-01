@@ -1,4 +1,5 @@
 #include "favorites_parser.h"
+#include "launch_request.h"
 #include "navigation.h"
 #include "theme_loader.h"
 #include "ui_row.h"
@@ -13,6 +14,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <iterator>
@@ -176,8 +178,32 @@ void blitScaled(
 
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+    if (argc == 3) {
+        std::string error;
+        bool success = false;
+
+        if (std::strcmp(argv[1], "--publish-handoff") == 0) {
+            success = publishStagedOnionLaunch(argv[2], error);
+        } else if (std::strcmp(argv[1], "--cancel-handoff") == 0) {
+            success = cancelStagedOnionLaunch(argv[2], error);
+        } else {
+            error = "Unknown handoff operation.";
+        }
+
+        if (!success) {
+            std::cerr << error << std::endl;
+        }
+
+        return success ? 0 : 1;
+    }
+
+    if (argc != 1) {
+        std::cerr << "Unexpected arguments." << std::endl;
+        return 1;
+    }
+
     constexpr int width = 640;
     constexpr int height = 480;
     constexpr int bpp = 16;
@@ -583,6 +609,7 @@ int main()
     };
 
     bool running = true;
+    bool launchRequested = false;
 
     long firstRow = 0;
 
@@ -696,6 +723,52 @@ int main()
                * actions as it does for navigation.
                */
               case SDLK_SPACE:
+                  if (event.key.repeat != 0) {
+                      break;
+                  }
+
+                  if (navigationSound) {
+                      Mix_PlayChannelTimed(
+                          -1,
+                          navigationSound,
+                          0,
+                          -1
+                      );
+                  }
+
+                  if (
+                      selectedRow >= rows.size() ||
+                      rows[selectedRow].type !=
+                          UiRowType::Favorite ||
+                      !rows[selectedRow].favorite
+                  ) {
+                      std::cerr
+                          << "Launch request failed: No game selected."
+                          << std::endl;
+                      break;
+                  }
+
+                  {
+                      std::string error;
+
+                      if (!requestOnionLaunch(
+                              *rows[selectedRow].favorite,
+                              error
+                          )) {
+                          std::cerr
+                              << "Launch request failed: "
+                              << error
+                              << std::endl;
+                          break;
+                      }
+                  }
+
+                  // The launcher acts only after all SDL/audio cleanup.
+                  SDL_Delay(50);
+                  launchRequested = true;
+                  running = false;
+                  break;
+
               case SDLK_LSHIFT:
               case SDLK_LALT:
                   if (
@@ -739,6 +812,10 @@ int main()
                   break;
 
             default:
+                break;
+            }
+
+            if (!running) {
                 break;
             }
 
@@ -1935,5 +2012,5 @@ int main()
     IMG_Quit();
     SDL_Quit();
 
-    return 0;
+    return launchRequested ? kLaunchRequestedExitCode : 0;
 }

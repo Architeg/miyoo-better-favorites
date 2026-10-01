@@ -26,6 +26,7 @@ struct Theme
     std::string backgroundPath;
     std::string titleBackgroundPath;
     std::string footerBackgroundPath;
+    std::string previewBackgroundPath;
 
     std::string selectedItemPath;
     std::string normalItemPath;

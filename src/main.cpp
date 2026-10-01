@@ -221,6 +221,24 @@ int main()
             );
     }
 
+    SDL_Surface* previewBackground = nullptr;
+
+    if (!theme.previewBackgroundPath.empty()) {
+        previewBackground =
+            IMG_Load(
+                theme.previewBackgroundPath.c_str()
+            );
+
+        if (!previewBackground) {
+            std::cerr
+                << "Preview background failed: "
+                << theme.previewBackgroundPath
+                << " : "
+                << IMG_GetError()
+                << std::endl;
+        }
+    }
+
     std::cerr
         << "THEME ICONS: hideIcons="
         << (theme.hideIcons ? "true" : "false")
@@ -274,6 +292,9 @@ int main()
             );
     }
 
+    SDL_Surface* selectedPreview = nullptr;
+    std::string selectedPreviewPath;
+
     SDL_Surface* divider = nullptr;
 
     if (!theme.horizontalDividerPath.empty()) {
@@ -314,6 +335,15 @@ int main()
             std::max(
                 1,
                 theme.section.size
+            )
+        );
+
+    TTF_Font* footerFont =
+        TTF_OpenFont(
+            theme.hint.fontPath.c_str(),
+            std::max(
+                1,
+                theme.hint.size
             )
         );
 
@@ -479,9 +509,64 @@ int main()
             default:
                 break;
             }
-        }
+          }
 
-        SDL_Rect fullScreen {
+          /*
+           * Load artwork for the currently selected Favorite.
+           *
+           * favourite.json is the source of truth. The parser already
+           * provides the exact Onion imgpath through Favorite::imagePath.
+           *
+           * Cache the loaded surface so disk I/O happens only when the
+           * selected game changes.
+           */
+          std::string newPreviewPath;
+
+          if (
+              selectedRow <
+                  rows.size() &&
+              rows[selectedRow].type ==
+                  UiRowType::Favorite &&
+              rows[selectedRow].favorite
+          ) {
+              newPreviewPath =
+                  rows[selectedRow].favorite->imagePath;
+          }
+
+          if (
+              newPreviewPath !=
+              selectedPreviewPath
+          ) {
+              if (selectedPreview) {
+                  SDL_FreeSurface(
+                      selectedPreview
+                  );
+
+                  selectedPreview =
+                      nullptr;
+              }
+
+              selectedPreviewPath =
+                  newPreviewPath;
+
+              if (!selectedPreviewPath.empty()) {
+                  selectedPreview =
+                      IMG_Load(
+                          selectedPreviewPath.c_str()
+                      );
+
+                  if (!selectedPreview) {
+                      std::cerr
+                          << "Preview image failed: "
+                          << selectedPreviewPath
+                          << " : "
+                          << IMG_GetError()
+                          << std::endl;
+                  }
+              }
+          }
+
+          SDL_Rect fullScreen {
             0,
             0,
             width,
@@ -917,14 +1002,6 @@ int main()
                   ? contentTop + sectionVisualHeight
                   : contentTop;
 
-         /*
-          * Screen Y position of the next console header after the
-          * current sticky section.
-          *
-          * -1 means there is no next section currently visible.
-          */
-         int nextSectionY = -1;
-
          for (
              long rowNumber = firstRow;
              rowNumber <
@@ -974,18 +1051,6 @@ int main()
                  ) {
                      y += currentHeight;
                      continue;
-                 }
-
-                 /*
-                  * Remember where the next console header is located.
-                  * It will be allowed to push the sticky header when
-                  * it reaches the sticky header's lower edge.
-                  */
-                 if (
-                     stickySectionRow >= 0 &&
-                     nextSectionY < 0
-                 ) {
-                     nextSectionY = y;
                  }
 
                  drawSectionHeader(
@@ -1052,11 +1117,128 @@ int main()
          }
 
          /*
-          * Draw the sticky console header only after the normal list
-          * content has been rendered.
+          * Onion-style selected game preview.
           *
-          * We restore the underlying theme background first so games
-          * underneath the sticky area cannot show through the header.
+          * preview-bg.png is theme-controlled. The actual artwork
+          * comes directly from Favorite::imagePath.
+          *
+          * Standard Onion geometry:
+          * - preview starts at y=60
+          * - preview width is the theme asset width
+          * - artwork is centered around y=240
+          * - artwork is scaled down proportionally when necessary
+          */
+          SDL_Rect selectedPreviewRect {
+              0,
+              0,
+              0,
+              0
+          };
+
+          bool selectedPreviewRectValid = false;
+
+         if (previewBackground) {
+             const int previewWidth =
+                 previewBackground->w;
+
+             SDL_Rect previewBackgroundRect {
+                 640 -
+                     previewBackground->w,
+                 60,
+                 previewBackground->w,
+                 previewBackground->h
+             };
+
+             SDL_BlitSurface(
+                 previewBackground,
+                 nullptr,
+                 screen,
+                 &previewBackgroundRect
+             );
+
+             if (selectedPreview) {
+                 int previewDrawWidth =
+                     selectedPreview->w;
+
+                 int previewDrawHeight =
+                     selectedPreview->h;
+
+                 if (
+                     previewDrawWidth >
+                     previewWidth
+                 ) {
+                     const double scale =
+                         static_cast<double>(
+                             previewWidth
+                         ) /
+                         static_cast<double>(
+                             selectedPreview->w
+                         );
+
+                     previewDrawWidth =
+                         static_cast<int>(
+                             selectedPreview->w *
+                             scale
+                         );
+
+                     previewDrawHeight =
+                         static_cast<int>(
+                             selectedPreview->h *
+                             scale
+                         );
+                 }
+
+                 SDL_Rect previewRect {
+                     640 -
+                         previewWidth +
+                         (
+                             previewWidth -
+                             previewDrawWidth
+                         ) / 2,
+                     240 -
+                         previewDrawHeight / 2,
+                     previewDrawWidth,
+                     previewDrawHeight
+                 };
+
+                 selectedPreviewRect =
+                     previewRect;
+
+                 selectedPreviewRectValid =
+                     true;
+
+                 if (
+                     previewDrawWidth ==
+                         selectedPreview->w &&
+                     previewDrawHeight ==
+                         selectedPreview->h
+                 ) {
+                     SDL_BlitSurface(
+                         selectedPreview,
+                         nullptr,
+                         screen,
+                         &previewRect
+                     );
+                 }
+                 else {
+                     SDL_BlitScaled(
+                         selectedPreview,
+                         nullptr,
+                         screen,
+                         &previewRect
+                     );
+                 }
+             }
+         }
+
+
+         /*
+          * Draw the sticky console header only after the normal list
+          * content and selected-game preview have been rendered.
+          *
+          * Keep the proven list/sticky geometry unchanged. The only
+          * preview-specific behavior is horizontal clipping when the
+          * actual rendered artwork overlaps the sticky header.
           */
          if (stickySectionRow >= 0) {
              SDL_Rect stickyBackground {
@@ -1066,6 +1248,51 @@ int main()
                  sectionVisualHeight
              };
 
+             SDL_Rect previousClip;
+
+             SDL_GetClipRect(
+                 screen,
+                 &previousClip
+             );
+
+             SDL_Rect headerClip =
+                 stickyBackground;
+
+             bool clipStickyHeader = false;
+
+             if (selectedPreviewRectValid) {
+                 SDL_Rect overlap;
+
+                 if (
+                     SDL_IntersectRect(
+                         &stickyBackground,
+                         &selectedPreviewRect,
+                         &overlap
+                     )
+                 ) {
+                     headerClip.w =
+                         std::max(
+                             0,
+                             overlap.x -
+                                 stickyBackground.x
+                         );
+
+                     clipStickyHeader = true;
+                 }
+             }
+
+             if (clipStickyHeader) {
+                 SDL_SetClipRect(
+                     screen,
+                     &headerClip
+                 );
+             }
+
+             /*
+              * Restore the normal theme background underneath the
+              * sticky header. The clip prevents this from erasing
+              * the selected artwork on the right.
+              */
              SDL_BlitSurface(
                  background,
                  &stickyBackground,
@@ -1073,6 +1300,11 @@ int main()
                  &stickyBackground
              );
 
+             /*
+              * The same clip applies to the title, fallback divider,
+              * and themed divider, so all of them stop at exactly the
+              * same artwork edge.
+              */
              drawSectionHeader(
                  rows[
                      static_cast<std::size_t>(
@@ -1082,66 +1314,10 @@ int main()
                  contentTop
              );
 
-             /*
-              * If the next console header has entered the sticky
-              * header's area, let it push the current header upward.
-              *
-              * Only the overlapping portion is restored, leaving the
-              * old sticky header visible above it.
-              */
-             if (
-                 nextSectionY >= contentTop &&
-                 nextSectionY <
-                     contentTop +
-                     sectionVisualHeight
-             ) {
-                 SDL_Rect pushedBackground {
-                     0,
-                     nextSectionY,
-                     width,
-                     sectionVisualHeight
-                 };
-
-                 SDL_BlitSurface(
-                     background,
-                     &pushedBackground,
-                     screen,
-                     &pushedBackground
-                 );
-
-                 long nextSectionRow = -1;
-
-                 for (
-                     long i = firstRow;
-                     i <
-                         static_cast<long>(
-                             rows.size()
-                         );
-                     ++i
-                 ) {
-                     if (
-                         rows[
-                             static_cast<std::size_t>(i)
-                         ].type ==
-                             UiRowType::SystemDivider &&
-                         i != stickySectionRow
-                     ) {
-                         nextSectionRow = i;
-                         break;
-                     }
-                 }
-
-                 if (nextSectionRow >= 0) {
-                     drawSectionHeader(
-                         rows[
-                             static_cast<std::size_t>(
-                                 nextSectionRow
-                             )
-                         ],
-                         nextSectionY
-                     );
-                 }
-             }
+             SDL_SetClipRect(
+                 screen,
+                 &previousClip
+             );
          }
 
         /*
@@ -1171,20 +1347,6 @@ int main()
                 footerRect
             );
         }
-
-        /*
-         * MainUI uses a fixed ~25px footer text size even when
-         * config.json specifies a different hint.size.
-         * Font family and colors still come from the active theme.
-         */
-         TTF_Font* footerFont =
-             TTF_OpenFont(
-                 theme.hint.fontPath.c_str(),
-                 std::max(
-                     1,
-                     theme.hint.size
-                 )
-             );
 
         if (footerFont) {
             const SDL_Color hintColor {
@@ -1431,10 +1593,6 @@ int main()
                     labelCenterY
                 );
             }
-
-            TTF_CloseFont(
-                footerFont
-            );
         }
 
         SDL_UpdateTexture(
@@ -1454,6 +1612,18 @@ int main()
         );
 
         SDL_RenderPresent(renderer);
+    }
+
+    if (selectedPreview) {
+        SDL_FreeSurface(
+            selectedPreview
+        );
+    }
+
+    if (previewBackground) {
+        SDL_FreeSurface(
+            previewBackground
+        );
     }
 
     if (divider) {
@@ -1489,6 +1659,7 @@ int main()
     TTF_CloseFont(sectionFont);
     TTF_CloseFont(listFont);
     TTF_CloseFont(titleFont);
+    TTF_CloseFont(footerFont);
 
     SDL_DestroyTexture(texture);
     SDL_FreeSurface(screen);

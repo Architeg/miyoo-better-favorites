@@ -174,6 +174,11 @@ Theme ThemeLoader::load() const
                 "tips-bar-bg.png"
             );
 
+        theme.previewBackgroundPath =
+            resolveThemeAsset(
+                "preview-bg.png"
+            );
+
         theme.selectedItemPath =
             resolveThemeAsset(
                 "bg-game-item-f.png"

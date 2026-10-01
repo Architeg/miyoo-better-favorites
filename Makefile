@@ -20,6 +20,9 @@ SDL_TTF_LIB := $(SDL_ROOT)/examples/libSDL2_ttf-2.0.so.0
 SDL_IMAGE_INC := third_party/sdl2_image/include
 SDL_IMAGE_LIB := $(SDL_ROOT)/examples/libSDL2_image-2.0.so.0
 
+SDL_MIXER_INC := third_party/sdl2_mixer/include
+SDL_MIXER_LIB := $(SDL_ROOT)/examples/libSDL2_mixer-2.0.so.0
+
 CXXFLAGS := \
 	-std=c++17 \
 	-O2 \
@@ -29,12 +32,14 @@ CXXFLAGS := \
 	-I$(SDL_INC) \
 	-Ithird_party/json-c/include \
 	-I$(SDL_TTF_INC) \
-	-I$(SDL_IMAGE_INC)
+	-I$(SDL_IMAGE_INC) \
+	-I$(SDL_MIXER_INC)
 
 LDFLAGS := \
 	$(SDL_LIB) \
 	$(SDL_TTF_LIB) \
 	$(SDL_IMAGE_LIB) \
+	$(SDL_MIXER_LIB) \
 	$(JSONC_LIB) \
 	-Wl,-rpath,'$$ORIGIN'
 

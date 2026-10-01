@@ -6,11 +6,16 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
 #include <SDL_ttf.h>
+
+#include <json.h>
 
 #include <algorithm>
 #include <cstddef>
+#include <fstream>
 #include <iostream>
+#include <iterator>
 #include <string>
 
 namespace
@@ -60,6 +65,94 @@ bool drawTextCenteredVertically(
 
     return result == 0;
 }
+
+
+std::string resolveNavigationSound(
+    const Theme& theme
+)
+{
+    /*
+     * Match Onion's resource_getSoundChange():
+     *
+     * 1. active theme sound/change.wav
+     * 2. Miyoo/Onion fallback sound/change.wav
+     */
+    const std::string themedPath =
+        theme.rootPath +
+        "/sound/change.wav";
+
+    std::ifstream themedFile(
+        themedPath,
+        std::ios::binary
+    );
+
+    if (themedFile.good()) {
+        return themedPath;
+    }
+
+    return
+        "/mnt/SDCARD/miyoo/app/sound/change.wav";
+}
+
+int loadNavigationVolume()
+{
+    /*
+     * Onion's settings loader reads bgmvol from the live
+     * /mnt/SDCARD/system.json used by MainUI.
+     */
+    std::ifstream input(
+        "/mnt/SDCARD/system.json"
+    );
+
+    if (!input.is_open()) {
+        return 20;
+    }
+
+    std::string json(
+        (
+            std::istreambuf_iterator<char>(
+                input
+            )
+        ),
+        std::istreambuf_iterator<char>()
+    );
+
+    json_object* root =
+        json_tokener_parse(
+            json.c_str()
+        );
+
+    if (!root) {
+        return 20;
+    }
+
+    int volume = 20;
+
+    json_object* value = nullptr;
+
+    if (
+        json_object_object_get_ex(
+            root,
+            "bgmvol",
+            &value
+        ) &&
+        value
+    ) {
+        volume =
+            json_object_get_int(value);
+    }
+
+    json_object_put(root);
+
+    return std::max(
+        0,
+        std::min(
+            20,
+            volume
+        )
+    );
+}
+
 
 void blitScaled(
     SDL_Surface* source,
@@ -119,7 +212,13 @@ int main()
         return 1;
     }
 
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
+    if (
+        SDL_Init(
+            SDL_INIT_VIDEO |
+            SDL_INIT_AUDIO |
+            SDL_INIT_EVENTS
+        ) != 0
+    ) {
         std::cerr
             << "SDL_Init failed: "
             << SDL_GetError()
@@ -295,6 +394,77 @@ int main()
     SDL_Surface* selectedPreview = nullptr;
     std::string selectedPreviewPath;
 
+    /*
+     * Onion-style navigation sound.
+     *
+     * The audio device and WAV are opened once. Navigation only calls
+     * Mix_PlayChannel(), so there is no filesystem work while scrolling.
+     */
+    Mix_Chunk* navigationSound = nullptr;
+
+    if (
+        Mix_OpenAudio(
+            48000,
+            AUDIO_S16SYS,
+            2,
+            1024
+        ) == 0
+    ) {
+        std::cerr
+            << "Audio opened successfully."
+            << std::endl;
+
+        const std::string navigationSoundPath =
+            resolveNavigationSound(theme);
+
+        navigationSound =
+            Mix_LoadWAV_RW(
+                SDL_RWFromFile(
+                    navigationSoundPath.c_str(),
+                    "rb"
+                ),
+                1
+            );
+
+            std::cerr
+                << "Navigation sound path: "
+                << navigationSoundPath
+                << std::endl;
+
+            if (navigationSound) {
+                std::cerr
+                    << "Navigation sound loaded successfully."
+                    << std::endl;
+            }
+
+        if (navigationSound) {
+            const int navigationVolume =
+                loadNavigationVolume();
+
+            Mix_Volume(
+                -1,
+                (
+                    navigationVolume *
+                    MIX_MAX_VOLUME
+                ) / 20
+            );
+        }
+        else {
+            std::cerr
+                << "Navigation sound failed: "
+                << navigationSoundPath
+                << " : "
+                << Mix_GetError()
+                << std::endl;
+        }
+    }
+    else {
+        std::cerr
+            << "Audio initialization failed: "
+            << Mix_GetError()
+            << std::endl;
+    }
+
     SDL_Surface* divider = nullptr;
 
     if (!theme.horizontalDividerPath.empty()) {
@@ -424,8 +594,14 @@ int main()
                 continue;
             }
 
+            const std::size_t previousSelection =
+                selectedRow;
+
+            bool navigationKey = false;
+
             switch (event.key.keysym.sym) {
             case SDLK_UP:
+                navigationKey = true;
                 selectedRow =
                     previousSelectableRow(
                         rows,
@@ -434,6 +610,8 @@ int main()
                 break;
 
               case SDLK_DOWN:
+                  navigationKey = true;
+
                   selectedRow =
                       nextSelectableRow(
                           rows,
@@ -442,6 +620,8 @@ int main()
                   break;
 
               case SDLK_LEFT:
+                  navigationKey = true;
+
                   selectedRow =
                       previousConsoleRow(
                           rows,
@@ -472,6 +652,8 @@ int main()
                   break;
 
               case SDLK_RIGHT:
+                  navigationKey = true;
+
                   selectedRow =
                       nextConsoleRow(
                           rows,
@@ -501,13 +683,88 @@ int main()
 
                   break;
 
+              /*
+               * Onion-style face-button feedback.
+               *
+               * Miyoo SDL mapping:
+               *   A = Space
+               *   B = Left Ctrl
+               *   X = Left Shift
+               *   Y = Left Alt
+               *
+               * Onion uses the same change.wav feedback for menu
+               * actions as it does for navigation.
+               */
+              case SDLK_SPACE:
+              case SDLK_LSHIFT:
+              case SDLK_LALT:
+                  if (
+                      navigationSound &&
+                      event.key.repeat == 0
+                  ) {
+                      Mix_PlayChannelTimed(
+                          -1,
+                          navigationSound,
+                          0,
+                          -1
+                      );
+                  }
+                  break;
+
               case SDLK_LCTRL:
-            case SDLK_ESCAPE:
-                running = false;
-                break;
+                  if (
+                      navigationSound &&
+                      event.key.repeat == 0
+                  ) {
+                      Mix_PlayChannelTimed(
+                          -1,
+                          navigationSound,
+                          0,
+                          -1
+                      );
+
+                      /*
+                       * B exits immediately, so give the short UI
+                       * sound enough time to reach the audio server
+                       * before Mix_CloseAudio() runs.
+                       */
+                      SDL_Delay(50);
+                  }
+
+                  running = false;
+                  break;
+
+              case SDLK_ESCAPE:
+                  running = false;
+                  break;
 
             default:
                 break;
+            }
+
+            /*
+             * Match Onion's change-sound behavior: play only when
+             * navigation actually changed the current selection.
+             *
+             * Reaching the beginning/end of the list therefore does
+             * not produce a false navigation click.
+             */
+            if (
+                navigationKey &&
+                selectedRow != previousSelection &&
+                navigationSound
+            ) {
+
+              std::cerr
+                  << "Playing navigation sound."
+                  << std::endl;
+
+                Mix_PlayChannelTimed(
+                    -1,
+                    navigationSound,
+                    0,
+                    -1
+                );
             }
           }
 
@@ -1613,6 +1870,14 @@ int main()
 
         SDL_RenderPresent(renderer);
     }
+
+    if (navigationSound) {
+        Mix_FreeChunk(
+            navigationSound
+        );
+    }
+
+    Mix_CloseAudio();
 
     if (selectedPreview) {
         SDL_FreeSurface(

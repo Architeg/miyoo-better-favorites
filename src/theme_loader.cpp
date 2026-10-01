@@ -122,335 +122,545 @@ Theme ThemeLoader::load() const
     theme.selectedItemPath =
         skinRoot + "/bg-game-item-f.png";
 
-    theme.normalItemPath =
-        skinRoot + "/bg-game-item-n.png";
+        /*
+         * Onion-style theme asset lookup:
+         *
+         * 1. Current profile override
+         * 2. Active theme
+         * 3. Onion/Miyoo fallback theme
+         *
+         * The renderer should not need to know where an asset came from.
+         */
+        auto resolveThemeAsset =
+            [&](const std::string& filename) {
+                const std::string profilePath =
+                    sdRoot_ +
+                    "/Saves/CurrentProfile/theme/skin/" +
+                    filename;
 
-    theme.listSmallPath =
-        skinRoot + "/bg-list-s.png";
+                if (std::ifstream(profilePath).good()) {
+                    return profilePath;
+                }
 
-    theme.listLargePath =
-        skinRoot + "/bg-list-l.png";
+                const std::string activePath =
+                    theme.rootPath +
+                    "/skin/" +
+                    filename;
 
-    theme.horizontalDividerPath =
-        skinRoot + "/div-line-h.png";
+                if (std::ifstream(activePath).good()) {
+                    return activePath;
+                }
 
-    theme.buttonAPath =
-        skinRoot + "/icon-A-54.png";
+                const std::string fallbackPath =
+                    sdRoot_ +
+                    "/miyoo/app/skin/" +
+                    filename;
 
-    theme.buttonBPath =
-        skinRoot + "/icon-B-54.png";
+                return fallbackPath;
+            };
 
-    const std::string configPath =
-        theme.rootPath + "/config.json";
+        theme.backgroundPath =
+            resolveThemeAsset(
+                "background.png"
+            );
 
-    std::ifstream input(configPath);
+        theme.titleBackgroundPath =
+            resolveThemeAsset(
+                "bg-title.png"
+            );
 
-    if (!input.is_open()) {
-        return theme;
-    }
+        theme.footerBackgroundPath =
+            resolveThemeAsset(
+                "tips-bar-bg.png"
+            );
 
-    std::ostringstream buffer;
-    buffer << input.rdbuf();
+        theme.selectedItemPath =
+            resolveThemeAsset(
+                "bg-game-item-f.png"
+            );
 
-    json_object* root =
-        json_tokener_parse(
-            buffer.str().c_str()
-        );
+        theme.normalItemPath =
+            resolveThemeAsset(
+                "bg-game-item-n.png"
+            );
 
-    if (!root) {
-        return theme;
-    }
+        theme.listSmallPath =
+            resolveThemeAsset(
+                "bg-list-s.png"
+            );
 
-    auto parseColor =
-        [](const char* text,
-           int& red,
-           int& green,
-           int& blue) {
-            if (!text || text[0] != '#') {
-                return;
-            }
+        theme.listLargePath =
+            resolveThemeAsset(
+                "bg-list-l.png"
+            );
 
-            const std::string value(text);
+        theme.horizontalDividerPath =
+            resolveThemeAsset(
+                "div-line-h.png"
+            );
 
-            if (value.size() != 7) {
-                return;
-            }
+        theme.buttonAPath =
+            resolveThemeAsset(
+                "icon-A-54.png"
+            );
 
-            char* end = nullptr;
+        theme.buttonBPath =
+            resolveThemeAsset(
+                "icon-B-54.png"
+            );
 
-            const long parsed =
-                std::strtol(
-                    value.c_str() + 1,
-                    &end,
-                    16
-                );
+            /*
+             * Onion-style configuration fallback:
+             *
+             * 1. Onion/Miyoo fallback configuration
+             * 2. Active theme configuration
+             * 3. Current-profile configuration overrides
+             *
+             * The fallback config establishes the baseline. The active
+             * theme then overrides only the values it defines. Finally,
+             * profile overrides modify only explicitly supplied values.
+             */
 
-            if (!end || *end != '\0') {
-                return;
-            }
+            auto loadConfigFile =
+                [&](const std::string& path,
+                    const ThemeTextStyle* hintFallback,
+                    const ThemeTextStyle* listFallback,
+                    bool allowFallbacks) {
+                    std::ifstream input(path);
 
-            red =
-                static_cast<int>(
-                    (parsed >> 16) & 0xff
-                );
+                    if (!input.is_open()) {
+                        return;
+                    }
 
-            green =
-                static_cast<int>(
-                    (parsed >> 8) & 0xff
-                );
+                    std::ostringstream buffer;
+                    buffer << input.rdbuf();
 
-            blue =
-                static_cast<int>(
-                    parsed & 0xff
-                );
-        };
+                    json_object* root =
+                        json_tokener_parse(
+                            buffer.str().c_str()
+                        );
 
-    auto loadTextStyle =
-        [&](const char* key,
-            ThemeTextStyle& style) {
-            json_object* section = nullptr;
+                    if (!root) {
+                        return;
+                    }
 
-            if (
-                !json_object_object_get_ex(
-                    root,
-                    key,
-                    &section
-                ) ||
-                !section ||
-                !json_object_is_type(
-                    section,
-                    json_type_object
-                )
-            ) {
-                return;
-            }
+                    auto parseColor =
+                        [](const char* text,
+                           int& red,
+                           int& green,
+                           int& blue) {
+                            if (!text || text[0] != '#') {
+                                return;
+                            }
 
-            json_object* value = nullptr;
+                            const std::string value(text);
 
-            if (
-                json_object_object_get_ex(
-                    section,
-                    "font",
-                    &value
-                ) &&
-                value &&
-                json_object_is_type(
-                    value,
-                    json_type_string
-                )
-            ) {
-                style.fontPath =
-                    resolveThemePath(
-                        theme.rootPath,
-                        json_object_get_string(
-                            value
+                            if (value.size() != 7) {
+                                return;
+                            }
+
+                            char* end = nullptr;
+
+                            const long parsed =
+                                std::strtol(
+                                    value.c_str() + 1,
+                                    &end,
+                                    16
+                                );
+
+                            if (!end || *end != '\0') {
+                                return;
+                            }
+
+                            red =
+                                static_cast<int>(
+                                    (parsed >> 16) & 0xff
+                                );
+
+                            green =
+                                static_cast<int>(
+                                    (parsed >> 8) & 0xff
+                                );
+
+                            blue =
+                                static_cast<int>(
+                                    parsed & 0xff
+                                );
+                        };
+
+                    auto loadTextStyle =
+                        [&](const char* key,
+                            ThemeTextStyle& style,
+                            const ThemeTextStyle* fallback) {
+                            json_object* section = nullptr;
+
+                            if (
+                                !json_object_object_get_ex(
+                                    root,
+                                    key,
+                                    &section
+                                ) ||
+                                !section ||
+                                !json_object_is_type(
+                                    section,
+                                    json_type_object
+                                )
+                            ) {
+                                if (fallback) {
+                                    style = *fallback;
+                                }
+
+                                return;
+                            }
+
+                            if (fallback) {
+                                style = *fallback;
+                            }
+
+                            json_object* value = nullptr;
+
+                            if (
+                                json_object_object_get_ex(
+                                    section,
+                                    "font",
+                                    &value
+                                ) &&
+                                value &&
+                                json_object_is_type(
+                                    value,
+                                    json_type_string
+                                )
+                            ) {
+                                style.fontPath =
+                                    resolveThemePath(
+                                        theme.rootPath,
+                                        json_object_get_string(
+                                            value
+                                        )
+                                    );
+                            }
+
+                            value = nullptr;
+
+                            if (
+                                json_object_object_get_ex(
+                                    section,
+                                    "size",
+                                    &value
+                                ) &&
+                                value
+                            ) {
+                                style.size =
+                                    json_object_get_int(value);
+                            }
+
+                            value = nullptr;
+
+                            if (
+                                json_object_object_get_ex(
+                                    section,
+                                    "color",
+                                    &value
+                                ) &&
+                                value &&
+                                json_object_is_type(
+                                    value,
+                                    json_type_string
+                                )
+                            ) {
+                                parseColor(
+                                    json_object_get_string(
+                                        value
+                                    ),
+                                    style.red,
+                                    style.green,
+                                    style.blue
+                                );
+                            }
+                        };
+
+                    /*
+                     * hideLabels is part of Onion's theme configuration.
+                     */
+                    json_object* hideLabels = nullptr;
+
+                    if (
+                        json_object_object_get_ex(
+                            root,
+                            "hideLabels",
+                            &hideLabels
+                        ) &&
+                        hideLabels &&
+                        json_object_is_type(
+                            hideLabels,
+                            json_type_object
                         )
+                    ) {
+                        json_object* value = nullptr;
+
+                        if (
+                            json_object_object_get_ex(
+                                hideLabels,
+                                "icons",
+                                &value
+                            ) &&
+                            value
+                        ) {
+                            theme.hideIcons =
+                                json_object_get_boolean(value);
+                        }
+
+                        value = nullptr;
+
+                        if (
+                            json_object_object_get_ex(
+                                hideLabels,
+                                "hints",
+                                &value
+                            ) &&
+                            value
+                        ) {
+                            theme.hideHints =
+                                json_object_get_boolean(value);
+                        }
+                    }
+                    else {
+                        /*
+                         * Onion also supports the older hideIconTitle
+                         * configuration.
+                         */
+                        json_object* value = nullptr;
+
+                        if (
+                            json_object_object_get_ex(
+                                root,
+                                "hideIconTitle",
+                                &value
+                            ) &&
+                            value
+                        ) {
+                            const bool hidden =
+                                json_object_get_boolean(value);
+
+                            theme.hideIcons = hidden;
+                            theme.hideHints = hidden;
+                        }
+                    }
+
+                    loadTextStyle(
+                        "title",
+                        theme.title,
+                        allowFallbacks ? nullptr : nullptr
                     );
-            }
 
-            value = nullptr;
+                    if (allowFallbacks) {
+                        loadTextStyle(
+                            "hint",
+                            theme.hint,
+                            &theme.title
+                        );
+
+                        loadTextStyle(
+                            "list",
+                            theme.list,
+                            &theme.title
+                        );
+                    }
+                    else {
+                        loadTextStyle(
+                            "hint",
+                            theme.hint,
+                            hintFallback
+                        );
+
+                        loadTextStyle(
+                            "list",
+                            theme.list,
+                            listFallback
+                        );
+                    }
+
+                    auto loadSectionColor =
+                        [&](const char* sectionName,
+                            const char* colorKey,
+                            int& red,
+                            int& green,
+                            int& blue) {
+                            json_object* section = nullptr;
+
+                            if (
+                                !json_object_object_get_ex(
+                                    root,
+                                    sectionName,
+                                    &section
+                                ) ||
+                                !section ||
+                                !json_object_is_type(
+                                    section,
+                                    json_type_object
+                                )
+                            ) {
+                                return;
+                            }
+
+                            json_object* value = nullptr;
+
+                            if (
+                                json_object_object_get_ex(
+                                    section,
+                                    colorKey,
+                                    &value
+                                ) &&
+                                value &&
+                                json_object_is_type(
+                                    value,
+                                    json_type_string
+                                )
+                            ) {
+                                parseColor(
+                                    json_object_get_string(
+                                        value
+                                    ),
+                                    red,
+                                    green,
+                                    blue
+                                );
+                            }
+                        };
+
+                    loadSectionColor(
+                        "currentpage",
+                        "color",
+                        theme.currentPageRed,
+                        theme.currentPageGreen,
+                        theme.currentPageBlue
+                    );
+
+                    loadSectionColor(
+                        "total",
+                        "color",
+                        theme.totalRed,
+                        theme.totalGreen,
+                        theme.totalBlue
+                    );
+
+                    json_object_put(root);
+                };
+
+            /*
+             * Establish Onion's fallback configuration first.
+             */
+            theme.title.fontPath =
+                sdRoot_ +
+                "/miyoo/app/Exo-2-Bold-Italic.ttf";
+
+            theme.title.size = 36;
+
+            theme.hint = theme.title;
+            theme.hint.size = 40;
+
+            theme.list = theme.title;
+            theme.list.size = 24;
+
+            theme.currentPageRed = 255;
+            theme.currentPageGreen = 255;
+            theme.currentPageBlue = 255;
+
+            theme.totalRed = 255;
+            theme.totalGreen = 255;
+            theme.totalBlue = 255;
+
+            const std::string fallbackConfigPath =
+                sdRoot_ +
+                "/miyoo/app/config.json";
+
+            loadConfigFile(
+                fallbackConfigPath,
+                nullptr,
+                nullptr,
+                true
+            );
+
+            /*
+             * Apply the active theme on top of the fallback.
+             *
+             * Missing hint/list values inherit from the active
+             * title style, matching Onion's config behavior.
+             */
+            const std::string activeConfigPath =
+                theme.rootPath +
+                "/config.json";
 
             if (
-                json_object_object_get_ex(
-                    section,
-                    "size",
-                    &value
-                ) &&
-                value
+                activeConfigPath != fallbackConfigPath
             ) {
-                style.size =
-                    json_object_get_int(value);
-            }
-
-            value = nullptr;
-
-            if (
-                json_object_object_get_ex(
-                    section,
-                    "color",
-                    &value
-                ) &&
-                value &&
-                json_object_is_type(
-                    value,
-                    json_type_string
-                )
-            ) {
-                parseColor(
-                    json_object_get_string(
-                        value
-                    ),
-                    style.red,
-                    style.green,
-                    style.blue
+                loadConfigFile(
+                    activeConfigPath,
+                    &theme.title,
+                    &theme.title,
+                    true
                 );
             }
-        };
 
-    loadTextStyle(
-        "title",
-        theme.title
-    );
-
-    loadTextStyle(
-        "list",
-        theme.list
-    );
-
-    loadTextStyle(
-        "hint",
-        theme.hint
-    );
-
-    /*
-     * Console section headers inherit the active list theme.
-     * We keep the same font and color, but make the section
-     * slightly smaller so it reads as a group heading rather
-     * than another game row.
-     */
-    theme.section = theme.list;
-
-    theme.section.size =
-        std::max(
-            1,
-            theme.list.size - 2
-        );
-
-    /*
-     * Onion theme setting:
-     *
-     * "hideLabels": {
-     *     "icons": true,
-     *     "hints": true
-     * }
-     *
-     * These control whether footer button icons and
-     * footer hint labels are shown.
-     */
-    json_object* hideLabels = nullptr;
-
-    if (
-        json_object_object_get_ex(
-            root,
-            "hideLabels",
-            &hideLabels
-        ) &&
-        hideLabels &&
-        json_object_is_type(
-            hideLabels,
-            json_type_object
-        )
-    ) {
-        json_object* value = nullptr;
-
-        if (
-            json_object_object_get_ex(
-                hideLabels,
-                "icons",
-                &value
-            ) &&
-            value &&
-            json_object_is_type(
-                value,
-                json_type_boolean
-            )
-        ) {
-            theme.hideIcons =
-                json_object_get_boolean(value);
-        }
-
-        value = nullptr;
-
-        if (
-            json_object_object_get_ex(
-                hideLabels,
-                "hints",
-                &value
-            ) &&
-            value &&
-            json_object_is_type(
-                value,
-                json_type_boolean
-            )
-        ) {
-            theme.hideHints =
-                json_object_get_boolean(value);
-        }
-    }
-
-    auto loadSectionColor =
-        [&](const char* sectionName,
-            const char* colorKey,
-            int& red,
-            int& green,
-            int& blue) {
-            json_object* section = nullptr;
+            /*
+             * Apply CurrentProfile overrides last.
+             * These modify only values explicitly present there.
+             */
+            const std::string profileConfigPath =
+                sdRoot_ +
+                "/Saves/CurrentProfile/theme/config.json";
 
             if (
-                !json_object_object_get_ex(
-                    root,
-                    sectionName,
-                    &section
-                ) ||
-                !section ||
-                !json_object_is_type(
-                    section,
-                    json_type_object
-                )
+                std::ifstream(profileConfigPath).good()
             ) {
-                return;
-            }
-
-            json_object* value = nullptr;
-
-            if (
-                json_object_object_get_ex(
-                    section,
-                    colorKey,
-                    &value
-                ) &&
-                value &&
-                json_object_is_type(
-                    value,
-                    json_type_string
-                )
-            ) {
-                parseColor(
-                    json_object_get_string(
-                        value
-                    ),
-                    red,
-                    green,
-                    blue
+                loadConfigFile(
+                    profileConfigPath,
+                    nullptr,
+                    nullptr,
+                    false
                 );
             }
-        };
 
-    loadSectionColor(
-        "grid",
-        "selectedcolor",
-        theme.selectedRed,
-        theme.selectedGreen,
-        theme.selectedBlue
-    );
+            /*
+             * Fonts are theme-controlled, but a missing font file
+             * must never make Better Favorites fail to start.
+             */
+            const std::string fallbackFont =
+                sdRoot_ +
+                "/miyoo/app/Exo-2-Bold-Italic.ttf";
 
-    loadSectionColor(
-        "currentpage",
-        "color",
-        theme.currentPageRed,
-        theme.currentPageGreen,
-        theme.currentPageBlue
-    );
+            auto ensureFont =
+                [&](ThemeTextStyle& style) {
+                    if (
+                        style.fontPath.empty() ||
+                        !std::ifstream(style.fontPath).good()
+                    ) {
+                        style.fontPath = fallbackFont;
+                    }
 
-    loadSectionColor(
-        "total",
-        "color",
-        theme.totalRed,
-        theme.totalGreen,
-        theme.totalBlue
-    );
+                    style.size =
+                        std::max(
+                            1,
+                            style.size
+                        );
+                };
 
-    json_object_put(root);
+            ensureFont(theme.title);
+            ensureFont(theme.hint);
+            ensureFont(theme.list);
+
+            /*
+             * Console section headers remain a Better Favorites feature.
+             * Their actual visual style is derived from the active
+             * theme's list style; layout spacing remains ours.
+             */
+            theme.section = theme.list;
+
+            theme.section.size =
+                std::max(
+                    1,
+                    theme.list.size - 2
+                );
 
     return theme;
 }

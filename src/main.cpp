@@ -16,46 +16,6 @@
 namespace
 {
 
-bool drawText(
-    SDL_Surface* destination,
-    TTF_Font* font,
-    const std::string& text,
-    const SDL_Color& color,
-    int x,
-    int y
-)
-{
-    SDL_Surface* rendered =
-        TTF_RenderUTF8_Blended(
-            font,
-            text.c_str(),
-            color
-        );
-
-    if (!rendered) {
-        return false;
-    }
-
-    SDL_Rect target {
-        x,
-        y,
-        rendered->w,
-        rendered->h
-    };
-
-    const int result =
-        SDL_BlitSurface(
-            rendered,
-            nullptr,
-            destination,
-            &target
-        );
-
-    SDL_FreeSurface(rendered);
-
-    return result == 0;
-}
-
 bool drawTextCenteredVertically(
     SDL_Surface* destination,
     TTF_Font* font,
@@ -261,6 +221,15 @@ int main()
             );
     }
 
+    std::cerr
+        << "THEME ICONS: hideIcons="
+        << (theme.hideIcons ? "true" : "false")
+        << " A="
+        << theme.buttonAPath
+        << " B="
+        << theme.buttonBPath
+        << std::endl;
+
     SDL_Surface* buttonA = nullptr;
     SDL_Surface* buttonB = nullptr;
 
@@ -269,6 +238,15 @@ int main()
             IMG_Load(
                 theme.buttonAPath.c_str()
             );
+
+        if (!buttonA) {
+            std::cerr
+                << "A icon failed: "
+                << theme.buttonAPath
+                << " : "
+                << IMG_GetError()
+                << std::endl;
+        }
     }
 
     if (!theme.buttonBPath.empty()) {
@@ -276,6 +254,15 @@ int main()
             IMG_Load(
                 theme.buttonBPath.c_str()
             );
+
+        if (!buttonB) {
+            std::cerr
+                << "B icon failed: "
+                << theme.buttonBPath
+                << " : "
+                << IMG_GetError()
+                << std::endl;
+        }
     }
 
     SDL_Surface* listSmall = nullptr;
@@ -313,6 +300,13 @@ int main()
                 theme.list.size
             )
         );
+
+    if (listFont) {
+        TTF_SetFontStyle(
+            listFont,
+            TTF_STYLE_BOLD
+        );
+    }
 
     TTF_Font* sectionFont =
         TTF_OpenFont(
@@ -453,72 +447,194 @@ int main()
             );
         }
 
-        drawText(
-            screen,
-            titleFont,
-            "Favorites",
-            titleColor,
-            24,
-            16
-        );
+        SDL_Surface* favoritesTitle =
+            TTF_RenderUTF8_Blended(
+                titleFont,
+                "Favorites",
+                titleColor
+            );
 
-        constexpr int contentTop = 62;
+        if (favoritesTitle) {
+            SDL_Rect titleRect {
+                (width - favoritesTitle->w) / 2,
+                29 - favoritesTitle->h / 2,
+                favoritesTitle->w,
+                favoritesTitle->h
+            };
+
+            SDL_BlitSurface(
+                favoritesTitle,
+                nullptr,
+                screen,
+                &titleRect
+            );
+
+            SDL_FreeSurface(
+                favoritesTitle
+            );
+        }
+
+        /*
+         * MainUI list geometry.
+         *
+         * The physical screen coordinates are fixed by Onion:
+         *
+         *   header:  0..59
+         *   list:   60..419
+         *   footer: 420..479
+         *
+         * Normal game rows are 60px.
+         *
+         * Console section headers are our own addition. Their typography
+         * comes from the active theme; only the additional spacing is
+         * Better Favorites-specific.
+         */
+        constexpr int contentTop = 60;
         constexpr int contentBottom = 420;
 
         constexpr int gameRowHeight = 60;
+
         constexpr int sectionTopGap = 8;
-        constexpr int sectionRowHeight = 40;
+        constexpr int sectionTitleHeight = 40;
+        constexpr int fallbackDividerHeight = 2;
 
         /*
-         * Maximum logical rows considered around
-         * the current selection. Actual screen use
-         * depends on whether rows are game rows or
-         * shorter section rows.
+         * Determine the visual height of a logical row.
+         *
+         * The divider belongs to the console heading, so the complete
+         * section occupies:
+         *
+         *   spacing + title + divider
          */
-        constexpr int visibleRows = 8;
+        auto rowHeight =
+            [&](const UiRow& row) -> int {
+                if (
+                    row.type ==
+                    UiRowType::SystemDivider
+                ) {
+                    const int dividerHeight =
+                        divider
+                            ? std::min(
+                                fallbackDividerHeight,
+                                divider->h
+                            )
+                            : fallbackDividerHeight;
 
-        const int halfWindow =
-            visibleRows / 2;
+                    return
+                        sectionTopGap +
+                        sectionTitleHeight +
+                        dividerHeight;
+                }
 
+                return gameRowHeight;
+            };
+
+        /*
+         * Select the first logical row by PIXEL height rather than
+         * assuming that eight logical rows fit on screen.
+         *
+         * This is important because our console headers are not 60px
+         * game rows. It also prevents the final rows from collapsing
+         * into the same visual position.
+         */
         long firstRow =
             static_cast<long>(
                 selectedRow
-            ) - halfWindow;
-
-        if (firstRow < 0) {
-            firstRow = 0;
-        }
-
-        const long maxFirst =
-            std::max(
-                0L,
-                static_cast<long>(
-                    rows.size()
-                ) - visibleRows
             );
 
-        if (firstRow > maxFirst) {
-            firstRow = maxFirst;
-        }
+        int accumulatedHeight = 0;
 
-        for (
-            int visible = 0;
-            visible < visibleRows;
-            ++visible
-        ) {
-            const long rowNumber =
-                firstRow + visible;
+        /*
+         * Keep approximately two normal game rows above the selection
+         * whenever there is enough content before it.
+         */
+        constexpr int desiredTopContext = 120;
+
+        while (firstRow > 0) {
+            const UiRow& previous =
+                rows[
+                    static_cast<std::size_t>(
+                        firstRow - 1
+                    )
+                ];
+
+            const int previousHeight =
+                rowHeight(previous);
 
             if (
-                rowNumber < 0 ||
-                rowNumber >=
-                    static_cast<long>(
-                        rows.size()
-                    )
+                accumulatedHeight +
+                previousHeight >
+                contentBottom - contentTop
             ) {
-                continue;
+                break;
             }
 
+            accumulatedHeight +=
+                previousHeight;
+
+            --firstRow;
+
+            if (
+                accumulatedHeight >=
+                desiredTopContext
+            ) {
+                break;
+            }
+        }
+
+        /*
+         * Make sure the selected row itself fits in the viewport.
+         *
+         * This is particularly important near the bottom of the
+         * Favorites list.
+         */
+        while (
+            firstRow <
+            static_cast<long>(selectedRow)
+        ) {
+            int totalHeight = 0;
+
+            for (
+                long i = firstRow;
+                i <=
+                    static_cast<long>(selectedRow);
+                ++i
+            ) {
+                totalHeight +=
+                    rowHeight(
+                        rows[
+                            static_cast<std::size_t>(
+                                i
+                            )
+                        ]
+                    );
+            }
+
+            if (
+                totalHeight <=
+                contentBottom - contentTop
+            ) {
+                break;
+            }
+
+            ++firstRow;
+        }
+
+        /*
+         * Render forward until the physical list area is full.
+         *
+         * There is deliberately no fixed "visibleRows" count.
+         */
+        int y = contentTop;
+
+        for (
+            long rowNumber = firstRow;
+            rowNumber <
+                static_cast<long>(
+                    rows.size()
+                );
+            ++rowNumber
+        ) {
             const UiRow& row =
                 rows[
                     static_cast<std::size_t>(
@@ -526,58 +642,31 @@ int main()
                     )
                 ];
 
-            int y = contentTop;
+            const int currentHeight =
+                rowHeight(row);
 
-            /*
-             * Calculate Y from the real height
-             * of every preceding visible row.
-             */
-            for (
-                int i = 0;
-                i < visible;
-                ++i
+            if (
+                y >= contentBottom
             ) {
-                const long previousRowNumber =
-                    firstRow + i;
-
-                if (
-                    previousRowNumber < 0 ||
-                    previousRowNumber >=
-                        static_cast<long>(
-                            rows.size()
-                        )
-                ) {
-                    continue;
-                }
-
-                const UiRow& previousRow =
-                    rows[
-                        static_cast<
-                            std::size_t
-                        >(
-                            previousRowNumber
-                        )
-                    ];
-
-                    y +=
-                        previousRow.type ==
-                            UiRowType::SystemDivider
-                            ? sectionTopGap + sectionRowHeight
-                            : gameRowHeight;
-            }
-
-            if (y >= contentBottom) {
                 break;
             }
 
             if (
+                y + currentHeight >
+                contentBottom
+            ) {
+                break;
+            }
+
+            /*
+             * Console group heading.
+             */
+            if (
                 row.type ==
                 UiRowType::SystemDivider
             ) {
-               y += sectionTopGap;
-                /*
-                 * Dedicated console section row.
-                 */
+                y += sectionTopGap;
+
                 drawTextCenteredVertically(
                     screen,
                     sectionFont,
@@ -585,22 +674,59 @@ int main()
                     sectionColor,
                     20,
                     y,
-                    sectionRowHeight - 6
+                    sectionTitleHeight
                 );
 
                 /*
-                 * Always draw a subtle theme-colored divider.
-                 * Some themes provide a transparent or extremely
-                 * faint div-line-h.png, so the color line guarantees
-                 * that console groups remain visually distinct.
+                 * The dedicated divider belongs AFTER the console
+                 * title and BEFORE the first game in the group.
+                 *
+                 * The theme asset is drawn at its native width when
+                 * possible. We do not force it into the old 584px
+                 * artificial area.
                  */
-                SDL_Rect dividerRect {
-                    28,
-                    y + sectionRowHeight - 2,
-                    584,
-                    2
-                };
+                const int dividerY =
+                    y + sectionTitleHeight;
 
+                if (divider) {
+                    SDL_Rect sourceRect {
+                        0,
+                        0,
+                        std::min(
+                            640,
+                            divider->w
+                        ),
+                        std::min(
+                            fallbackDividerHeight,
+                            divider->h
+                        )
+                    };
+
+                    SDL_Rect targetRect {
+                        0,
+                        dividerY,
+                        sourceRect.w,
+                        sourceRect.h
+                    };
+
+                    SDL_BlitSurface(
+                        divider,
+                        &sourceRect,
+                        screen,
+                        &targetRect
+                    );
+                }
+
+                /*
+                 * Some themes intentionally have a transparent or
+                 * effectively invisible div-line-h.png.
+                 *
+                 * Keep our subtle fallback line, but only where the
+                 * theme asset does not visibly provide one.
+                 *
+                 * We currently retain this fallback because your
+                 * mini.os theme uses a transparent divider asset.
+                 */
                 const Uint32 dividerColor =
                     SDL_MapRGB(
                         screen->format,
@@ -615,96 +741,100 @@ int main()
                         )
                     );
 
+                SDL_Rect fallbackRect {
+                    0,
+                    dividerY,
+                    640,
+                    fallbackDividerHeight
+                };
+
                 SDL_FillRect(
                     screen,
-                    &dividerRect,
+                    &fallbackRect,
                     dividerColor
                 );
 
                 /*
-                 * If the theme has its own divider artwork,
-                 * layer it over our fallback line.
+                 * Theme artwork is deliberately drawn LAST so that,
+                 * when it contains visible pixels, it wins over the
+                 * fallback line.
                  */
                 if (divider) {
-                    SDL_Rect themedDividerRect {
-                        28,
-                        y + sectionRowHeight - 3,
-                        584,
-                        4
+                    SDL_Rect sourceRect {
+                        0,
+                        0,
+                        std::min(
+                            640,
+                            divider->w
+                        ),
+                        std::min(
+                            fallbackDividerHeight,
+                            divider->h
+                        )
                     };
 
-                    blitScaled(
+                    SDL_Rect targetRect {
+                        0,
+                        dividerY,
+                        sourceRect.w,
+                        sourceRect.h
+                    };
+
+                    SDL_BlitSurface(
                         divider,
+                        &sourceRect,
                         screen,
-                        themedDividerRect
+                        &targetRect
                     );
                 }
 
+                y += currentHeight;
                 continue;
             }
 
-            if (
-                y + gameRowHeight >
-                contentBottom
-            ) {
-                break;
-            }
-
+            /*
+             * Normal Favorite row.
+             */
             const bool selected =
                 static_cast<std::size_t>(
                     rowNumber
                 ) == selectedRow;
 
-            SDL_Rect itemRect {
-                0,
-                y,
-                640,
-                gameRowHeight
-            };
+            /*
+             * Onion's selected list background is normally the
+             * 56px bg-list-s asset inside a 60px logical row.
+             *
+             * Preserve the theme asset's native dimensions instead
+             * of inventing a replacement geometry.
+             */
+            if (
+                selected &&
+                listSmall
+            ) {
+                SDL_Rect selectedRect {
+                    0,
+                    y +
+                        (
+                            gameRowHeight -
+                            listSmall->h
+                        ) / 2,
+                    listSmall->w,
+                    listSmall->h
+                };
 
-            if (selected) {
-                if (listSmall) {
-                    /*
-                     * Onion draws bg-list-s at its native size,
-                     * horizontally from x=0 and vertically centered
-                     * inside the 60px game-row band.
-                     */
-                    SDL_Rect selectedRect {
-                        0,
-                        y + (gameRowHeight - listSmall->h) / 2,
-                        listSmall->w,
-                        listSmall->h
-                    };
-
-                    SDL_BlitSurface(
-                        listSmall,
-                        nullptr,
-                        screen,
-                        &selectedRect
-                    );
-                } else {
-                    const Uint32 fallbackColor =
-                        SDL_MapRGB(
-                            screen->format,
-                            static_cast<Uint8>(
-                                theme.selectedRed
-                            ),
-                            static_cast<Uint8>(
-                                theme.selectedGreen
-                            ),
-                            static_cast<Uint8>(
-                                theme.selectedBlue
-                            )
-                        );
-
-                    SDL_FillRect(
-                        screen,
-                        &itemRect,
-                        fallbackColor
-                    );
-                }
+                SDL_BlitSurface(
+                    listSmall,
+                    nullptr,
+                    screen,
+                    &selectedRect
+                );
             }
 
+            /*
+             * Render the game name.
+             *
+             * x=20 follows the native Onion list text position.
+             */
             drawTextCenteredVertically(
                 screen,
                 listFont,
@@ -714,10 +844,12 @@ int main()
                 selected
                     ? selectedTextColor
                     : listColor,
-                28,
+                20,
                 y,
                 gameRowHeight
             );
+
+            y += gameRowHeight;
         }
 
         /*
@@ -863,7 +995,7 @@ int main()
              * Transparent/large placeholder images supplied by
              * themes are intentionally respected.
              */
-            if (!theme.hideIcons && buttonA) {
+            if (buttonA) {
                 SDL_Rect buttonARect {
                     offsetX,
                     buttonCenterY -
@@ -903,7 +1035,7 @@ int main()
             /*
              * B icon.
              */
-             if (!theme.hideIcons && buttonB) {
+             if (buttonB) {
                 SDL_Rect buttonBRect {
                     offsetX,
                     buttonCenterY -

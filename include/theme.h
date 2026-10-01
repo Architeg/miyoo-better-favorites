@@ -54,13 +54,13 @@ struct Theme
     int selectedGreen = 208;
     int selectedBlue = 208;
 
-    int currentPageRed = 132;
-    int currentPageGreen = 132;
-    int currentPageBlue = 132;
+    int currentPageRed = 255;
+    int currentPageGreen = 255;
+    int currentPageBlue = 255;
 
-    int totalRed = 132;
-    int totalGreen = 132;
-    int totalBlue = 132;
+    int totalRed = 255;
+    int totalGreen = 255;
+    int totalBlue = 255;
 };
 
 #endif

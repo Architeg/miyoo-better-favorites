@@ -384,6 +384,8 @@ int main()
 
     bool running = true;
 
+    long firstRow = 0;
+
     while (running) {
         SDL_Event event;
 
@@ -401,15 +403,75 @@ int main()
                     );
                 break;
 
-            case SDLK_DOWN:
-                selectedRow =
-                    nextSelectableRow(
-                        rows,
-                        selectedRow
-                    );
-                break;
+              case SDLK_DOWN:
+                  selectedRow =
+                      nextSelectableRow(
+                          rows,
+                          selectedRow
+                      );
+                  break;
 
-            case SDLK_LCTRL:
+              case SDLK_LEFT:
+                  selectedRow =
+                      previousConsoleRow(
+                          rows,
+                          selectedRow
+                      );
+
+                  if (
+                      selectedRow <
+                      rows.size()
+                  ) {
+                      const std::size_t headerRow =
+                          consoleHeaderRow(
+                              rows,
+                              selectedRow
+                          );
+
+                      if (
+                          headerRow <
+                          rows.size()
+                      ) {
+                          firstRow =
+                              static_cast<long>(
+                                  headerRow
+                              );
+                      }
+                  }
+
+                  break;
+
+              case SDLK_RIGHT:
+                  selectedRow =
+                      nextConsoleRow(
+                          rows,
+                          selectedRow
+                      );
+
+                  if (
+                      selectedRow <
+                      rows.size()
+                  ) {
+                      const std::size_t headerRow =
+                          consoleHeaderRow(
+                              rows,
+                              selectedRow
+                          );
+
+                      if (
+                          headerRow <
+                          rows.size()
+                      ) {
+                          firstRow =
+                              static_cast<long>(
+                                  headerRow
+                              );
+                      }
+                  }
+
+                  break;
+
+              case SDLK_LCTRL:
             case SDLK_ESCAPE:
                 running = false;
                 break;
@@ -529,328 +591,558 @@ int main()
                 return gameRowHeight;
             };
 
-        /*
-         * Select the first logical row by PIXEL height rather than
-         * assuming that eight logical rows fit on screen.
-         *
-         * This is important because our console headers are not 60px
-         * game rows. It also prevents the final rows from collapsing
-         * into the same visual position.
-         */
-        long firstRow =
-            static_cast<long>(
-                selectedRow
-            );
+         /*
+          * Keep the scroll position stable while the selection moves.
+          *
+          * The selection is allowed to travel through the complete
+          * visible area. The list only scrolls when the selected row
+          * reaches an edge.
+          *
+          * Console headers have their real pixel height, so the same
+          * logic works across mixed header/game rows.
+          */
 
-        int accumulatedHeight = 0;
+         if (
+             selectedRow <
+             static_cast<std::size_t>(
+                 firstRow
+             )
+         ) {
+             /*
+              * Selection moved above the visible area.
+              *
+              * Move the viewport just enough to reveal it.
+              */
+             firstRow =
+                 static_cast<long>(
+                     selectedRow
+                 );
+         }
 
-        /*
-         * Keep approximately two normal game rows above the selection
-         * whenever there is enough content before it.
-         */
-        constexpr int desiredTopContext = 120;
+         /*
+          * If the selected row is below the viewport, advance the
+          * viewport until the complete selected row fits.
+          */
+         while (
+             firstRow <
+             static_cast<long>(
+                 selectedRow
+             )
+         ) {
+             int totalHeight = 0;
 
-        while (firstRow > 0) {
-            const UiRow& previous =
-                rows[
-                    static_cast<std::size_t>(
-                        firstRow - 1
-                    )
-                ];
+             for (
+                 long i = firstRow;
+                 i <=
+                     static_cast<long>(
+                         selectedRow
+                     );
+                 ++i
+             ) {
+                 totalHeight +=
+                     rowHeight(
+                         rows[
+                             static_cast<std::size_t>(
+                                 i
+                             )
+                         ]
+                     );
+             }
 
-            const int previousHeight =
-                rowHeight(previous);
+             /*
+              * A sticky console header occupies real viewport space.
+              *
+              * When the viewport starts inside a console group, the games
+              * cannot use the pixels occupied by that header.
+              */
+             int stickyReservedHeight = 0;
 
-            if (
-                accumulatedHeight +
-                previousHeight >
-                contentBottom - contentTop
-            ) {
-                break;
-            }
+             if (
+                 firstRow >= 0 &&
+                 firstRow <
+                     static_cast<long>(
+                         rows.size()
+                     ) &&
+                 rows[
+                     static_cast<std::size_t>(
+                         firstRow
+                     )
+                 ].type ==
+                     UiRowType::Favorite
+             ) {
+                 const std::size_t headerRow =
+                     consoleHeaderRow(
+                         rows,
+                         static_cast<std::size_t>(
+                             firstRow
+                         )
+                     );
 
-            accumulatedHeight +=
-                previousHeight;
+                 if (
+                     headerRow <
+                     rows.size()
+                 ) {
+                     const int dividerHeight =
+                         divider
+                             ? std::min(
+                                 fallbackDividerHeight,
+                                 divider->h
+                             )
+                             : fallbackDividerHeight;
 
-            --firstRow;
+                     stickyReservedHeight =
+                         sectionTopGap +
+                         sectionTitleHeight +
+                         dividerHeight;
+                 }
+             }
 
-            if (
-                accumulatedHeight >=
-                desiredTopContext
-            ) {
-                break;
-            }
-        }
+             const int availableHeight =
+                 contentBottom -
+                 contentTop -
+                 stickyReservedHeight;
 
-        /*
-         * Make sure the selected row itself fits in the viewport.
-         *
-         * This is particularly important near the bottom of the
-         * Favorites list.
-         */
-        while (
-            firstRow <
-            static_cast<long>(selectedRow)
-        ) {
-            int totalHeight = 0;
+             if (
+                 totalHeight <=
+                 availableHeight
+             ) {
+                 break;
+             }
 
-            for (
-                long i = firstRow;
-                i <=
-                    static_cast<long>(selectedRow);
-                ++i
-            ) {
-                totalHeight +=
-                    rowHeight(
-                        rows[
-                            static_cast<std::size_t>(
-                                i
-                            )
-                        ]
-                    );
-            }
+             ++firstRow;
+         }
 
-            if (
-                totalHeight <=
-                contentBottom - contentTop
-            ) {
-                break;
-            }
-
-            ++firstRow;
-        }
+         /*
+          * Keep firstRow valid if the list is shorter than the viewport.
+          */
+         if (
+             firstRow >
+             static_cast<long>(
+                 selectedRow
+             )
+         ) {
+             firstRow =
+                 static_cast<long>(
+                     selectedRow
+                 );
+         }
 
         /*
          * Render forward until the physical list area is full.
          *
          * There is deliberately no fixed "visibleRows" count.
          */
-        int y = contentTop;
+         /*
+          * Sticky console header.
+          *
+          * If scrolling has moved past a console header, keep that
+          * header attached to the top of the list viewport while its
+          * games continue scrolling underneath.
+          *
+          * The next console header can push the current sticky header
+          * upward, exactly like a sticky section heading in a long list.
+          */
+         long stickySectionRow = -1;
 
-        for (
-            long rowNumber = firstRow;
-            rowNumber <
-                static_cast<long>(
-                    rows.size()
-                );
-            ++rowNumber
-        ) {
-            const UiRow& row =
-                rows[
-                    static_cast<std::size_t>(
-                        rowNumber
-                    )
-                ];
+         if (
+             firstRow >= 0 &&
+             firstRow <
+                 static_cast<long>(rows.size()) &&
+             rows[
+                 static_cast<std::size_t>(
+                     firstRow
+                 )
+             ].type ==
+                 UiRowType::Favorite
+         ) {
+             for (
+                 long i = firstRow - 1;
+                 i >= 0;
+                 --i
+             ) {
+                 if (
+                     rows[
+                         static_cast<std::size_t>(i)
+                     ].type ==
+                         UiRowType::SystemDivider
+                 ) {
+                     stickySectionRow = i;
+                     break;
+                 }
+             }
+         }
 
-            const int currentHeight =
-                rowHeight(row);
+         const int stickyDividerHeight =
+             divider
+                 ? std::min(
+                     fallbackDividerHeight,
+                     divider->h
+                 )
+                 : fallbackDividerHeight;
 
-            if (
-                y >= contentBottom
-            ) {
-                break;
-            }
+         const int sectionVisualHeight =
+             sectionTopGap +
+             sectionTitleHeight +
+             stickyDividerHeight;
 
-            if (
-                y + currentHeight >
-                contentBottom
-            ) {
-                break;
-            }
+         /*
+          * Draw one console header using the same renderer as the
+          * normal list header.
+          *
+          * This keeps the theme-controlled typography and the existing
+          * divider/fallback behavior in one place.
+          */
+         auto drawSectionHeader =
+             [&](const UiRow& row, int topY) {
+                 const int titleY =
+                     topY + sectionTopGap;
 
-            /*
-             * Console group heading.
-             */
-            if (
-                row.type ==
-                UiRowType::SystemDivider
-            ) {
-                y += sectionTopGap;
+                 drawTextCenteredVertically(
+                     screen,
+                     sectionFont,
+                     row.text,
+                     sectionColor,
+                     20,
+                     titleY,
+                     sectionTitleHeight
+                 );
 
-                drawTextCenteredVertically(
-                    screen,
-                    sectionFont,
-                    row.text,
-                    sectionColor,
-                    20,
-                    y,
-                    sectionTitleHeight
-                );
+                 const int dividerY =
+                     titleY + sectionTitleHeight;
 
-                /*
-                 * The dedicated divider belongs AFTER the console
-                 * title and BEFORE the first game in the group.
-                 *
-                 * The theme asset is drawn at its native width when
-                 * possible. We do not force it into the old 584px
-                 * artificial area.
-                 */
-                const int dividerY =
-                    y + sectionTitleHeight;
+                 /*
+                  * Theme divider first.
+                  *
+                  * Some themes contain a transparent divider asset,
+                  * so the fallback line below remains necessary.
+                  */
+                 if (divider) {
+                     SDL_Rect sourceRect {
+                         0,
+                         0,
+                         std::min(
+                             640,
+                             divider->w
+                         ),
+                         std::min(
+                             fallbackDividerHeight,
+                             divider->h
+                         )
+                     };
 
-                if (divider) {
-                    SDL_Rect sourceRect {
-                        0,
-                        0,
-                        std::min(
-                            640,
-                            divider->w
-                        ),
-                        std::min(
-                            fallbackDividerHeight,
-                            divider->h
-                        )
-                    };
+                     SDL_Rect targetRect {
+                         0,
+                         dividerY,
+                         sourceRect.w,
+                         sourceRect.h
+                     };
 
-                    SDL_Rect targetRect {
-                        0,
-                        dividerY,
-                        sourceRect.w,
-                        sourceRect.h
-                    };
+                     SDL_BlitSurface(
+                         divider,
+                         &sourceRect,
+                         screen,
+                         &targetRect
+                     );
+                 }
 
-                    SDL_BlitSurface(
-                        divider,
-                        &sourceRect,
-                        screen,
-                        &targetRect
-                    );
-                }
+                 const Uint32 dividerColor =
+                     SDL_MapRGB(
+                         screen->format,
+                         static_cast<Uint8>(
+                             theme.currentPageRed
+                         ),
+                         static_cast<Uint8>(
+                             theme.currentPageGreen
+                         ),
+                         static_cast<Uint8>(
+                             theme.currentPageBlue
+                         )
+                     );
 
-                /*
-                 * Some themes intentionally have a transparent or
-                 * effectively invisible div-line-h.png.
-                 *
-                 * Keep our subtle fallback line, but only where the
-                 * theme asset does not visibly provide one.
-                 *
-                 * We currently retain this fallback because your
-                 * mini.os theme uses a transparent divider asset.
-                 */
-                const Uint32 dividerColor =
-                    SDL_MapRGB(
-                        screen->format,
-                        static_cast<Uint8>(
-                            theme.currentPageRed
-                        ),
-                        static_cast<Uint8>(
-                            theme.currentPageGreen
-                        ),
-                        static_cast<Uint8>(
-                            theme.currentPageBlue
-                        )
-                    );
+                 SDL_Rect fallbackRect {
+                     0,
+                     dividerY,
+                     640,
+                     fallbackDividerHeight
+                 };
 
-                SDL_Rect fallbackRect {
-                    0,
-                    dividerY,
-                    640,
-                    fallbackDividerHeight
-                };
+                 SDL_FillRect(
+                     screen,
+                     &fallbackRect,
+                     dividerColor
+                 );
 
-                SDL_FillRect(
-                    screen,
-                    &fallbackRect,
-                    dividerColor
-                );
+                 /*
+                  * Draw the theme asset again so visible theme artwork
+                  * wins over the fallback line.
+                  */
+                 if (divider) {
+                     SDL_Rect sourceRect {
+                         0,
+                         0,
+                         std::min(
+                             640,
+                             divider->w
+                         ),
+                         std::min(
+                             fallbackDividerHeight,
+                             divider->h
+                         )
+                     };
 
-                /*
-                 * Theme artwork is deliberately drawn LAST so that,
-                 * when it contains visible pixels, it wins over the
-                 * fallback line.
-                 */
-                if (divider) {
-                    SDL_Rect sourceRect {
-                        0,
-                        0,
-                        std::min(
-                            640,
-                            divider->w
-                        ),
-                        std::min(
-                            fallbackDividerHeight,
-                            divider->h
-                        )
-                    };
+                     SDL_Rect targetRect {
+                         0,
+                         dividerY,
+                         sourceRect.w,
+                         sourceRect.h
+                     };
 
-                    SDL_Rect targetRect {
-                        0,
-                        dividerY,
-                        sourceRect.w,
-                        sourceRect.h
-                    };
+                     SDL_BlitSurface(
+                         divider,
+                         &sourceRect,
+                         screen,
+                         &targetRect
+                     );
+                 }
+             };
 
-                    SDL_BlitSurface(
-                        divider,
-                        &sourceRect,
-                        screen,
-                        &targetRect
-                    );
-                }
+         /*
+          * The first visible row still starts at the normal list top.
+          *
+          * The sticky header is drawn as an overlay later. This means
+          * the game rows continue to use the exact existing geometry.
+          */
+          int y =
+              stickySectionRow >= 0
+                  ? contentTop + sectionVisualHeight
+                  : contentTop;
 
-                y += currentHeight;
-                continue;
-            }
+         /*
+          * Screen Y position of the next console header after the
+          * current sticky section.
+          *
+          * -1 means there is no next section currently visible.
+          */
+         int nextSectionY = -1;
 
-            /*
-             * Normal Favorite row.
-             */
-            const bool selected =
-                static_cast<std::size_t>(
-                    rowNumber
-                ) == selectedRow;
+         for (
+             long rowNumber = firstRow;
+             rowNumber <
+                 static_cast<long>(
+                     rows.size()
+                 );
+             ++rowNumber
+         ) {
+             const UiRow& row =
+                 rows[
+                     static_cast<std::size_t>(
+                         rowNumber
+                     )
+                 ];
 
-            /*
-             * Onion's selected list background is normally the
-             * 56px bg-list-s asset inside a 60px logical row.
-             *
-             * Preserve the theme asset's native dimensions instead
-             * of inventing a replacement geometry.
-             */
-            if (
-                selected &&
-                listSmall
-            ) {
-                SDL_Rect selectedRect {
-                    0,
-                    y +
-                        (
-                            gameRowHeight -
-                            listSmall->h
-                        ) / 2,
-                    listSmall->w,
-                    listSmall->h
-                };
+             const int currentHeight =
+                 rowHeight(row);
 
-                SDL_BlitSurface(
-                    listSmall,
-                    nullptr,
-                    screen,
-                    &selectedRect
-                );
-            }
+             if (
+                 y >= contentBottom
+             ) {
+                 break;
+             }
 
-            /*
-             * Render the game name.
-             *
-             * x=20 follows the native Onion list text position.
-             */
-            drawTextCenteredVertically(
-                screen,
-                listFont,
-                parser.displayLabel(
-                    *row.favorite
-                ),
-                selected
-                    ? selectedTextColor
-                    : listColor,
-                20,
-                y,
-                gameRowHeight
-            );
+             if (
+                 y + currentHeight >
+                 contentBottom
+             ) {
+                 break;
+             }
 
-            y += gameRowHeight;
-        }
+             /*
+              * Console group heading.
+              */
+             if (
+                 row.type ==
+                 UiRowType::SystemDivider
+             ) {
+                 /*
+                  * The current sticky section is already rendered
+                  * separately at the top. It must not be rendered a
+                  * second time in its original position.
+                  */
+                 if (
+                     rowNumber ==
+                     stickySectionRow
+                 ) {
+                     y += currentHeight;
+                     continue;
+                 }
+
+                 /*
+                  * Remember where the next console header is located.
+                  * It will be allowed to push the sticky header when
+                  * it reaches the sticky header's lower edge.
+                  */
+                 if (
+                     stickySectionRow >= 0 &&
+                     nextSectionY < 0
+                 ) {
+                     nextSectionY = y;
+                 }
+
+                 drawSectionHeader(
+                     row,
+                     y
+                 );
+
+                 y += currentHeight;
+                 continue;
+             }
+
+             /*
+              * Normal Favorite row.
+              */
+             const bool selected =
+                 static_cast<std::size_t>(
+                     rowNumber
+                 ) == selectedRow;
+
+             /*
+              * Onion's selected list background is normally the
+              * 56px bg-list-s asset inside a 60px logical row.
+              *
+              * Preserve the existing theme geometry.
+              */
+             if (
+                 selected &&
+                 listSmall
+             ) {
+                 SDL_Rect selectedRect {
+                     0,
+                     y +
+                         (
+                             gameRowHeight -
+                             listSmall->h
+                         ) / 2,
+                     listSmall->w,
+                     listSmall->h
+                 };
+
+                 SDL_BlitSurface(
+                     listSmall,
+                     nullptr,
+                     screen,
+                     &selectedRect
+                 );
+             }
+
+             drawTextCenteredVertically(
+                 screen,
+                 listFont,
+                 parser.displayLabel(
+                     *row.favorite
+                 ),
+                 selected
+                     ? selectedTextColor
+                     : listColor,
+                 20,
+                 y,
+                 gameRowHeight
+             );
+
+             y += gameRowHeight;
+         }
+
+         /*
+          * Draw the sticky console header only after the normal list
+          * content has been rendered.
+          *
+          * We restore the underlying theme background first so games
+          * underneath the sticky area cannot show through the header.
+          */
+         if (stickySectionRow >= 0) {
+             SDL_Rect stickyBackground {
+                 0,
+                 contentTop,
+                 width,
+                 sectionVisualHeight
+             };
+
+             SDL_BlitSurface(
+                 background,
+                 &stickyBackground,
+                 screen,
+                 &stickyBackground
+             );
+
+             drawSectionHeader(
+                 rows[
+                     static_cast<std::size_t>(
+                         stickySectionRow
+                     )
+                 ],
+                 contentTop
+             );
+
+             /*
+              * If the next console header has entered the sticky
+              * header's area, let it push the current header upward.
+              *
+              * Only the overlapping portion is restored, leaving the
+              * old sticky header visible above it.
+              */
+             if (
+                 nextSectionY >= contentTop &&
+                 nextSectionY <
+                     contentTop +
+                     sectionVisualHeight
+             ) {
+                 SDL_Rect pushedBackground {
+                     0,
+                     nextSectionY,
+                     width,
+                     sectionVisualHeight
+                 };
+
+                 SDL_BlitSurface(
+                     background,
+                     &pushedBackground,
+                     screen,
+                     &pushedBackground
+                 );
+
+                 long nextSectionRow = -1;
+
+                 for (
+                     long i = firstRow;
+                     i <
+                         static_cast<long>(
+                             rows.size()
+                         );
+                     ++i
+                 ) {
+                     if (
+                         rows[
+                             static_cast<std::size_t>(i)
+                         ].type ==
+                             UiRowType::SystemDivider &&
+                         i != stickySectionRow
+                     ) {
+                         nextSectionRow = i;
+                         break;
+                     }
+                 }
+
+                 if (nextSectionRow >= 0) {
+                     drawSectionHeader(
+                         rows[
+                             static_cast<std::size_t>(
+                                 nextSectionRow
+                             )
+                         ],
+                         nextSectionY
+                     );
+                 }
+             }
+         }
 
         /*
          * Onion-calibrated footer.

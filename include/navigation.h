@@ -20,4 +20,19 @@ std::size_t previousSelectableRow(
     std::size_t current
 );
 
+std::size_t nextConsoleRow(
+    const std::vector<UiRow>& rows,
+    std::size_t current
+);
+
+std::size_t previousConsoleRow(
+    const std::vector<UiRow>& rows,
+    std::size_t current
+);
+
+std::size_t consoleHeaderRow(
+    const std::vector<UiRow>& rows,
+    std::size_t current
+);
+
 #endif

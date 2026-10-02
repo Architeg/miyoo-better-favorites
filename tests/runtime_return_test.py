@@ -216,6 +216,73 @@ bf_return before-launch "$app"
 [ "$BETTER_FAVORITES_RETURN_DIR" != "$stale" ]
 bf_return after-app "$app" 0
 [ -z "$bf_origin" ]
+# MENU-origin sessions do not require any recent record or selected ROM.
+menu_adopt() {
+    bf_return before-launch "$app"
+    [ "$BETTER_FAVORITES_SWITCHER_HANDOFF" = 1 ]
+    context="$BETTER_FAVORITES_RETURN_DIR"
+    printf 'BetterFavoritesSwitcher1\nprivate-request-nonce\n' > "$context/switcher.request"
+    cp "$context/switcher.request" "$sysdir/.runGameSwitcher"
+    printf '%s\n' "$epoch" > "$context/generation"
+    rm -f "$sysdir/cmd_to_run.sh"
+    bf_return after-app "$app" 0
+    [ "$bf_origin" = BetterFavorites:GameSwitcher ]
+    [ -z "${BETTER_FAVORITES_SWITCHER_HANDOFF:-}" ] && [ ! -e "$context" ]
+}
+for menu_exit in B START EMPTY_A; do
+    menu_adopt
+    # B/START delete the active command. Empty-history A publishes no command.
+    rm "$sysdir/.runGameSwitcher"
+    bf_return after-switcher 0
+    [ -z "$bf_origin" ] && [ "$(cat "$sysdir/cmd_to_run.sh")" = "$app" ]
+    bf_return before-launch "$app"
+    bf_return resolved-game '' 0
+    bf_return after-app "$app" 0
+    rm "$sysdir/cmd_to_run.sh"
+    bf_return after-switcher 0
+    [ ! -e "$sysdir/cmd_to_run.sh" ]
+done
+for menu_exit in B START; do
+    menu_adopt
+    printf '%s' "$game" > "$sysdir/cmd_to_run.sh"
+    rm "$sysdir/.runGameSwitcher"
+    bf_return after-switcher 0
+    bf_return before-launch "$game"
+    bf_return resolved-game "$CARD/Roms/GB/one.gb" 1
+    [ "$bf_origin" = BetterFavorites:GameSwitcher ]
+    printf '%s' "$other_command" > "$sysdir/cmd_to_run.sh"
+    bf_return after-switcher 0
+    bf_return before-launch "$other_command"
+    bf_return resolved-game "$other" 1
+    [ "$bf_origin" = BetterFavorites:GameSwitcher ]
+    rm "$sysdir/cmd_to_run.sh"
+    bf_return after-switcher 0
+    [ "$(cat "$sysdir/cmd_to_run.sh")" = "$app" ] && [ -z "$bf_origin" ]
+done
+for menu_failure in OFF GENERATION FLAG APPFAIL SHUTDOWN; do
+    bf_return before-launch "$app"
+    context="$BETTER_FAVORITES_RETURN_DIR"
+    printf 'BetterFavoritesSwitcher1\nprivate-request-nonce\n' > "$context/switcher.request"
+    cp "$context/switcher.request" "$sysdir/.runGameSwitcher"
+    printf '%s\n' "$epoch" > "$context/generation"
+    rm -f "$sysdir/cmd_to_run.sh"
+    status=0
+    case "$menu_failure" in
+        OFF) printf 'BetterFavoritesSettings1\n0\n%s\n' "$epoch" > "$setting" ;;
+        GENERATION) printf foreign > "$context/generation" ;;
+        FLAG) printf foreign > "$sysdir/.runGameSwitcher" ;;
+        APPFAIL) status=1 ;;
+        SHUTDOWN) touch "$TMP/.offOrder" ;;
+    esac
+    bf_return after-app "$app" "$status"
+    [ -z "$bf_origin" ] && [ ! -e "$context" ]
+    rm "$sysdir/.runGameSwitcher"
+    bf_return after-switcher 0
+    [ ! -e "$sysdir/cmd_to_run.sh" ]
+    rm -f "$TMP/.offOrder"
+    printf 'BetterFavoritesSettings1\n1\n%s\n' "$epoch" > "$setting"
+done
+
 # A log write failure cannot prevent ownership adoption or reopening.
 if command -v bf_return_diag >/dev/null; then
     diagnostic="$sysdir/logs/better-favorites-return.log"
@@ -236,7 +303,7 @@ fi
         raise SystemExit(result.returncode)
     if 'bf_return_diag()' in helper:
         records = (card / '.tmp_update/logs/better-favorites-return.log').read_text()
-        for token in ('action=adopt reason=verified-ticket', 'reason=generation-mismatch',
+        for token in ('action=adopt reason=verified-ticket', 'action=adopt reason=verified-menu-ticket', 'reason=generation-mismatch',
                       'reason=settings-disabled', 'reason=game-within-session',
                       'reason=game-exit-status exit_status=139', 'reason=ordinary-menu-return',
                       'reason=runtime-init', 'reason=switcher-exit-status', 'reason=shutdown-request',

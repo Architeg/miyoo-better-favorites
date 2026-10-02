@@ -7,6 +7,14 @@
 
 // The outer launcher recognizes this only after main() has cleaned up SDL.
 constexpr int kLaunchRequestedExitCode = 20;
+constexpr int kSwitcherRequestedExitCode = 21;
+bool stageOnionSwitcherRequest(const std::string& requestDir, std::string& error);
+bool requestOnionSwitcher(std::string& error);
+bool publishStagedOnionSwitcher(const std::string& requestDir, std::string& error);
+bool publishOnionSwitcherRequest(const std::string& requestDir,
+    const std::string& activePath, const std::string& quickSwitchPath,
+    const std::string& pendingPath, const std::string& shutdownPath,
+    const std::string& sdRoot, std::string& error);
 
 bool buildOnionLaunchCommand(
     const Favorite& favorite,

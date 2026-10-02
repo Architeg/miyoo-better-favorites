@@ -141,18 +141,18 @@ Host-built sizes for this revision (logical bytes, not filesystem allocation or 
 
 | Item | Bytes / lifetime |
 | --- | --- |
-| ARM app executable, including debug info | 202,040; exits before gameplay |
-| Binary increase over registered-launch checkpoint | 27,184 (previous binary 174,856) |
-| Binary increase over preceding return-only build | 9,116 (previous binary 192,924) |
+| ARM app executable, including debug info | 206,868; exits before gameplay |
+| Binary increase over registered-launch checkpoint | 32,012 (previous binary 174,856) |
+| Binary increase over preceding return-only build | 13,944 (previous binary 192,924) |
 | Original / patched Onion runtime | 24,440 / 24,939; +499 |
-| Sourced runtime helper | 12,637; combined runtime/helper disk increase 13,136 |
+| Sourced runtime helper | 13,955; combined runtime/helper disk increase 14,454 |
 | Separate runtime patch / host installer | 670 / 7,268; host review/install artifacts |
 | App settings | 60 once written; no file required for default off |
 | Browser state | Path-dependent, at most 65,536; persists on card |
 | Private ticket | Exact game command plus 33-byte generation; removed after app return |
 
 During gameplay the added persistent runtime data is the canonical originating ROM
-string (session provenance, not a restriction on the current game), its 32-character
+string or GameSwitcher-origin marker (session provenance, not a current-game restriction), its 32-character
 generation, and an empty invocation-context variable.
 When disabled these strings are empty. Helper function definitions remain loaded
 in Onion's existing runtime shell. Scratch strings are unset on hook completion;
@@ -261,7 +261,7 @@ when it launches the same ROM. GameSwitcher B/START consume ownership and reopen
 the app at its saved position; changing games does not change browser-state.
 Normal app B exit cannot reopen it again. Direct game exit, ordinary MainUI
 return, runtime restart, disable/generation mismatch, and shutdown retain their
-existing invalidation/precedence rules. Browser MENU behavior is unchanged.
+existing invalidation/precedence rules. The MENU extension below was confirmed working on hardware by the user on 2026-10-02.
 
 Boundary-only diagnostics append to
 `.tmp_update/logs/better-favorites-return.log`, independently of Onion's global
@@ -291,3 +291,84 @@ favorites and history. The reviewed update was installed and verified on
 `../miyoo-better-favorites-backups/20261002-033020-return-helper/`.
 `manage.py install`
 correctly refuses an existing installation; it is not an upgrade command.
+
+## Browser MENU extension (hardware-verified checkpoint)
+
+Verified mounted v4.3.1-1 reference:
+`App/PackageManager/data/App/GameSwitcher (Shortcut)/App/StartGameSwitcher/launch.sh`
+only touches `.tmp_update/.runGameSwitcher`. Runtime `main` runs `check_switcher`
+after `check_game`; `check_switcher` prioritizes that flag, and `launch_switcher`
+changes to `.tmp_update`, starts Onion audio, runs `gameSwitcher` with libpadsp,
+then invokes the existing after-switcher hook. App postprocessing already invokes
+the after-app hook. No new runtime hook placement is needed.
+
+[Matching GameSwitcher source](https://github.com/OnionUI/Onion/blob/v4.3.1-1/src/gameSwitcher/gameSwitcher.c)
+shows B/START remove the active command. A/MENU call
+[resumeGame](https://github.com/OnionUI/Onion/blob/v4.3.1-1/src/common/system/state.h),
+which only publishes when it finds a matching valid history entry. With empty
+history, A/MENU can publish nothing (`gameIndex` is zero). A leftover app command
+must therefore be removed before GameSwitcher runs to prevent replaying it.
+Onion itself can deduplicate history or move a resumed game to its front; this
+extension adds no recent-list entry just for pressing MENU.
+
+One non-repeated MENU/ESC press outside Settings saves selection/viewport and
+privately stages `switcher.request`. An empty favorites list has no position to
+save and leaves any previous state file intact. The binary returns **21** only
+after all SDL/audio cleanup. A remains exit 20; B remains ordinary app exit.
+Inside Settings, MENU still only closes the overlay.
+
+The outer launcher dispatches exit 21 to `--publish-switcher-handoff`. It verifies
+its captured active app command, runtime binary, and absent pending/quick-switch,
+shutdown and GameSwitcher flags. It prepares an app-command recovery file on the
+command filesystem, removes only the captured command after an identity/content
+recheck, and creates `.runGameSwitcher` last with O_EXCL, fsync and close checks.
+The flag contains an invocation-unique token; Onion only tests its presence. A
+failed handoff removes only its own ticket/flag and restores the app command only
+into an absent slot, preserving foreign files. Snapshot/unlink/restore checks
+still rely on Onion's serialized app-return writer; they are not filesystem CAS.
+Stage/validation failures keep browsing. Publication failure after cleanup exits
+to Onion normally, with error logging and no accepted return session.
+
+With Automatic return ON, the MENU-capable runtime helper exports
+`BETTER_FAVORITES_SWITCHER_HANDOFF=1`. The publisher places a matching token and
+settings generation in the private runtime context. After successful app return,
+the helper adopts `BetterFavorites:GameSwitcher` as session provenance only when
+ticket, flag, generation, app identity and absent command/queue agree and shutdown
+is absent. This supports B/START return from GameSwitcher immediately or after
+selecting/switching games. Empty-history A/MENU also return once while owned;
+origin is consumed before reopening, so ordinary B cannot reopen in a loop.
+With the preference OFF no session is adopted and Onion returns to its stock
+menus. With ON and an older/no runtime helper, MENU fails closed while browsing
+instead of promising an unavailable return path. A launch is unchanged.
+
+Required future deployment: revised binary, repository launcher, return helper,
+and the matching installed-manifest helper hash. **No runtime.sh replacement** is
+needed: its patched hash/hook placement and original backup remain unchanged.
+Do not use install over an existing installation; follow the verified helper/hash
+update procedure and back up app/helper/manifest before an authorized deployment.
+
+Additional checks:
+
+```sh
+c++ -std=c++17 -Wall -Wextra -DBETTER_FAVORITES_HANDOFF_TESTING -Iinclude tests/switcher_request_test.cpp src/launch_request.cpp src/app_settings.cpp -o /tmp/better-favorites-switcher-test
+/tmp/better-favorites-switcher-test
+python3 tests/launcher_handoff_test.py
+```
+
+Runtime fixtures cover MENU ownership with empty history, B/START, game switching,
+OFF, generation/flag mismatch, shutdown, failure and reopened-app B. Handoff tests
+cover cancellation, both history files unchanged, foreign commands/flags, blocked
+publication and rollback. The actual input mapping, MENU cleanup/launch timing,
+Onion audio transition and empty-history screen remain device test requirements.
+
+Final local MENU checks passed: focused C++ handoff, existing A launch/history,
+settings/persistence, lifecycle fixtures under /tmp and macOS temporary roots,
+real-launcher dispatch with isolated child stubs, installer fault fixtures, shell
+syntax, Python parsing and whitespace. Docker rebuilt an ARM EABI5 executable;
+the existing SDL2_ttf `libbz2.so.1.0` linker warning remains. These checks do not
+establish device MENU/audio timing or measured RAM use. Installed card files still
+match checkpoint hashes; no deployed files were changed.
+
+On 2026-10-02, after verified deployment of the binary, launcher, helper and
+manifest, the user confirmed MENU works as expected on hardware. Failure and
+shutdown edge cases remain fixture checks; no RAM measurement is claimed.

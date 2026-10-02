@@ -696,7 +696,7 @@ bool cancelOnionLaunchCommand(
 
     for (const std::string& path : {
              stagedPath(requestDir), appCommandPath(requestDir),
-             recentRecordPath(requestDir)}) {
+             recentRecordPath(requestDir), requestDir + "/switcher.request"}) {
         struct stat details {};
         if (lstat(path.c_str(), &details) != 0) {
             if (errno == ENOENT) continue;
@@ -959,4 +959,183 @@ bool requestOnionLaunch(
         requestDir,
         error
     );
+}
+
+namespace {
+constexpr const char* kSwitcherRequest = "BetterFavoritesSwitcher1\n";
+bool menuPathAbsent(const std::string& path, std::string& error) {
+    struct stat details {};
+    if (lstat(path.c_str(), &details) == 0) {
+        error = "Existing Onion handoff file: " + path; return false;
+    }
+    if (errno == ENOENT) return true;
+    error = "Cannot inspect Onion handoff file: " + path; return false;
+}
+}
+
+bool stageOnionSwitcherRequest(const std::string& requestDir, std::string& error) {
+    error.clear();
+    return validRequestDirectory(requestDir, error) &&
+        writePrivateFile(requestDir + "/switcher.request", kSwitcherRequest, error);
+}
+
+bool publishOnionSwitcherRequest(const std::string& requestDir,
+    const std::string& activePath, const std::string& quickSwitchPath,
+    const std::string& pendingPath, const std::string& shutdownPath,
+    const std::string& sdRoot, std::string& error) {
+    error.clear();
+    if (!validRequestDirectory(requestDir, error)) return false;
+    std::string marker, captured;
+    FileSnapshot active;
+    if (!readCommand(requestDir + "/switcher.request", marker, error) ||
+        marker != kSwitcherRequest ||
+        !readCommand(appCommandPath(requestDir), captured, error) ||
+        !validAppCommand(captured) || !readSnapshot(activePath, active, error) ||
+        !active.exists || active.contents != captured) {
+        if (error.empty()) error = "MENU request or active app ownership is invalid.";
+        return false;
+    }
+    const std::string flagPath = sdRoot + "/.tmp_update/.runGameSwitcher";
+    const std::string flagContents = std::string(kSwitcherRequest) + requestDir + "\n";
+    if (!menuPathAbsent(flagPath, error) || !menuPathAbsent(quickSwitchPath, error) ||
+        !menuPathAbsent(pendingPath, error) || !menuPathAbsent(shutdownPath, error)) return false;
+    const std::string switcher = sdRoot + "/.tmp_update/bin/gameSwitcher";
+    if (!regularFile(switcher, error) || access(switcher.c_str(), X_OK) != 0) {
+        error = "Onion GameSwitcher is unavailable."; return false;
+    }
+    AppSettings settings;
+    const char* settingsEnv = std::getenv("BETTER_FAVORITES_SETTINGS");
+    std::string settingsError;
+    loadAppSettings(settingsEnv && *settingsEnv ? settingsEnv :
+        sdRoot + "/App/BetterFavoritesTest/settings.conf", settings, settingsError);
+    if (!settingsError.empty()) std::cerr << settingsError << '\n';
+    Replacement ticket, generation, restoreApp;
+    if (settings.automaticReturn) {
+        const char* capability = std::getenv("BETTER_FAVORITES_SWITCHER_HANDOFF");
+        const char* context = std::getenv("BETTER_FAVORITES_RETURN_DIR");
+        struct stat details {};
+        const std::string directory = context ? context : "";
+        const std::string prefix = "/tmp/better-favorites-return.";
+        if (!capability || std::string(capability) != "1" ||
+            !startsWith(directory, prefix) || directory.size() == prefix.size() ||
+            directory.find('/', prefix.size()) != std::string::npos ||
+            lstat(directory.c_str(), &details) != 0 || !S_ISDIR(details.st_mode) ||
+            details.st_uid != geteuid() || (details.st_mode & 077) != 0) {
+            error = "Automatic return requires the MENU-capable runtime helper."; return false;
+        }
+        ticket.path = directory + "/switcher.request"; ticket.contents = flagContents;
+        generation.path = directory + "/generation";
+        generation.contents = settings.returnGeneration + "\n";
+        if (!readSnapshot(ticket.path, ticket.before, error) || ticket.before.exists ||
+            !readSnapshot(generation.path, generation.before, error) || generation.before.exists) {
+            if (error.empty()) error = "Return context is already occupied.";
+            return false;
+        }
+        if (!ticket.prepare(error, 0600) || !generation.prepare(error, 0600)) return false;
+    }
+    restoreApp.path = activePath; restoreApp.contents = captured;
+    if (!restoreApp.prepare(error, active.details.st_mode & 0777)) return false;
+    bool removed = false, flagOwned = false;
+    struct stat ownedFlag {};
+    auto rollback = [&]() {
+        if (flagOwned) {
+            FileSnapshot flag;
+            std::string problem;
+            if (readSnapshot(flagPath, flag, problem) && flag.exists &&
+                flag.details.st_dev == ownedFlag.st_dev && flag.details.st_ino == ownedFlag.st_ino &&
+                flag.contents.size() <= flagContents.size() &&
+                flagContents.compare(0, flag.contents.size(), flag.contents) == 0) {
+                // An interrupted/short write is still our inode and token prefix.
+                // A foreign rewrite with other contents remains untouched.
+                if (unlink(flagPath.c_str()) != 0) error += "; cannot remove owned GameSwitcher flag";
+            }
+        }
+        std::string problem;
+        generation.rollback(problem); if (!problem.empty()) error += "; " + problem;
+        problem.clear(); ticket.rollback(problem); if (!problem.empty()) error += "; " + problem;
+        if (removed) {
+            // The saved command is restored only into an absent slot. This is
+            // a conflict guard, not CAS; Onion's app-return writer is serialized.
+            problem.clear();
+            if (!restoreApp.publish(problem)) error += "; app restore: " + problem;
+        }
+    };
+    if (settings.automaticReturn && (!ticket.publish(error) || !generation.publish(error))) {
+        rollback(); return false;
+    }
+    handoffTestPoint("menu-before-remove");
+    FileSnapshot current;
+    if (!readSnapshot(activePath, current, error) || !sameSnapshot(active, current) ||
+        !menuPathAbsent(quickSwitchPath, error) || !menuPathAbsent(pendingPath, error) ||
+        !menuPathAbsent(shutdownPath, error)) {
+        if (error.empty()) error = "Active app command changed before MENU handoff.";
+        rollback(); return false;
+    }
+    if (unlink(activePath.c_str()) != 0) {
+        error = "Cannot remove owned app command."; rollback(); return false;
+    }
+    removed = true;
+    handoffTestPoint("menu-after-remove");
+    if (!menuPathAbsent(activePath, error) || !menuPathAbsent(quickSwitchPath, error) ||
+        !menuPathAbsent(pendingPath, error) || !menuPathAbsent(shutdownPath, error) ||
+        (settings.automaticReturn && (!ticket.stillPublished(error) || !generation.stillPublished(error)))) {
+        rollback(); return false;
+    }
+    // Runtime observes this last, after the launcher returns, just like Onion's
+    // StartGameSwitcher shortcut. MENU does not write command/history data.
+    const int fd = open(flagPath.c_str(), O_WRONLY | O_CREAT | O_EXCL, 0600);
+    if (fd < 0) { error = "Cannot publish GameSwitcher flag."; rollback(); return false; }
+    const bool written = writeAll(fd, flagContents);
+    flagOwned = fstat(fd, &ownedFlag) == 0;
+    if (!flagOwned && written) {
+        FileSnapshot identified;
+        std::string inspectionError;
+        if (readSnapshot(flagPath, identified, inspectionError) && identified.exists &&
+            identified.contents == flagContents) {
+            ownedFlag = identified.details; flagOwned = true;
+        }
+    }
+    bool okay = written && flagOwned && fsync(fd) == 0;
+    if (close(fd) != 0) okay = false;
+    handoffTestPoint("menu-after-flag");
+    FileSnapshot flag;
+    okay = okay && readSnapshot(flagPath, flag, error) && flag.exists && flag.contents == flagContents &&
+        flag.details.st_dev == ownedFlag.st_dev && flag.details.st_ino == ownedFlag.st_ino &&
+        menuPathAbsent(activePath, error) && menuPathAbsent(pendingPath, error) &&
+        menuPathAbsent(quickSwitchPath, error) && menuPathAbsent(shutdownPath, error);
+    if (!okay) {
+        if (error.empty()) error = "Cannot verify GameSwitcher flag publication.";
+        rollback(); return false;
+    }
+    std::cerr << "Published Onion GameSwitcher request; history unchanged.\n";
+    return true;
+}
+
+bool publishStagedOnionSwitcher(const std::string& requestDir, std::string& error) {
+    return publishOnionSwitcherRequest(requestDir, kActiveCommand, kQuickSwitch,
+        "/tmp/cmd_to_run.sh", "/tmp/.offOrder", kSdRoot, error);
+}
+
+bool requestOnionSwitcher(std::string& error) {
+    error.clear();
+    const char* requestDir = std::getenv("BETTER_FAVORITES_REQUEST_DIR");
+    if (!requestDir || !validRequestDirectory(requestDir, error)) {
+        if (error.empty()) error = "Private MENU request directory is unavailable.";
+        return false;
+    }
+    std::string captured, active;
+    if (!readCommand(appCommandPath(requestDir), captured, error) || !validAppCommand(captured) ||
+        !readCommand(kActiveCommand, active, error) || active != captured) {
+        if (error.empty()) error = "Active Onion command is not this app invocation.";
+        return false;
+    }
+    AppSettings settings; std::string settingError;
+    const char* env = std::getenv("BETTER_FAVORITES_SETTINGS");
+    loadAppSettings(env && *env ? env : "/mnt/SDCARD/App/BetterFavoritesTest/settings.conf", settings, settingError);
+    const char* capability = std::getenv("BETTER_FAVORITES_SWITCHER_HANDOFF");
+    if (settings.automaticReturn && (!capability || std::string(capability) != "1")) {
+        error = "Automatic return requires the MENU-capable runtime helper."; return false;
+    }
+    if (!regularFile("/mnt/SDCARD/.tmp_update/bin/gameSwitcher", error)) return false;
+    return stageOnionSwitcherRequest(requestDir, error);
 }

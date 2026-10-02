@@ -51,9 +51,9 @@ bf_return_finish() {
 }
 
 bf_return_clear_context() {
-    unset BETTER_FAVORITES_RETURN_DIR
+    unset BETTER_FAVORITES_RETURN_DIR BETTER_FAVORITES_SWITCHER_HANDOFF
     if [ -n "$bf_context" ]; then
-        rm -f "$bf_context/request.sh" "$bf_context/generation"
+        rm -f "$bf_context/request.sh" "$bf_context/generation" "$bf_context/switcher.request"
         rmdir "$bf_context" 2>/dev/null || true
     fi
     bf_context=""
@@ -74,7 +74,7 @@ bf_return() {
     if [ "$1" = init ]; then
         bf_return_clear_origin runtime-init
         bf_context=""
-        unset BETTER_FAVORITES_RETURN_DIR
+        unset BETTER_FAVORITES_RETURN_DIR BETTER_FAVORITES_SWITCHER_HANDOFF
     fi
     bf_return_read_settings
     bf_return_diag "action=boundary enabled=$bf_enabled settings_reason=$bf_setting_reason arg2=[${2:-}] arg3=[${3:-}] active=$(bf_return_path_state "$sysdir/cmd_to_run.sh") pending=$(bf_return_path_state /tmp/cmd_to_run.sh) quick_switch=$(bf_return_path_state /tmp/quick_switch) switcher_flag=$(bf_return_path_state "$sysdir/.runGameSwitcher") shutdown=$(bf_return_path_state /tmp/.offOrder)"
@@ -94,6 +94,7 @@ bf_return() {
                 bf_context=$(mktemp -d /tmp/better-favorites-return.XXXXXX) || bf_context=""
                 if [ -n "$bf_context" ]; then
                     export BETTER_FAVORITES_RETURN_DIR="$bf_context"
+                    export BETTER_FAVORITES_SWITCHER_HANDOFF=1
                     bf_return_diag "action=context-created context=[$bf_context]"
                 else
                     bf_return_diag 'action=context-failed reason=private-directory-creation-failed'
@@ -145,6 +146,22 @@ bf_return() {
                 esac
             else
                 bf_return_diag "action=reject reason=adoption-preconditions-failed exit_status=$3 enabled=$bf_enabled ticket_generation=[$bf_ticket_generation]"
+            fi
+            # MENU uses Onion's shortcut flag without a game/recent command.
+            if [ "$bf_enabled" = 1 ] && [ "$3" = 0 ] && bf_return_is_app "$2" &&
+               [ -n "$bf_context" ] && [ -f "$sysdir/.runGameSwitcher" ] &&
+               [ ! -e "$sysdir/cmd_to_run.sh" ] && [ ! -L "$sysdir/cmd_to_run.sh" ] &&
+               [ ! -e /tmp/cmd_to_run.sh ] && [ ! -L /tmp/cmd_to_run.sh ] &&
+               [ ! -e /tmp/quick_switch ] && [ ! -L /tmp/quick_switch ] &&
+               [ ! -f /tmp/.offOrder ] &&
+               [ ! -L "$bf_context/switcher.request" ] && [ -f "$bf_context/switcher.request" ] &&
+               [ ! -L "$bf_context/generation" ] && [ -f "$bf_context/generation" ] &&
+               [ "$(head -n 1 "$bf_context/switcher.request")" = BetterFavoritesSwitcher1 ] &&
+               cmp -s "$bf_context/switcher.request" "$sysdir/.runGameSwitcher" &&
+               [ "$(cat "$bf_context/generation")" = "$bf_setting_epoch" ]; then
+                bf_origin=BetterFavorites:GameSwitcher
+                bf_origin_epoch="$bf_setting_epoch"
+                bf_return_diag 'action=adopt reason=verified-menu-ticket'
             fi
             bf_return_clear_context
             ;;

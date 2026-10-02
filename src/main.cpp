@@ -187,7 +187,9 @@ int main(int argc, char* argv[])
         std::string error;
         bool success = false;
 
-        if (std::strcmp(argv[1], "--publish-handoff") == 0) {
+        if (std::strcmp(argv[1], "--publish-switcher-handoff") == 0) {
+            success = publishStagedOnionSwitcher(argv[2], error);
+        } else if (std::strcmp(argv[1], "--publish-handoff") == 0) {
             success = publishStagedOnionLaunch(argv[2], error);
         } else if (std::strcmp(argv[1], "--cancel-handoff") == 0) {
             success = cancelStagedOnionLaunch(argv[2], error);
@@ -629,6 +631,7 @@ int main(int argc, char* argv[])
     bool settingsSaveFailed = false;
     bool running = true;
     bool launchRequested = false;
+    bool switcherRequested = false;
 
     while (running) {
         SDL_Event event;
@@ -849,6 +852,17 @@ int main(int argc, char* argv[])
                   break;
 
               case SDLK_ESCAPE:
+                  if (event.key.repeat != 0) break;
+                  {
+                      std::string error;
+                      // An empty favorites list has no browser position to save.
+                      if ((!rows.empty() && !saveBrowserState(browserStatePath, rows,
+                              selectedRow, firstRow, error)) || !requestOnionSwitcher(error)) {
+                          std::cerr << "GameSwitcher request failed: " << error << std::endl;
+                          break;
+                      }
+                  }
+                  switcherRequested = true;
                   running = false;
                   break;
 
@@ -2070,5 +2084,6 @@ int main(int argc, char* argv[])
     IMG_Quit();
     SDL_Quit();
 
-    return launchRequested ? kLaunchRequestedExitCode : 0;
+    return switcherRequested ? kSwitcherRequestedExitCode :
+        (launchRequested ? kLaunchRequestedExitCode : 0);
 }

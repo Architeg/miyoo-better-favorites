@@ -68,7 +68,7 @@ Browser state uses selected launch/ROM identity, fallback ordinal, and viewport
 identity. Missing favorites select a nearby clamped entry; corrupt state uses
 defaults. This is app state, not a separate history system. Lifecycle diagnostics
 in `.tmp_update/logs/better-favorites-return.log` report ownership and decisions;
-logging failure does not alter the handoff. Browser MENU behavior is unchanged.
+logging failure does not alter the handoff. Browser MENU extension is hardware verified; see below.
 
 ## Version and deployment
 
@@ -99,9 +99,26 @@ memory measurement](onion-return.md). MainUI internals remain unverified.
 
 ## Roadmap and exact next step
 
-**Next: design browser MENU behavior as a separate reviewed change.** Do not
-change the working game/session return while adding it. Retain device checks for
-START, stock-menu isolation, removed favorites, shutdown/direct exit/restart and
-BusyBox/filesystem failure behavior. Then proceed to Favorites Home tile
-integration and packaging. Preserve UI geometry, themes, navigation and audio;
-never modify `favourite.json` or introduce a separate game/history loop.
+Next: implement SELECT actions, full-screen Settings/Help, and guarded removal of
+one favorite. Preserve browser geometry and verified Onion launch/return/audio.
+Inspect Onion removal semantics first; no deployment of this next step yet.
+
+## Hardware-verified MENU checkpoint
+
+The previous automatic-return checkpoint is `cd55c018cea2a273eef9f1feacf0cb8d27866a97`.
+MENU saves browser state, stages a private request and exits 21 after cleanup.
+The launcher removes only its captured active app command and publishes Onion's
+`.runGameSwitcher` flag. No selected favorite/history registration occurs. ON
+adopts a GameSwitcher-origin session; OFF uses Onion's normal app/menu return.
+The helper and manifest were updated alongside the binary/launcher; runtime hook
+placement is unchanged. Settings MENU closes the overlay; browser B exits.
+
+On 2026-10-02 the user confirmed the deployed MENU revision works as expected on
+hardware. This complements the earlier hardware-confirmed A launch, OFF/ON return,
+switching games, A resume and restored selection/viewport. Failure, shutdown and
+empty-history cases remain fixture-verified unless separately observed on device.
+
+Deployment backup: `../miyoo-better-favorites-backups/20261002-180751-menu`.
+Focused handoff/lifecycle, launcher, settings/state and installer checks passed.
+Shell syntax and Docker ARM build passed, with the existing libbz2 linker warning.
+No device RAM measurement has been made.

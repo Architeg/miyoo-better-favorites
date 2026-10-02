@@ -69,17 +69,19 @@ app_exit=$?
 APP_PID=""
 printf 'binary pid=%s exit status=%s\n' "$last_app_pid" "$app_exit" >> "$LOG"
 
-if [ "$app_exit" -eq 20 ]; then
+if [ "$app_exit" -eq 20 ] || [ "$app_exit" -eq 21 ]; then
     if [ -z "$REQUEST_DIR" ]; then
         echo "No private request directory for handoff." >> "$LOG"
         exit 1
     fi
-    # The helper publishes only after the binary has finished SDL/audio
-    # cleanup. It registers the recent record and sets quick_switch last;
-    # ownership checks and rollback handle publication errors.
+    # Both operations publish only after SDL/audio cleanup. A registers its
+    # recent record and sets quick_switch; MENU only requests GameSwitcher.
+    # Ownership checks and rollback handle publication errors.
     trap '' INT TERM
+    operation=--publish-handoff
+    [ "$app_exit" -ne 21 ] || operation=--publish-switcher-handoff
     "$APP_DIR/better-favorites" \
-        --publish-handoff "$REQUEST_DIR" >> "$LOG" 2>&1
+        "$operation" "$REQUEST_DIR" >> "$LOG" 2>&1
     publish_status=$?
     if [ "$publish_status" -eq 0 ]; then
         HANDOFF_COMMITTED=1
@@ -87,7 +89,7 @@ if [ "$app_exit" -eq 20 ]; then
     trap 'exit 130' INT
     trap 'exit 143' TERM
     if [ "$HANDOFF_COMMITTED" -eq 1 ]; then
-        echo "Published game command, recent record, and quick-switch flag." >> "$LOG"
+        echo "Published Onion handoff: $operation." >> "$LOG"
         exit 0
     fi
     echo "Could not publish game handoff." >> "$LOG"

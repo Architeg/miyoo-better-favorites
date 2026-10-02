@@ -95,6 +95,17 @@ and **superseded** do not add obligations to the active v1 milestone sequence.
 
 ### Implemented and hardware-confirmed
 
+Browser Settings functionality (persistent grouping, numeric-prefix display and
+sorting) and presentation are user-confirmed on deployed build `4f857eb6`.
+Only the final centering, description-size and panel-padding adjustments await
+device follow-up;
+this does not imply exhaustive fault-injection or theme coverage.
+
+Final readability confirmation: supplied 2026-10-02 device photos show the deployed
+SELECT menu, removal modal, Settings, About and Help. This is screen-specific
+evidence, not an exhaustive theme/fault/lifecycle matrix. Photo identifiers are
+recorded in [status](development-status.md#verification-status).
+
 The supplied report and preceding device reports confirm the following major
 behaviors. This does not imply every failure case/device/theme/version was tested.
 
@@ -131,7 +142,7 @@ Theme/device identities and test logs are not complete enough for universal clai
 
 | Feature/change | Current evidence and missing evidence |
 | --- | --- |
-| Final larger/heavier small text, filled controls, stronger arrows | Included in `cf8c840`; host SDL/ARM checks, deployed afterward; no subsequent device confirmation supplied |
+| Final modal text centering, larger descriptions and reduced panel padding | Host/SDL checks and ARM build; device follow-up pending; preceding Settings presentation/controls are user-confirmed |
 | Empty favorites browsing/menu availability | Implemented and fixture-covered; complete device empty-list matrix pending |
 | Removed remembered entry → nearby selection | Identity/ordinal fallback and tests; dedicated device edge-case check pending |
 | Corrupt/missing preference/state behavior | Host fixtures; device fault cases not exhaustively observed |
@@ -143,9 +154,6 @@ Theme/device identities and test logs are not complete enough for universal clai
 
 | Feature | Existing support versus missing work |
 | --- | --- |
-| Grouping preference | `groupByConsole=true` field; parser/main always group; no toggle or persistence |
-| Numeric-prefix display | `displayLabel` supports hiding digit-dot prefixes; default shown; no Settings control/persistence |
-| Sorting | OriginalLabel and AlphabeticalTitle parser paths; no Settings control/persistence |
 | Remember-position preference | Restoration works; optional ON/OFF control not implemented or finalized |
 | Hint/artwork preferences | Theme hide flags and artwork rendering work; proposed app controls absent |
 | Artwork failure behavior | IMG loading failures handled; full missing/corrupt presentation not verified |
@@ -159,7 +167,7 @@ Theme/device identities and test logs are not complete enough for universal clai
 
 - Selected overflowing browser-title horizontal scrolling.
 - Browser page-at-a-time navigation after button semantics are resolved.
-- Usable persistent browser settings (core grouping/prefix/sort first).
+- Device follow-up for the final centering/text-size/padding adjustments; optional controls remain unresolved.
 - Measured startup/memory profiling and evidence-based optimization.
 - Normal Home Favorites tile entry; direct Home shortcut investigation as alternative.
 - Explicit device/Onion/theme compatibility matrix and filename compatibility audit.
@@ -171,16 +179,17 @@ completed browser features or the ordered remaining milestones.
 
 ## 4. Settings matrix: requirements versus proposed controls
 
-`include/settings.h` is code configuration; `src/app_settings.cpp` currently
-persists only Automatic return and its generation. A field or parser branch is
-**not** a usable, persistent Settings option. The screen currently exposes only
-Automatic return and its explanation; new categories must contain real options.
+`include/settings.h` defines app configuration. `src/app_settings.cpp` continues
+to persist only Automatic return/generation using the unchanged runtime protocol.
+`src/browser_preferences.cpp` separately persists grouping, prefixes and sorting;
+the five-row screen exposes four adjustable values plus About. A code field alone
+still does **not** imply a usable persistent option. See [browser Settings](browser-settings.md).
 
 | Area | Accepted requirement/default | Current implementation | Remaining Settings work / unresolved optional choice |
 | --- | --- | --- | --- |
-| Grouping | Group by console ON by default; grouped/flat browsing option | Field true; grouping unconditional | Persist/expose choice and build flat rows; flat ordering, headings and Left/Right behavior require definition |
-| Numeric prefixes | Show by default; optionally hide prefixes such as `001.` for display only | Parser hides leading digits plus dot/space; no persistent UI | Add real control; preserve original label/record/launch/history semantics; other prefix formats not agreed |
-| Sorting | Original-label sort default; alternate alphabetical title sort ignoring numeric prefix | Both parser branches; ASCII case folding for alternate keys | Persist/expose modes; do not equate OriginalLabel with file order/natural numeric sorting; global flat-list ordering and Unicode collation unresolved |
+| Grouping | Group by console ON by default | Persistent UI; OFF is a flat list with global chosen sort, no headings or console jumps | Normal functionality user-confirmed; edge-case matrix remains |
+| Numeric prefixes | Show by default; Hide removes leading digit-dot/space prefixes for display only | Persistent UI; stored labels and sort mode remain independent | Normal functionality user-confirmed; other prefix formats not agreed |
+| Sorting | Original label default; alternate Alphabetical title ignores numeric prefix | Persistent UI; literal-label order, or ASCII-folded title keys; ties use literal label/source offset | Normal functionality user-confirmed; Unicode collation/natural numeric sorting not promised |
 | Long titles | Selected overflowing row scrolls after about one second; other rows stationary | Browser scrolling absent; dialog paging exists | Behavior is core; enable/disable/speed control proposed, exact choices/default not finalized |
 | Remembered position | Preserve selected identity and viewport; nearby fallback if removed | Implemented independently of a user toggle | Optional toggle proposed; default and OFF behavior/storage retention unresolved |
 | Hints | Follow theme preferences; readable menu text-control labels as accepted | Theme hideIcons/hideHints applied; no app override | App hint override proposed; defaults/precedence unresolved; preserve browser/menu distinction |
@@ -189,8 +198,9 @@ Automatic return and its explanation; new categories must contain real options.
 
 Settings changes must not write favorite labels/order, lose selection identity,
 change Onion core settings or accidentally rotate/revive return ownership. Expand
-the settings format with migration and failure behavior compatible with the return
-helper's actual parser. File format/version design is unfinished, not specified here.
+browser preferences without changing the return helper's settings format. The
+separate versioned browser file has safe defaults for missing/malformed data;
+checked same-directory atomic publication precedes applying a value in memory.
 
 ## 5. Ordered remaining milestones
 
@@ -201,8 +211,9 @@ and remaining navigation/artwork precede profiling and Home entry integration.
 
 - **Intended behavior:** existing menu UI remains readable across light/dark themes,
   including heavier small text and filled control labels; no navigation redesign.
-- **Current/missing:** final adjustments are committed and deployed; preceding UI
-  is hardware-confirmed. A device result for these final adjustments is missing.
+- **Current/missing:** final adjustments are committed/deployed and the supplied
+  2026-10-02 device photos confirm the presentation shown. M1 is closed for that
+  checkpoint; later scoped refinements have their own pending acceptance in M2.
 - **Dependencies:** the deployed `cf8c840` build, its verified backup and actual
   themes/fonts; no new implementation is needed unless a real regression is found.
 - **Reuse/inspect:** current active-theme resolution, SDL_ttf owned fonts, cached
@@ -221,11 +232,15 @@ and remaining navigation/artwork precede profiling and Home entry integration.
 - **Intended behavior:** user can persist grouped versus flat browsing, show/hide
   numeric prefixes and select OriginalLabel versus AlphabeticalTitle sorting.
   Accepted defaults: grouping ON, prefixes shown, OriginalLabel sorting.
-- **Current/missing:** configuration fields/parser support exist; grouping is still
-  unconditional and the settings file/UI lack these controls. Implement actual
-  persistent choices, model rebuild, stable selection/viewport and migration.
-- **Dependencies:** current menus/state/removal identity; define grouped/flat row
-  semantics and settings-format compatibility with the optional return helper.
+- **Current/missing:** implemented in the Settings checkpoint: four adjustable rows plus About,
+  separate atomic browser preferences, live flat/grouped rebuild, independent display/
+  sort options, original launch/ROM selection anchors and exact-record removal identity.
+  User confirms deployed functionality and presentation, including inline descriptions,
+  chevrons, About and horizontal modal actions/Up-Down paging, passed hardware tests.
+  Final centered modal text, slightly larger descriptions and reduced panel padding
+  await device follow-up. Fault cases remain separately tracked.
+- **Dependencies:** current menus/state/removal identity and unchanged return format.
+  OFF now explicitly means no headings or console jumps, globally sorted favorites.
 - **Reuse/inspect:** parser display/sort functions, row/navigation/state helpers,
   app setting transaction/generation parser; Onion Emu labels and original favorites.
   Inspect stock presentation/order without rewriting its records.
@@ -236,9 +251,13 @@ and remaining navigation/artwork precede profiling and Home entry integration.
 - **Host/device verification:** defaults/migration/read-write-failure tests; grouped/
   flat/empty/duplicate/Unicode/prefix/sort fixtures and state restoration tests.
   Device cycle all combinations, restart and launch/return/remove smoke checks.
-- **Exclusions/decisions:** no empty Settings categories or unrelated metadata/core
-  options. Flat console-jump handling, flat ordering and collation/tie handling need
-  explicit decisions; no invented app defaults for proposed hint/artwork/state toggles.
+- **Exclusions/decisions:** no empty categories or unrelated metadata/core options.
+  Original label is literal-label sorting, not source order. Alternate ASCII-folded
+  keys preserve UTF-8 bytes; tie handling is deterministic. Unicode collation remains
+  unresolved. No invented defaults for optional hint/artwork/state controls. The
+  [device checklist](browser-settings.md#device-acceptance-checklist) records the
+  final readability follow-up. M2 is closed for functionality and preceding
+  presentation; M3 begins separately at the user's request.
 
 ### M3 — Scroll selected long browser titles horizontally
 
@@ -247,7 +266,7 @@ and remaining navigation/artwork precede profiling and Home entry integration.
   resets the presentation. Dialog title paging remains a separate feature.
 - **Current/missing:** browser renders static titles; no horizontal animation/timer
   handler. Measure the usable title region and add bounded selected-row behavior.
-  Dialog LEFT/RIGHT paging does not satisfy this milestone.
+  Dialog Up/Down paging does not satisfy this milestone.
 - **Dependencies:** M2 display labels and model/state changes; current artwork area,
   sticky headings and stable browser geometry.
 - **Reuse/inspect:** SDL_ttf width measurement, cached selected text, SDL timing and
@@ -411,13 +430,15 @@ separate dimensions; Mini/Plus are targets, not a completed support matrix.
 
 Evidence gaps and limitations to retain until resolved:
 
-- Final readability changes deployed but not yet device-confirmed; preceding
-  dark/light presentation confirmation is not automatically inherited.
-- Other settings are not persistent UI controls; groupByConsole is unused by the
-  unconditional grouping path. Return setting's compact format/helper compatibility
-  needs attention before expanding settings.
+- Final readability is confirmed by supplied device photos for the screens shown;
+  browser Settings functionality and preceding presentation are hardware-confirmed.
+  Final modal centering, description-size and padding adjustments are hardware pending. mini.os has
+  no matching regular Nunito face; native bold is retained without a false weight claim.
+- Grouping/prefix/sort are now persistent UI controls in a separate file. Optional
+  long-title/hint/artwork/remember-position controls remain proposals, not implemented.
+  Return setting's compact format/helper compatibility remains unchanged.
 - Browser long titles are static; dialog paging is not horizontal browser scrolling.
-  Browser page controls are not defined. Flat-mode navigation remains undecided.
+  Browser page controls are not defined. Flat mode disables console jumps.
 - Valid paths with `&` and other excluded characters cannot currently launch;
   broader compatibility must satisfy shell execution and Onion's parser together.
   Resolved existing traversal paths are supported without changing their strings.

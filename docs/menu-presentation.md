@@ -64,16 +64,17 @@ splits long words only at UTF-8 boundaries. No menu text uses clipping.
 
 - Settings: Automatic return label left and ON/OFF right; short contextual
   description. Technical installation/availability details live in explanation.
-  An unavailable integration is stated explicitly in the contextual description.
+  Availability is confined to About; the fixed description contains only the
+  selected setting's inline text and badges.
 - Help: aligned control/action columns with short labels. Browser and menu
   contexts are separate reading pages; Up/Down changes only the displayed page.
 - Explanation: measured paragraphs, with Up/Down reading pages if needed.
 - Removal: question, full game title, “The game file will be kept.”, Cancel/Remove.
   The verified confirmation cursor still starts on Cancel. Extremely long titles
-  use LEFT/RIGHT in a dedicated paging strip. Text stays still until explicitly
-  paged; Up/Down continues to select Cancel/Remove.
+  use Up/Down in a dedicated paging strip. Text stays still until explicitly
+  paged; Left/Right selects Cancel/Remove in the horizontal action row.
 - Errors show concise complete measured summaries without timed pagination.
-  Original technical details remain in logs; the clear-on-action policy is unchanged.
+  Original technical details remain in logs; title paging preserves the visible error.
 - Footer: shared centerline, symbol size and gaps; concise context actions.
   Oversized theme hint fonts are reopened at a smaller measured size inside the
   existing 60px footer, preserving font family/color and browser font resources.
@@ -141,36 +142,38 @@ stock dialog art. Only the asset's plain central material is reused: Analogue's
 full dialog has baked CANCEL/OK artwork. Missing dialog material falls back to
 an opaque theme-derived panel/boundary. Browser dimming uses its sampled color.
 
-Removal is a measured centered modal with 20px horizontal and at least 24px
-vertical safety margins, bounded title wrapping, LEFT/RIGHT title pages, and
-complete concise errors inside. Cancel/Remove remain vertical rows with the
-existing Up/Down selection and A/B actions. Settings values remain right aligned.
+Removal is a centered 520px modal with 60px horizontal and at least 24px vertical
+screen margins, 24px internal padding, Up/Down title pages and complete concise
+errors inside. Cancel/Remove are side by side, selected with Left/Right; A activates
+and B cancels. Settings values remain right aligned.
 Explanation separates integration status and short On/Off sections.
 
-Generate exactly three review images with the reusable driver:
+Generate exactly two contact sheets with the reusable driver:
 
 ```sh
 sh tools/build-menu-preview.sh /tmp/better-favorites-sdl-preview /tmp/better-favorites-sdl-preview/build
-mkdir -p /tmp/better-favorites-device-menu-previews
+mkdir -p /tmp/better-favorites-settings-corrections-previews
 /tmp/better-favorites-sdl-preview/build/menu-preview \
+  /tmp/better-favorites-readability-previews/light-card \
   /tmp/better-favorites-menu-previews/current-card \
-  /tmp/better-favorites-menu-previews/alternate-card \
   /tmp/better-favorites-menu-previews/missing-card \
-  /tmp/better-favorites-device-menu-previews
+  /tmp/better-favorites-settings-corrections-previews
 ```
 
-Outputs: Help, removal over representative browser, alternate/missing contact
-sheet. Contact-sheet sample symbols include X/START for visual validation; they
-are not extra Help actions. Native SDL renders the production menu code with
-real mounted theme resources; this is not device rasterization verification.
-Tests also render preferences, both Settings rows and explanation offscreen.
+Outputs: `settings-about-sheet.png` (dark/light Settings and About) and
+`removal-sheet.png` (dark/light normal and long-title/error modals). Native SDL
+renders the production menu code with real theme resources and a representative
+browser underlay; this is not device rasterization verification. Other checks run
+offscreen and create no extra images. The driver checks all five Settings rows.
 Historical preview matrices/files are retained without regeneration or cleanup.
 
 ## Final readability checkpoint
 
 The preceding presentation was hardware-confirmed by the user across dark and
-light themes. These final micro-adjustments are host-tested/ARM-built and await
-device verification. Menu Help, Settings-description, About and footer text use
+light themes. The five device photos supplied on 2026-10-02 confirm the deployed
+final readability presentation shown; this does not establish exhaustive theme
+or lifecycle coverage. The browser Settings functionality is now also hardware-confirmed; the newer
+targeted presentation/modal-control refinements below await device verification. Menu Help, Settings-description, About and footer text use
 separate app-owned fonts, one point larger where it fits. Same-family heavier
 faces are preferred (for example CleanOnionGB's `Inter-SemiBold.otf`); otherwise
 SDL_ttf bold is applied only to those new instances. Browser fonts/styles remain
@@ -180,7 +183,94 @@ cached and are released before SDL cleanup. Wrapping/paging are measured again.
 
 The current reusable preview driver writes at most two images:
 `menu-preview LIGHT_FIXTURE DARK_FIXTURE MISSING_FIXTURE OUTPUT_DIR` produces
-`light-help.png` and `dark-removal.png`; all long-title/error/missing-resource,
-hidden-footer, Settings/About and borrowed-font preservation checks run offscreen.
+`settings-about-sheet.png` and `removal-sheet.png` for this revision; all long-title/error/
+missing-resource, hidden-footer, all five Settings rows, Help/About and borrowed-font
+preservation checks run offscreen.
 Earlier three-image/contact-sheet and matrix captures are historical and retained.
 The sample row remains preview-only, guarded by `BETTER_FAVORITES_MENU_RENDER_TESTING`.
+
+## Targeted corrections after Settings hardware feedback
+
+Browser Settings functionality was user-reported working after deployment of
+`bb1c7af20b8eb6cd65e0a2229fb55f1ea8ad445772e7617f7d36b06889c4eec3`.
+The device photo `5E91BA02-BF85-4838-BDA8-E4A3A39E626E.heic` and prior previews
+identify separate presentation issues; they do not invalidate that functionality
+report or verify the new corrections.
+
+The fixed Settings description now uses continuous measured inline text and badges,
+maximum two lines without changing its established font size. The ON-only note is
+`[B] / [START]: return here from GameSwitcher.` Availability appears only in About.
+Values retain one common right edge; selection shows theme chevrons (existing
+`icon-left-arrow-24.png`/`icon-right-arrow-24.png` are chevrons in both inspected
+themes), or two theme-colored strokes when icons are hidden/missing.
+
+About uses “When enabled” / “When disabled” headings in the borrowed browser
+console-heading font/color, inline badges and regular
+explanatory text when the actual font face permits it. No horizontal rules or
+control columns; the final direct-exit note is a paragraph. Both tested themes
+fit one page; oversized layouts retain measured paging.
+
+The 520px removal modal has 24px padding, two horizontal actions using the existing
+list selection treatment, and A Choose/B Back footer. Left/Right selects actions,
+Up/Down pages titles, A activates once and B cancels. Note/errors use the established
+body point size. The font loader verifies family and native style before selecting
+a sibling regular face. Inter Regular is available (23pt body/19pt description).
+mini.os has only Nunito Bold (19pt body/17pt description), so it retains native
+weight and logs that no matching regular face exists. No regular-weight claim is
+made for that theme, and no new font is bundled. Borrowed browser fonts are untouched.
+
+Exactly two current contact sheets show dark/light Settings/About and dark/light
+normal/long-title-error modals. They use production SDL/theme resources with a
+representative browser underlay, not device rasterization. Offscreen checks cover
+OFF/no note, absence of availability in the description, wrapping/bounds, modal
+paging/static text, same-family face resolution, body size, font ownership, all
+Settings rows, Help, hidden hints and missing assets. These corrections await
+device verification. [Controls and implementation](browser-settings.md).
+
+## Universal font policy
+
+Font configuration and actual SDL_ttf loading follow current-profile override →
+active theme → existing Onion/Miyoo fallback. Relative font paths use the config's
+own directory. Missing or unusable files fall through at the original requested
+size; an absent active-theme marker still permits the existing fallback.
+
+Regular explanation faces are selected by native family/style metadata from the
+current profile or active theme only. Canonical paths restrict sibling searches
+to those roots; no installed-theme discovery or family-name branches are used.
+If neither supplies a matching regular face, use the resolved theme font without
+synthetic bold. An inherently heavy face remains heavy. System fallbacks repair
+missing/unusable font configuration, not weight preference. Spacing/size hierarchy
+continues to work with a single supplied weight. No new font dependency.
+
+`tests/theme_fonts_test.cpp`, run by the existing native preview driver, covers
+profile-relative precedence, absent/corrupt fonts, system fallback, retained heavy
+faces, profile/active regular faces, ignored unrelated themes, missing active-theme
+configuration and preserved readable sizes. Observed font names above are evidence
+from the inspected card, not hardcoded resolver behavior.
+
+### Fixed description panel and secondary text
+
+The Settings panel touches the footer at y=420; its height reserves two measured
+lines plus 16px padding and never depends on row count or selection. Short notes
+are vertically centered. Rows scroll above an 8px gap. Its opaque theme-derived
+popup color is separate from the row selection asset. About remains ordinary
+content with spaced section headings and no panel or divider collection.
+
+Secondary descriptions use the browser's resolved `currentPage` section color
+when a 4px-grid contrast check of the actual composited surface reaches 4.5:1;
+otherwise they use normal theme text. This includes the modal's same-size keep-file
+sentence. The light fixture needs the normal-color fallback; the dark fixture
+retains its section color in About/modal and falls back in the brighter Settings
+panel. This does not guarantee arbitrary theme art or device contrast: two
+contact sheets are host-reviewed; these refinements still await device feedback.
+Font resolution remains current profile → active theme → existing Onion/Miyoo
+fallback, with no weight-driven switch to a system or unrelated-theme font.
+
+### Settings checkpoint closeout
+
+User confirms the deployed Settings functionality and presentation passed hardware
+testing. The final pass centers the modal heading, game title and keep-file note,
+increases the existing description/About font by two points, and reduces panel
+padding to 8px above/below its two reserved lines. Controls, safeguards and browser
+geometry are unchanged. These last adjustments need device verification. Native
+SDL bounds checks use `menu-preview ... --checks-only`; no previews are generated.

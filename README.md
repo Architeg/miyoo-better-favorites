@@ -42,9 +42,13 @@ Only consoles containing favorites are displayed.
 ## Status
 
 Native SDL2 browser with hardware-confirmed Onion launch/GameSwitcher return,
-SELECT actions, Settings/Help and safe favorite removal. Final menu readability
-adjustments await device verification. See [development status](docs/development-status.md).
+SELECT actions, Settings/Help and safe favorite removal. Supplied device photos
+confirm the final readability presentation shown. Persistent grouping, numeric-prefix
+display and sorting Settings are now user-confirmed on hardware. Targeted
+final centering, text-size and padding adjustments await device verification;
+see [development status](docs/development-status.md).
 The normal Home-screen Favorites tile integration remains the primary delivery
-goal. Earlier core Settings/title/navigation work is also unfinished; see the
+goal. Targeted presentation acceptance and remaining title/navigation work are
+unfinished; see the
 [authoritative development roadmap](docs/roadmap.md) for the ordered milestones,
 feature inventory, verification status and unresolved choices.

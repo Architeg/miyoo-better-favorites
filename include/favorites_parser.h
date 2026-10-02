@@ -45,9 +45,6 @@ private:
         const std::string& path
     ) const;
 
-    std::string makeSortKey(
-        const std::string& label
-    ) const;
 };
 
 #endif

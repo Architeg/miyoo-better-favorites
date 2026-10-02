@@ -23,16 +23,16 @@ implementation and verification evidence.
 2. Resolve each favorite to its console/system
 3. Resolve the ROM path
 4. Resolve matching box art
-5. Group games by console
-6. Sort within groups by original label by default; alternate prefix-ignoring title sorting has parser support but no persistent Settings control
+5. Build console groups (default) or a genuine flat list from persistent browser preferences
+6. Sort within groups, or globally in flat mode, by literal original label (default) or prefix-ignoring alphabetical title
 7. Render a stock-like Favorites interface using SDL2
 8. Privately stage the selected game/history request; finish SDL/audio cleanup
 9. Hand off through the outer launcher to Onion's existing runtime mechanisms
 
 Onion owns cores, saves/resume, activity tracking and GameSwitcher. Optional
 session-return integration restores the app/browser position; it is distinct from
-the unfinished Home Favorites entry integration. Current grouping is unconditional;
-a real persistent grouped/flat choice remains a roadmap milestone.
+the unfinished Home Favorites entry integration. Browser preferences are stored
+separately from the return protocol; see [browser Settings](browser-settings.md).
 
 ## UI
 

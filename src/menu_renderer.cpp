@@ -3,12 +3,16 @@
 #include <SDL_image.h>
 #include <algorithm>
 #include <cmath>
+#include <array>
+#include <cstring>
 #include <iostream>
 #include <vector>
 #include <functional>
 #include <sstream>
 #include <fstream>
 #include <cctype>
+#include <dirent.h>
+#include <cstdlib>
 #ifdef BETTER_FAVORITES_MENU_RENDER_TESTING
 #include <cassert>
 #endif
@@ -42,6 +46,30 @@ SDL_Color sample(SDL_Surface* surface, SDL_Color fallback) {
     SDL_UnlockSurface(rgba); SDL_FreeSurface(rgba);
     return weight ? SDL_Color {Uint8(red/weight),Uint8(green/weight),Uint8(blue/weight),255} : fallback;
 }
+// Check the already-composited surface, including theme dialog/background art.
+// A theme section color is optional secondary ink; normal theme text is the fallback.
+double relativeLight(SDL_Color c) {
+    static const auto linear=[] {std::array<double,256> values{};
+        for(int i=0;i<256;++i){const double v=i/255.0;values[i]=v<=0.04045?v/12.92:std::pow((v+0.055)/1.055,2.4);}return values;}();
+    return 0.2126*linear[c.r]+0.7152*linear[c.g]+0.0722*linear[c.b];
+}
+SDL_Color secondaryInk(SDL_Surface* screen,SDL_Rect area,SDL_Color section,SDL_Color normal) {
+    SDL_Rect clipped;if(!SDL_IntersectRect(&area,&screen->clip_rect,&clipped))return normal;
+    if(SDL_LockSurface(screen)!=0)return normal;
+    const double ink=relativeLight(section)+0.05;bool readable=true;
+    for(int y=clipped.y;y<clipped.y+clipped.h && readable;y+=4)for(int x=clipped.x;x<clipped.x+clipped.w;x+=4){
+        const int bytes=screen->format->BytesPerPixel;
+        const auto* at=static_cast<const Uint8*>(screen->pixels)+y*screen->pitch+x*bytes;
+        Uint32 pixel=0;
+        if(bytes==3)pixel=SDL_BYTEORDER==SDL_BIG_ENDIAN?(at[0]<<16|at[1]<<8|at[2]):(at[0]|at[1]<<8|at[2]<<16);
+        else if(bytes==2){Uint16 shortPixel;std::memcpy(&shortPixel,at,2);pixel=shortPixel;}
+        else std::memcpy(&pixel,at,bytes);
+        SDL_Color bg{};SDL_GetRGB(pixel,screen->format,&bg.r,&bg.g,&bg.b);
+        const double surface=relativeLight(bg)+0.05;
+        if(std::max(ink,surface)/std::min(ink,surface)<4.5){readable=false;break;}
+    }
+    SDL_UnlockSurface(screen);return readable?section:normal;
+}
 void fill(SDL_Surface* screen, SDL_Rect rect, SDL_Color c) { SDL_FillRect(screen,&rect,SDL_MapRGB(screen->format,c.r,c.g,c.b)); }
 void blit(SDL_Surface* image, SDL_Surface* screen, SDL_Rect rect) { if (image) SDL_BlitScaled(image,nullptr,screen,&rect); }
 int width(TTF_Font* font, const std::string& text) { int w=0,h=0; if(font) TTF_SizeUTF8(font,text.c_str(),&w,&h); return w; }
@@ -71,7 +99,16 @@ int control(SDL_Surface* screen, SDL_Surface* label, int x, int centerY) {
     SDL_Rect rect{x,centerY-label->h/2,label->w,label->h};
     SDL_BlitSurface(label,nullptr,screen,&rect);return label->w;
 }
-TTF_Font* readableFont(const ThemeTextStyle& style,int maxHeight=0) {
+std::string canonical(const std::string& path) {
+    char* resolved=realpath(path.c_str(),nullptr);if(!resolved)return {};
+    std::string result=resolved;std::free(resolved);return result;
+}
+bool suppliedFont(const Theme& theme,const std::string& path) {
+    const auto file=canonical(path);if(file.empty())return false;
+    for(const auto& root:theme.regularFontRoots){const auto base=canonical(root);if(!base.empty()&&file.rfind(base+"/",0)==0)return true;}
+    return false;
+}
+TTF_Font* readableFont(const Theme& theme,const ThemeTextStyle& style,int maxHeight=0) {
     std::string path=style.fontPath;
     const auto dot=path.find_last_of('.');
     std::string stem=dot==std::string::npos?path:path.substr(0,dot);
@@ -81,7 +118,7 @@ TTF_Font* readableFont(const ThemeTextStyle& style,int maxHeight=0) {
     // Only a heavier face in the same family/directory is eligible.
     for(const auto* suffix:{"-SemiBold.otf","-SemiBold.ttf","-Bold.otf","-Bold.ttf"}) {
         const auto candidate=stem+suffix;
-        if(std::ifstream(candidate).good()){path=candidate;break;}
+        if(suppliedFont(theme,candidate)&&std::ifstream(candidate).good()){path=candidate;break;}
     }
     for(int size=style.size+1;size>=8;--size) {
         auto* font=TTF_OpenFont(path.c_str(),size);if(!font)return nullptr;
@@ -92,6 +129,103 @@ TTF_Font* readableFont(const ThemeTextStyle& style,int maxHeight=0) {
         TTF_CloseFont(font);
     }
     return nullptr;
+}
+// Only an actual same-family regular face supplied by the current profile/theme is eligible.
+// The inherited theme face remains the honest fallback when none is installed.
+bool regularFace(TTF_Font* font) {
+    if (!font || (TTF_GetFontStyle(font) & (TTF_STYLE_BOLD | TTF_STYLE_ITALIC))) return false;
+    std::string style=TTF_FontFaceStyleName(font)?TTF_FontFaceStyleName(font):"";
+    std::transform(style.begin(),style.end(),style.begin(),[](unsigned char c){return std::tolower(c);});
+    return style.empty() || style=="regular" || style=="normal" || style=="book" || style=="roman";
+}
+TTF_Font* regularFont(const Theme& theme,const ThemeTextStyle& style,int size) {
+    auto* original=TTF_OpenFont(style.fontPath.c_str(),size);
+    if(!original)return nullptr;
+    const std::string family=TTF_FontFaceFamilyName(original)?TTF_FontFaceFamilyName(original):"";
+    std::string chosen=style.fontPath;
+    if(!regularFace(original) && !family.empty()) {
+        // Search only supplied current-profile/active-theme faces. A configured
+        // absolute font outside these roots is usable, but does not authorize a
+        // scan of its siblings (which could belong to an unrelated theme).
+        std::vector<std::string> roots;
+        for(const auto& root:theme.regularFontRoots){const auto resolved=canonical(root);if(!resolved.empty())roots.push_back(resolved);}
+        const auto resolvedFont=canonical(style.fontPath);
+        std::string relativeDirectory;
+        for(const auto& root:roots) {
+            if(resolvedFont.rfind(root+"/",0)==0) {
+                const auto relative=resolvedFont.substr(root.size()+1);
+                const auto slash=relative.find_last_of('/');
+                if(slash!=std::string::npos)relativeDirectory=relative.substr(0,slash);
+                break;
+            }
+        }
+        std::vector<std::string> paths;
+        for(const auto& root:roots) {
+            std::vector<std::string> directories{root};
+            if(!relativeDirectory.empty())directories.insert(directories.begin(),root+"/"+relativeDirectory);
+            std::vector<std::string> supplied;
+            for(const auto& directory:directories) {
+                const auto resolvedDirectory=canonical(directory);
+                const bool allowed=std::any_of(roots.begin(),roots.end(),[&](const std::string& root){return resolvedDirectory==root || resolvedDirectory.rfind(root+"/",0)==0;});
+                if(!allowed)continue;
+                auto* entries=opendir(resolvedDirectory.c_str());if(!entries)continue;
+                while(auto* entry=readdir(entries)) {
+                    std::string name=entry->d_name;const auto dot=name.find_last_of('.');
+                    if(dot!=std::string::npos && (name.substr(dot)==".ttf" || name.substr(dot)==".otf"))supplied.push_back(directory+"/"+name);
+                }
+                closedir(entries);
+            }
+            std::sort(supplied.begin(),supplied.end());
+            paths.insert(paths.end(),supplied.begin(),supplied.end());
+        }
+        for(const auto& path:paths) {
+            if(!suppliedFont(theme,path))continue;
+            auto* candidate=TTF_OpenFont(path.c_str(),size);if(!candidate)continue;
+            if(regularFace(candidate) && TTF_FontFaceFamilyName(candidate) && family==TTF_FontFaceFamilyName(candidate)) {
+                TTF_CloseFont(original);original=candidate;chosen=path;break;
+            }
+            TTF_CloseFont(candidate);
+        }
+    }
+    std::cerr<<"Menu explanation font: "<<chosen<<" size="<<size<<" face="
+        <<(TTF_FontFaceStyleName(original)?TTF_FontFaceStyleName(original):"unknown")
+        <<(regularFace(original)?" (regular)":" (no same-family regular face available; native weight retained)")<<std::endl;
+    return original;
+}
+// Inline words and cached badges share one measured text flow. Punctuation stays
+// attached to its badge; wrapped continuation lines start at the same left edge.
+struct FlowWord {std::string text,suffix;SDL_Surface* badge=nullptr;int x=0,line=0,w=0;};
+struct TextFlow {std::vector<FlowWord> words;int lines=0,lineHeight=0;};
+TextFlow inlineFlow(TTF_Font* font,const std::string& sentence,int maxWidth,
+                    const std::function<SDL_Surface*(const std::string&)>& badge) {
+    TextFlow flow;flow.lineHeight=std::max(lineHeight(font),TTF_FontHeight(font))+4;
+    std::istringstream input(sentence);std::string token;
+    int x=0,line=0;const int gap=width(font," ");
+    while(input>>token) {
+        FlowWord word;word.text=token;
+        if(token.front()=='[') {
+            const auto end=token.find(']');
+            if(end!=std::string::npos){word.badge=badge(token.substr(1,end-1));word.suffix=token.substr(end+1);}
+        }
+        word.w=word.badge?word.badge->w+width(font,word.suffix):width(font,word.text);
+        if(word.badge)flow.lineHeight=std::max(flow.lineHeight,word.badge->h+4);
+        if(x && x+gap+word.w>maxWidth){++line;x=0;}
+        if(x)x+=gap;
+        word.x=x;word.line=line;flow.words.push_back(word);x+=word.w;
+    }
+    flow.lines=flow.words.empty()?0:line+1;return flow;
+}
+void drawFlow(SDL_Surface* screen,TTF_Font* font,const TextFlow& flow,int x,int y,SDL_Color ink) {
+    for(const auto& word:flow.words) {
+        const int center=y+word.line*flow.lineHeight+flow.lineHeight/2;
+        if(word.badge){control(screen,word.badge,x+word.x,center);text(screen,font,word.suffix,ink,x+word.x+word.badge->w,center-TTF_FontHeight(font)/2);}
+        else text(screen,font,word.text,ink,x+word.x,center-TTF_FontHeight(font)/2);
+    }
+}
+void chevron(SDL_Surface* screen,SDL_Surface* asset,int x,int cy,bool right,SDL_Color ink) {
+    if(asset){blit(asset,screen,{x,cy-12,24,24});return;}
+    // Two diagonal strokes, without an arrow shaft.
+    for(int i=0;i<=8;++i){const int px=x+7+(right?8-i:i);fill(screen,{px,cy-i,2,2},ink);fill(screen,{px,cy+i,2,2},ink);}
 }
 void arrow(SDL_Surface* screen,TTF_Font* font,const std::string& key,SDL_Color ink,SDL_Rect rect) {
     const Uint16 glyph=key=="UP"?0x2191:key=="DOWN"?0x2193:key=="LEFT"?0x2190:0x2192;
@@ -114,9 +248,11 @@ struct Painter {
     SDL_Surface* screen; const Theme& theme; MenuResources resources;
     SDL_Color list, selected, hint, background, panel;
     std::function<SDL_Surface*(const std::string&)> label;
-    int row(const std::string& label,const std::string& value,int y,int w,bool active,bool disabled=false) {
+    SDL_Surface *leftChevron, *rightChevron;
+    int row(const std::string& label,const std::string& value,int y,int w,bool active,bool disabled=false,bool adjustable=false) {
         auto font=resources.listFont;
-        const int valueWidth=value.empty()?0:width(font,value)+24;
+        const int arrowWidth=adjustable?64:0;
+        const int valueWidth=value.empty()?0:width(font,value)+24+arrowWidth;
         const auto lines=wrap(font,label,w-margin*2-valueWidth);
         const int height=std::max(rowHeight,int(lines.size())*lineHeight(font)+16);
         if(active) {
@@ -126,7 +262,13 @@ struct Painter {
         SDL_Color c=active?selected:list; if(disabled)c=mix(c,panel,60);
         int top=y+(height-int(lines.size())*lineHeight(font))/2;
         for(const auto& line:lines) {text(screen,font,line,c,margin,top);top+=lineHeight(font);}
-        if(!value.empty()) text(screen,font,value,c,w-margin-width(font,value),y+(height-TTF_FontHeight(font))/2);
+        if(!value.empty()) {
+            int right=w-margin-(adjustable?32:0);
+            if(adjustable&&active)chevron(screen,rightChevron,w-margin-24,y+height/2,true,c);
+            const int valueX=right-width(font,value);
+            text(screen,font,value,c,valueX,y+(height-TTF_FontHeight(font))/2);
+            if(adjustable&&active)chevron(screen,leftChevron,valueX-32,y+height/2,false,c);
+        }
         return height;
     }
     int paragraph(const std::string& value,int y,int w=600) {
@@ -148,15 +290,27 @@ struct Painter {
     }
 };
 }
-MenuRenderer::MenuRenderer(const Theme& theme,MenuResources resources):theme_(theme),resources_(resources) {
+MenuRenderer::MenuRenderer(const Theme& theme,MenuResources resources):sectionHeadingFont_(resources.bodyFont),theme_(theme),resources_(resources) {
     if(!theme.actionMenuPath.empty()) popup_=IMG_Load(theme.actionMenuPath.c_str());
     if(!theme.menuLeftArrowPath.empty()) leftArrow_=IMG_Load(theme.menuLeftArrowPath.c_str());
     if(!theme.menuRightArrowPath.empty()) rightArrow_=IMG_Load(theme.menuRightArrowPath.c_str());
     // App-owned instances only. Browser resources are borrowed and never restyled.
-    ownedBodyFont_=readableFont(theme.section);
-    ownedHintFont_=readableFont(theme.hint,26);
+    ownedBodyFont_=readableFont(theme,theme.section);
+    ownedHintFont_=readableFont(theme,theme.hint,26);
     if(ownedBodyFont_)resources_.bodyFont=ownedBodyFont_;
     if(ownedHintFont_)resources_.hintFont=ownedHintFont_;
+    // Preserve the established body size for modal notes; regular weight is a
+    // face choice, never a smaller substitute for the note's readable size.
+    regularBodyFont_=regularFont(theme,theme.section,theme.section.size+1);
+    // Increase the preceding fitted description size by two points. Wrapping
+    // never shrinks it; face selection happens once at construction.
+    int descriptionSize=std::max(16,theme.section.size-1);
+    for(;descriptionSize>8;--descriptionSize){
+        auto* probe=TTF_OpenFont(theme.section.fontPath.c_str(),descriptionSize);
+        if(!probe)break;
+        const int h=TTF_FontHeight(probe);TTF_CloseFont(probe);if(h<=24)break;
+    }
+    descriptionFont_=regularFont(theme,theme.section,descriptionSize+2);
     const auto ink=color(theme_.list);
     backgroundColor_=sample(resources_.background,contrastBase(ink));
     panelColor_=popupColor(backgroundColor_,ink);
@@ -215,6 +369,10 @@ void MenuRenderer::release(){
     if(leftArrow_) SDL_FreeSurface(leftArrow_);
     if(rightArrow_) SDL_FreeSurface(rightArrow_);
     leftArrow_=rightArrow_=nullptr;
+    if(regularBodyFont_)TTF_CloseFont(regularBodyFont_);
+    regularBodyFont_=nullptr;
+    if(descriptionFont_)TTF_CloseFont(descriptionFont_);
+    descriptionFont_=nullptr;
     if(ownedBodyFont_)TTF_CloseFont(ownedBodyFont_);
     if(ownedHintFont_)TTF_CloseFont(ownedHintFont_);
     ownedBodyFont_=ownedHintFont_=nullptr;
@@ -222,14 +380,15 @@ void MenuRenderer::release(){
 MenuRenderer::~MenuRenderer(){release();}
 void MenuRenderer::movePage(int direction){page_=std::max(0,std::min(pages_-1,page_+direction));}
 void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,bool hasFavorite,
-                        bool returnOn,bool available,const std::string& gameTitle,Uint32 ticks,const std::string& error) {
+                        bool returnOn,bool available,const std::string& gameTitle,Uint32 ticks,const std::string& error,const AppSettings& settings) {
     (void)ticks;
     if(previous_!=page){page_=0;pages_=1;previous_=page;}
     const auto list=color(theme_.list),hint=color(theme_.hint);
     const SDL_Color selection{Uint8(theme_.selectedRed),Uint8(theme_.selectedGreen),Uint8(theme_.selectedBlue),255};
+    const SDL_Color section{Uint8(theme_.currentPageRed),Uint8(theme_.currentPageGreen),Uint8(theme_.currentPageBlue),255};
     const auto bg=backgroundColor_;
     const auto surface=panelColor_;
-    Painter p{screen,theme_,resources_,list,selection,hint,bg,surface,[&](const std::string& key){return controlLabel(key);}};
+    Painter p{screen,theme_,resources_,list,selection,hint,bg,surface,[&](const std::string& key){return controlLabel(key);},theme_.hideIcons?nullptr:leftArrow_,theme_.hideIcons?nullptr:rightArrow_};
     if(page==MenuPage::Actions) {
         const char* labels[]={"Launch","Remove from Favorites","Settings","Help"};
         int w=320;
@@ -245,55 +404,64 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
     }
     if(page==MenuPage::RemoveConfirm) {
         blit(shade_,screen,{0,0,640,480});
-        const int inset=20;
-        const int panelWidth=std::min(600,std::max({400,
-            width(resources_.titleFont,"Remove from Favorites?")+inset*2,
-            width(resources_.listFont,gameTitle)+inset*2,
-            width(resources_.bodyFont,"The game file will be kept.")+inset*2,
-            error.empty()?0:width(resources_.bodyFont,conciseMenuError(error))+inset*2}));
-        const int inner=panelWidth-inset*2;
-        const int titleH=lineHeight(resources_.titleFont), textH=lineHeight(resources_.bodyFont);
-        const int choiceH=std::max(36,TTF_FontHeight(resources_.listFont)+8);
+        constexpr int inset=24,panelWidth=520,inner=panelWidth-inset*2;
+        const auto body=regularBodyFont_?regularBodyFont_:resources_.bodyFont;
+        const int titleH=lineHeight(resources_.titleFont),textH=lineHeight(body),lineH=lineHeight(resources_.listFont);
+        const int choiceH=std::max(40,TTF_FontHeight(resources_.listFont)+12);
+        const int pagingH=std::max(36,TTF_FontHeight(resources_.hintFont)+12);
+        const int footerH=theme_.hideHints?0:std::max(44,TTF_FontHeight(resources_.hintFont)+16);
         const auto heading=wrap(resources_.titleFont,"Remove from Favorites?",inner);
         const auto lines=wrap(resources_.listFont,gameTitle.empty()?"No game selected":gameTitle,inner);
-        const auto note=wrap(resources_.bodyFont,"The game file will be kept.",inner);
-        const auto errors=error.empty()?std::vector<std::string>{}:wrap(resources_.bodyFont,conciseMenuError(error),inner);
-        const int base=32+int(heading.size())*titleH+12+int(note.size())*textH+12+choiceH*2+44+(errors.empty()?0:int(errors.size())*textH+12);
-        const int lineH=lineHeight(resources_.listFont);
+        const auto note=wrap(body,"The game file will be kept.",inner);
+        const auto errors=error.empty()?std::vector<std::string>{}:wrap(body,conciseMenuError(error),inner);
+        const int base=48+int(heading.size())*titleH+12+12+int(note.size())*textH+
+            (errors.empty()?0:12+int(errors.size())*textH)+16+choiceH+(footerH?12+footerH:0);
         int perPage=std::max(1,std::min(3,(432-base)/lineH));
         pages_=std::max(1,(int(lines.size())+perPage-1)/perPage);
-        if(pages_>1){perPage=std::max(1,std::min(3,(432-base-36)/lineH));pages_=std::max(1,(int(lines.size())+perPage-1)/perPage);}
+        if(pages_>1){perPage=std::max(1,std::min(3,(432-base-pagingH)/lineH));pages_=std::max(1,(int(lines.size())+perPage-1)/perPage);}
         page_=std::min(page_,pages_-1);
         const int visible=std::min(perPage,int(lines.size())-page_*perPage);
-        const int panelHeight=base+visible*lineH+(pages_>1?36:0);
-        const int x=(640-panelWidth)/2, top=(480-panelHeight)/2;
+        const int panelHeight=base+visible*lineH+(pages_>1?pagingH:0);
+        const int x=(640-panelWidth)/2,top=(480-panelHeight)/2;
+#ifdef BETTER_FAVORITES_MENU_RENDER_TESTING
+        assert(panelHeight<=432 && top>=24);
+#endif
         SDL_Rect panel{x,top,panelWidth,panelHeight};fill(screen,panel,surface);
         if(dialog_)blit(dialog_,screen,panel);
         boundary(screen,panel,mix(surface,list,22));
-        int y=top+16;
-        for(const auto& line:heading){text(screen,resources_.titleFont,line,color(theme_.title),x+inset,y);y+=titleH;}
+        int y=top+inset;
+        for(const auto& line:heading){text(screen,resources_.titleFont,line,color(theme_.title),x+(panelWidth-width(resources_.titleFont,line))/2,y);y+=titleH;}
         y+=12;
-        for(int i=page_*perPage;i<page_*perPage+visible;++i){text(screen,resources_.listFont,lines[i],list,x+inset,y);y+=lineH;}
+        for(int i=page_*perPage;i<page_*perPage+visible;++i){text(screen,resources_.listFont,lines[i],list,x+(panelWidth-width(resources_.listFont,lines[i]))/2,y);y+=lineH;}
         if(pages_>1){
-            y+=4;fill(screen,{x+inset,y,panelWidth-inset*2,1},mix(surface,list,20));y+=4;
-            text(screen,resources_.hintFont,std::to_string(page_+1)+" of "+std::to_string(pages_),hint,x+inset,y);
-            // Paging is informative content, not a footer; the control remains visible.
-            auto* label=controlLabel("LEFT RIGHT");control(screen,label,x+panelWidth-inset-(label?label->w:0)-width(resources_.hintFont,"Page")-10,y+TTF_FontHeight(resources_.hintFont)/2);
-            text(screen,resources_.hintFont,"Page",hint,x+panelWidth-inset-width(resources_.hintFont,"Page"),y);
-            y+=28;
+            const int cy=y+pagingH/2;
+            text(screen,resources_.hintFont,std::to_string(page_+1)+" of "+std::to_string(pages_),hint,x+inset,cy-TTF_FontHeight(resources_.hintFont)/2);
+            auto* badge=controlLabel("UP DOWN");
+            const int labelWidth=width(resources_.hintFont,"Title pages");
+            control(screen,badge,x+panelWidth-inset-labelWidth-10-(badge?badge->w:0),cy);
+            text(screen,resources_.hintFont,"Title pages",hint,x+panelWidth-inset-labelWidth,cy-TTF_FontHeight(resources_.hintFont)/2);
+            y+=pagingH;
         }
-        for(const auto& line:note){text(screen,resources_.bodyFont,line,list,x+inset,y);y+=textH;}
         y+=12;
-        for(const auto& line:errors){text(screen,resources_.bodyFont,line,list,x+inset,y);y+=textH;}
+        const auto noteInk=secondaryInk(screen,{x+inset,y,inner,int(note.size())*textH},section,list);
+        for(const auto& line:note){text(screen,body,line,noteInk,x+(panelWidth-width(body,line))/2,y);y+=textH;}
         if(!errors.empty())y+=12;
+        for(const auto& line:errors){text(screen,body,line,list,x+inset,y);y+=textH;}
+        y+=16;
+        const int choiceW=(inner-16)/2;
         for(std::size_t i=0;i<2;++i){
+            SDL_Rect choice{x+inset+int(i)*(choiceW+16),y,choiceW,choiceH};
             if(selected==i){
-                if(resources_.selection)blit(resources_.selection,screen,{x+1,y,panelWidth-2,choiceH});
-                else fill(screen,{x+1,y,panelWidth-2,choiceH},mix(surface,list,18));
+                if(resources_.selection)blit(resources_.selection,screen,choice);
+                else fill(screen,choice,mix(surface,list,18));
             }
-            text(screen,resources_.listFont,i==0?"Cancel":"Remove",selected==i?selection:list,x+inset,y+(choiceH-TTF_FontHeight(resources_.listFont))/2);y+=choiceH;
+            centered(screen,resources_.listFont,i==0?"Cancel":"Remove",selected==i?selection:list,choice);
         }
-        p.hints({{"A",selected==0?"Cancel":"Remove"},{"B","Back"}},x+inset,top+panelHeight-22);
+        y+=choiceH;
+        if(footerH){y+=12;p.hints({{"A","Choose"},{"B","Back"}},x+inset,y+footerH/2);y+=footerH;}
+#ifdef BETTER_FAVORITES_MENU_RENDER_TESTING
+        assert(y==top+panelHeight-inset);
+#endif
         return;
     }
     fill(screen,{0,0,640,480},bg);blit(resources_.background,screen,{0,0,640,480});blit(resources_.title,screen,{0,0,640,header});
@@ -304,19 +472,52 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
     int headingY=(header-int(titleLines.size())*lineHeight(resources_.titleFont))/2;
     for(const auto& line:titleLines){text(screen,resources_.titleFont,line,color(theme_.title),(640-width(resources_.titleFont,line))/2,headingY);headingY+=lineHeight(resources_.titleFont);}
     if(page==MenuPage::Settings) {
+        const char* labels[]={"Automatic return","Group by console","Numeric prefixes","Sorting","About automatic return"};
+        const std::string values[]={returnOn?"ON":"OFF",settings.groupByConsole?"ON":"OFF",settings.showNumericPrefixes?"Show":"Hide",settings.sortMode==SortMode::OriginalLabel?"Original label":"Alphabetical title",""};
+        const auto font=descriptionFont_?descriptionFont_:resources_.bodyFont;
+        // Reserve two lines at the existing font/badge size, regardless of row count
+        // or selected description. The surface touches the footer at y=420.
+        const auto twoLineMetrics=inlineFlow(font,"[B] [START]",600,[&](const std::string& key){return controlLabel(key);});
+        const int panelHeight=2*twoLineMetrics.lineHeight+16;
+        const SDL_Rect descriptionPanel{0,bottom-panelHeight,640,panelHeight};
+        const int rowsBottom=descriptionPanel.y-8;
+        fill(screen,descriptionPanel,surface);
+        // No selection asset: this is a quiet, opaque theme-derived popup surface.
+        // Only fully measured rows fit above the independently anchored panel.
+        auto settingHeight=[&](int i){
+            const int arrows=i<4?64:0;
+            const int valueWidth=values[i].empty()?0:width(resources_.listFont,values[i])+24+arrows;
+            return std::max(60,int(wrap(resources_.listFont,labels[i],600-valueWidth).size())*lineHeight(resources_.listFont)+16);
+        };
+        int first=int(selected), used=settingHeight(first);
+        while(first>0 && used+settingHeight(first-1)<=rowsBottom-header){--first;used+=settingHeight(first);}
         int y=header;
-        y+=p.row("Automatic return",returnOn?"ON":"OFF",y,640,selected==0);
-        y+=p.row("About automatic return","",y,640,selected==1);
-        p.paragraph(available?"Return here when you leave GameSwitcher.":"Automatic return is unavailable in this session.",y+24);
-        p.footer({{"A",selected==0?"Toggle":"Details"},{"B","Back"}});
+        for(int i=first;i<5 && y+settingHeight(i)<=rowsBottom;++i)y+=p.row(labels[i],values[i],y,640,selected==std::size_t(i),false,i<4);
+#ifdef BETTER_FAVORITES_MENU_RENDER_TESTING
+        assert(y<=rowsBottom && descriptionPanel.y+descriptionPanel.h==bottom);
+#endif
+        const std::string descriptions[]={returnOn?"[B] / [START]: return here from GameSwitcher.":"",
+            settings.groupByConsole?"Group games under console headings.":"Flat list. Console jumps are disabled.",
+            settings.showNumericPrefixes?"Show numeric prefixes in displayed titles.":"Hide leading numeric prefixes. Sorting is unchanged.",
+            settings.sortMode==SortMode::OriginalLabel?"Sort by literal stored labels.":"Sort titles without leading numeric prefixes.",
+            "Read how automatic return works."};
+        const auto description=inlineFlow(font,descriptions[selected],600,[&](const std::string& key){return controlLabel(key);});
+#ifdef BETTER_FAVORITES_MENU_RENDER_TESTING
+        assert(description.lines<=2 && description.lines*description.lineHeight+16<=panelHeight);
+#endif
+        const int descriptionHeight=description.lines*description.lineHeight;
+        const int descriptionY=descriptionPanel.y+(descriptionPanel.h-descriptionHeight)/2;
+        const auto descriptionInk=secondaryInk(screen,{margin,descriptionY,600,descriptionHeight},section,list);
+        drawFlow(screen,font,description,margin,descriptionY,descriptionInk);
+        p.footer({{"A",selected<4?"Change":"Open"},{"B","Back"}});
     } else if(page==MenuPage::Help) {
         pages_=2;page_=std::min(page_,pages_-1);
         const bool browser=page_==0;
         const std::vector<std::pair<std::string,std::string>> browserRows={
-            {"UP DOWN","Move selection"},{"LEFT RIGHT","Change console"},{"A","Launch"},{"B","Exit"},
+            {"UP DOWN","Move selection"},{"LEFT RIGHT",settings.groupByConsole?"Change console":"Console jumps disabled"},{"A","Launch"},{"B","Exit"},
             {"SELECT","Actions"},{"Y","Settings"},{"MENU","GameSwitcher"}};
         const std::vector<std::pair<std::string,std::string>> menuRows={
-            {"UP DOWN","Move selection"},{"A","Choose"},{"B","Back"},{"MENU","Close menu"}};
+            {"UP DOWN","Move selection"},{"A","Choose"},{"B","Back"},{"LEFT RIGHT","Change value"},{"MENU","Close menu"}};
         text(screen,resources_.bodyFont,browser?"Favorites list":"Inside menus",list,margin,header+8);
         const int dividerY=header+8+lineHeight(resources_.bodyFont)+4;
         fill(screen,{0,dividerY,640,2},{Uint8(theme_.currentPageRed),Uint8(theme_.currentPageGreen),Uint8(theme_.currentPageBlue),255});
@@ -330,16 +531,33 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
         }
         p.footer({{browser?"DOWN":"UP",browser?"Inside menus":"Favorites list"},{"B","Back"}});
     } else if(page==MenuPage::ReturnInfo) {
-        const std::vector<std::string> paragraphs={
-            available?"Integration: available":"Integration: unavailable (optional runtime patch required)",
-            "On", "B or START in GameSwitcher returns here. Switching games keeps the session. A resumes the game.",
-            "Off", "Use Onion's ordinary menu return. Direct game exit ends the return session."};
-        std::vector<std::string> lines;
-        for(const auto& value:paragraphs){auto wrapped=wrap(resources_.bodyFont,value,600);lines.insert(lines.end(),wrapped.begin(),wrapped.end());lines.emplace_back();}
-        const int h=lineHeight(resources_.bodyFont)+4, perPage=std::max(1,340/h);
-        pages_=std::max(1,(int(lines.size())+perPage-1)/perPage);page_=std::min(page_,pages_-1);
-        int y=header+12;for(int i=page_*perPage;i<std::min(int(lines.size()),(page_+1)*perPage);++i){text(screen,resources_.bodyFont,lines[i],list,margin,y);y+=h;}
+        const auto font=descriptionFont_?descriptionFont_:resources_.bodyFont;
+        struct Block {std::string value;bool heading;};
+        const std::vector<Block> blocks={
+            {available?"Integration: available":"Integration: unavailable (optional patch required)",false},
+            {"When enabled",true},{"[B] / [START]: return here from GameSwitcher.",false},
+            {"[A]: resume the game. Switching games keeps the session.",false},
+            {"When disabled",true},{"Use Onion's ordinary menu return.",false},
+            {"Direct game exit ends the return session.",false}};
+        struct Positioned {TextFlow flow;TTF_Font* font;int y,page;};
+        std::vector<Positioned> laidOut;int y=header+8,pageIndex=0;
+        for(std::size_t i=0;i<blocks.size();++i){
+            const auto& block=blocks[i];auto* face=block.heading?sectionHeadingFont_:font;
+            if(block.heading)y+=12;
+            auto flow=inlineFlow(face,block.value,600,[&](const std::string& key){return controlLabel(key);});
+            const int height=flow.lines*flow.lineHeight;
+            int keep=height;
+            if(block.heading && i+1<blocks.size())keep+=4+inlineFlow(font,blocks[i+1].value,600,[&](const std::string& key){return controlLabel(key);}).lineHeight;
+            if(y+keep>bottom-4){++pageIndex;y=header+8;}
+            laidOut.push_back({flow,face,y,pageIndex});y+=height+(block.heading?2:8);
+        }
+        pages_=pageIndex+1;page_=std::min(page_,pages_-1);
+        for(const auto& block:laidOut)if(block.page==page_){
+            const auto ink=secondaryInk(screen,{margin,block.y,600,block.flow.lines*block.flow.lineHeight},section,list);
+            drawFlow(screen,block.font,block.flow,margin,block.y,ink);
+        }
         if(pages_>1)p.footer({{"UP DOWN","Page"},{"B","Back"}});else p.footer({{"B","Back"}});
+
     }
 
     if(pages_>1 && page!=MenuPage::RemoveConfirm && !theme_.hideHints)text(screen,resources_.hintFont,std::to_string(page_+1)+" of "+std::to_string(pages_),hint,620-width(resources_.hintFont,std::to_string(page_+1)+" of "+std::to_string(pages_)),450-TTF_FontHeight(resources_.hintFont)/2);
@@ -358,6 +576,28 @@ void MenuRenderer::drawError(SDL_Surface* screen,const std::string& message,Uint
 }
 
 #ifdef BETTER_FAVORITES_MENU_RENDER_TESTING
+void testMenuSecondaryContrast() {
+    for(const auto format:{SDL_PIXELFORMAT_RGB565,SDL_PIXELFORMAT_RGBA32}){
+        auto* screen=SDL_CreateRGBSurfaceWithFormat(0,32,32,SDL_BITSPERPIXEL(format),format);assert(screen);
+        const SDL_Color section{128,128,128,255},normal{255,255,255,255};
+        fill(screen,{0,0,32,32},{0,0,0,255});
+        auto ink=secondaryInk(screen,{0,0,32,32},section,normal);assert(ink.r==section.r);
+        // A composited theme-art patch can invalidate an otherwise readable color.
+        fill(screen,{8,8,16,16},section);
+        ink=secondaryInk(screen,{0,0,32,32},section,normal);assert(ink.r==normal.r);
+        SDL_FreeSurface(screen);
+    }
+}
+bool MenuRenderer::explanationsAreRegular() const {return regularFace(regularBodyFont_) && regularFace(descriptionFont_);}
+void MenuRenderer::verifyFonts(bool expectRegular) const {
+    assert(regularBodyFont_ && descriptionFont_);
+    if(expectRegular)assert(regularFace(regularBodyFont_) && regularFace(descriptionFont_));
+    auto* original=TTF_OpenFont(theme_.section.fontPath.c_str(),theme_.section.size+1);assert(original);
+    assert(TTF_FontHeight(regularBodyFont_)>=TTF_FontHeight(original)-2);
+    assert(std::string(TTF_FontFaceFamilyName(original))==TTF_FontFaceFamilyName(regularBodyFont_));
+    if(regularFace(original))assert(regularFace(regularBodyFont_));
+    TTF_CloseFont(original);
+}
 void MenuRenderer::drawControlSamples(SDL_Surface* screen) {
     int x=20;
     for(const auto& key:{"A","B","X","Y","SELECT","START","MENU"})x+=control(screen,controlLabel(key),x,350)+12;

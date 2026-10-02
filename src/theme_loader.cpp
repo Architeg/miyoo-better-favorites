@@ -103,9 +103,9 @@ Theme ThemeLoader::load() const
     theme.rootPath =
         readActiveThemePath();
 
-    if (theme.rootPath.empty()) {
-        return theme;
-    }
+    theme.regularFontRoots.push_back(sdRoot_+"/Saves/CurrentProfile/theme");
+    if(!theme.rootPath.empty())theme.regularFontRoots.push_back(theme.rootPath);
+    if(theme.rootPath.empty())theme.rootPath=sdRoot_+"/miyoo/app";
 
     const std::string skinRoot =
         theme.rootPath + "/skin";
@@ -356,11 +356,12 @@ Theme ThemeLoader::load() const
                             ) {
                                 style.fontPath =
                                     resolveThemePath(
-                                        theme.rootPath,
+                                        path.substr(0,path.find_last_of('/')),
                                         json_object_get_string(
                                             value
                                         )
                                     );
+                                style.fontCandidates.insert(style.fontCandidates.begin(),style.fontPath);
                             }
 
                             value = nullptr;
@@ -577,6 +578,7 @@ Theme ThemeLoader::load() const
                 sdRoot_ +
                 "/miyoo/app/Exo-2-Bold-Italic.ttf";
 
+            theme.title.fontCandidates={theme.title.fontPath};
             theme.title.size = 36;
 
             theme.hint = theme.title;
@@ -610,6 +612,7 @@ Theme ThemeLoader::load() const
              * Missing hint/list values inherit from the active
              * title style, matching Onion's config behavior.
              */
+            const auto fallbackTitle=theme.title,fallbackHint=theme.hint,fallbackList=theme.list;
             const std::string activeConfigPath =
                 theme.rootPath +
                 "/config.json";
@@ -629,6 +632,13 @@ Theme ThemeLoader::load() const
              * Apply CurrentProfile overrides last.
              * These modify only values explicitly present there.
              */
+            auto appendFallback=[](ThemeTextStyle& style,const ThemeTextStyle& lower){
+                for(const auto& font:lower.fontCandidates)
+                    if(std::find(style.fontCandidates.begin(),style.fontCandidates.end(),font)==style.fontCandidates.end())style.fontCandidates.push_back(font);
+            };
+            appendFallback(theme.title,fallbackTitle);
+            appendFallback(theme.hint,fallbackHint);
+            appendFallback(theme.list,fallbackList);
             const std::string profileConfigPath =
                 sdRoot_ +
                 "/Saves/CurrentProfile/theme/config.json";
@@ -654,11 +664,9 @@ Theme ThemeLoader::load() const
 
             auto ensureFont =
                 [&](ThemeTextStyle& style) {
-                    if (
-                        style.fontPath.empty() ||
-                        !std::ifstream(style.fontPath).good()
-                    ) {
-                        style.fontPath = fallbackFont;
+                    if(style.fontCandidates.empty())style.fontCandidates.push_back(fallbackFont);
+                    for(const auto& candidate:style.fontCandidates) {
+                        if(std::ifstream(candidate).good()){style.fontPath=candidate;break;}
                     }
 
                     style.size =

@@ -7,7 +7,7 @@
 #include <vector>
 
 std::vector<UiRow> buildUiRows(
-    const std::vector<SystemGroup>& groups
+    const std::vector<SystemGroup>& groups, bool headings = true
 );
 
 #endif

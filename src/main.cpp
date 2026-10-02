@@ -3,10 +3,13 @@
 #include "menu_state.h"
 #include "menu_renderer.h"
 #include "browser_state.h"
+#include "browser_preferences.h"
+#include "browser_model.h"
 #include "settings.h"
 #include "launch_request.h"
 #include "navigation.h"
 #include "theme_loader.h"
+#include "theme_fonts.h"
 #include "ui_row.h"
 #include "ui_rows.h"
 
@@ -217,7 +220,7 @@ int main(int argc, char* argv[])
     constexpr int bpp = 16;
 
     ThemeLoader themeLoader("/mnt/SDCARD");
-    const Theme theme = themeLoader.load();
+    Theme theme = themeLoader.load();
 
     const char* settingsEnvironment = std::getenv("BETTER_FAVORITES_SETTINGS");
     const std::string appSettingsPath = settingsEnvironment && *settingsEnvironment
@@ -226,6 +229,10 @@ int main(int argc, char* argv[])
     std::string settingsError;
     loadAppSettings(appSettingsPath, appSettings, settingsError);
     if (!settingsError.empty()) std::cerr << settingsError << std::endl;
+    const auto preferenceSlash=appSettingsPath.find_last_of('/');
+    const std::string browserPreferencesPath=(preferenceSlash==std::string::npos?".":appSettingsPath.substr(0,preferenceSlash))+"/browser-preferences.conf";
+    loadBrowserPreferences(browserPreferencesPath,appSettings,settingsError);
+    if(!settingsError.empty())std::cerr<<settingsError<<std::endl;
     FavoritesParser parser("/mnt/SDCARD", appSettings);
 
     const std::string favoritesPath = "/mnt/SDCARD/Roms/favourite.json";
@@ -235,7 +242,7 @@ int main(int argc, char* argv[])
     if (!favoritesError.empty()) std::cerr << favoritesError << std::endl;
     auto favorites = parser.loadFavoritesFromText(favoritesSnapshot.bytes);
     auto groups = parser.groupFavorites(favorites);
-    auto rows = buildUiRows(groups);
+    auto rows = buildUiRows(groups, appSettings.groupByConsole);
 
     std::size_t selectedRow =
         firstSelectableRow(rows);
@@ -292,6 +299,8 @@ int main(int argc, char* argv[])
         SDL_Quit();
         return 1;
     }
+
+    resolveThemeFonts(theme);
 
     SDL_Window* window =
         SDL_CreateWindow(
@@ -667,7 +676,7 @@ int main(int argc, char* argv[])
         if (!readFavoritesSnapshot(favoritesPath, favoritesSnapshot, error)) reportError(error);
         favorites = parser.loadFavoritesFromText(favoritesSnapshot.bytes);
         groups = parser.groupFavorites(favorites);
-        rows = buildUiRows(groups);
+        rows = buildUiRows(groups, appSettings.groupByConsole);
         selectedRow = selectableRowAtOrdinal(rows, ordinal);
         firstRow = rows.empty() ? 0 : std::max(0L,
             std::min(firstRow, static_cast<long>(selectedRow)));
@@ -676,7 +685,7 @@ int main(int argc, char* argv[])
         // The next render applies the existing pixel-based viewport correction.
         // State is saved below, after that correction; empty lists need no state.
     };
-    bool saveRemovedPosition = false;
+    bool saveUpdatedPosition = false;
 
     while (running) {
         SDL_Event event;
@@ -697,6 +706,8 @@ int main(int argc, char* argv[])
                 switch (key) {
                 case SDLK_UP: menuKey = MenuKey::Up; break;
                 case SDLK_DOWN: menuKey = MenuKey::Down; break;
+                case SDLK_LEFT: menuKey = MenuKey::Left; break;
+                case SDLK_RIGHT: menuKey = MenuKey::Right; break;
                 case SDLK_SPACE: menuKey = MenuKey::A; break;
                 case SDLK_LCTRL: menuKey = MenuKey::B; break;
                 case SDLK_ESCAPE: menuKey = MenuKey::Menu; break;
@@ -704,27 +715,34 @@ int main(int argc, char* argv[])
                 case SDLK_LALT: menuKey = MenuKey::Y; break;
                 default: handled = false; break;
                 }
-                if (wasMenuOpen && (previousPage == MenuPage::Help || previousPage == MenuPage::ReturnInfo)) {
-                    if (key == SDLK_UP) menuRenderer.movePage(-1);
-                    if (key == SDLK_DOWN) menuRenderer.movePage(1);
-                }
-                // Title paging is presentation only; keep confirmation selection intact.
-                if (wasMenuOpen && previousPage == MenuPage::RemoveConfirm &&
-                        (key == SDLK_LEFT || key == SDLK_RIGHT)) {
-                    if (!event.key.repeat) menuRenderer.movePage(key == SDLK_LEFT ? -1 : 1);
-                    continue;
-                }
                 if (handled) action = menu.handle(menuKey, event.key.repeat != 0, hasFavorite());
+                if (action == MenuAction::PageUp) menuRenderer.movePage(-1);
+                if (action == MenuAction::PageDown) menuRenderer.movePage(1);
                 if (menu.page() != previousPage) menuRenderer.resetPage();
-                if (handled && event.key.repeat == 0) uiError.clear();
+                if (handled && event.key.repeat == 0 && action != MenuAction::PageUp && action != MenuAction::PageDown) uiError.clear();
                 if (action == MenuAction::Launch) launchSelected();
                 else if (action == MenuAction::Remove) {
-                    removeSelected(); saveRemovedPosition = !menu.open();
+                    removeSelected(); saveUpdatedPosition = !menu.open();
                 } else if (action == MenuAction::ToggleReturn) {
                     if (!setAutomaticReturn(appSettingsPath, !appSettings.automaticReturn,
                                             appSettings, settingsError)) reportError(settingsError);
                     else std::cerr << "Automatic return: "
                         << (appSettings.automaticReturn ? "on" : "off") << std::endl;
+                }
+                if(action==MenuAction::ToggleGrouping||action==MenuAction::TogglePrefixes||action==MenuAction::CycleSorting){
+                    AppSettings candidate=appSettings;
+                    if(action==MenuAction::ToggleGrouping)candidate.groupByConsole=!candidate.groupByConsole;
+                    if(action==MenuAction::TogglePrefixes)candidate.showNumericPrefixes=!candidate.showNumericPrefixes;
+                    if(action==MenuAction::CycleSorting)candidate.sortMode=candidate.sortMode==SortMode::OriginalLabel?SortMode::AlphabeticalTitle:SortMode::OriginalLabel;
+                    const auto anchor=captureBrowserAnchor(rows,selectedRow,firstRow);
+                    if(!saveBrowserPreferences(browserPreferencesPath,candidate,appSettings,settingsError))reportError(settingsError);
+                    else {
+                        parser=FavoritesParser("/mnt/SDCARD",appSettings);
+                        groups=parser.groupFavorites(favorites);
+                        rows=buildUiRows(groups,appSettings.groupByConsole);
+                        restoreBrowserAnchor(anchor,rows,selectedRow,firstRow);
+                        saveUpdatedPosition=true;
+                    }
                 }
                 if (navigationSound && (previousPage != menu.page() ||
                         previousMenuSelection != menu.selected() || action == MenuAction::ToggleReturn))
@@ -760,6 +778,7 @@ int main(int argc, char* argv[])
                   break;
 
               case SDLK_LEFT:
+                  if(!appSettings.groupByConsole)break;
                   navigationKey = true;
 
                   selectedRow =
@@ -792,6 +811,7 @@ int main(int argc, char* argv[])
                   break;
 
               case SDLK_RIGHT:
+                  if(!appSettings.groupByConsole)break;
                   navigationKey = true;
 
                   selectedRow =
@@ -1227,8 +1247,8 @@ int main(int argc, char* argv[])
                  );
          }
 
-        if (saveRemovedPosition) {
-            saveRemovedPosition = false;
+        if (saveUpdatedPosition) {
+            saveUpdatedPosition = false;
             std::string error;
             if (!rows.empty() && !saveBrowserState(browserStatePath, rows,
                     selectedRow, firstRow, error)) reportError(error);
@@ -2025,7 +2045,7 @@ int main(int argc, char* argv[])
         if (menu.open()) {
             menuRenderer.draw(screen, menu.page(), menu.selected(), hasFavorite(),
                 appSettings.automaticReturn, automaticReturnAvailable(),
-                hasFavorite() ? parser.displayLabel(*rows[selectedRow].favorite) : "", SDL_GetTicks(), uiError);
+                hasFavorite() ? parser.displayLabel(*rows[selectedRow].favorite) : "", SDL_GetTicks(), uiError, appSettings);
         }
         if (!uiError.empty() && menu.page() != MenuPage::RemoveConfirm) menuRenderer.drawError(screen, uiError, SDL_GetTicks());
 

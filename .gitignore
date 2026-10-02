@@ -59,3 +59,6 @@ third_party/sdl2_image/
 
 # App-owned favorite backups (never distribution content)
 .favourite.json.better-favorites-backup.*
+
+/App/BetterFavoritesTest/browser-preferences.conf
+/App/BetterFavoritesTest/browser-preferences.conf.*

@@ -2,10 +2,13 @@
 #define BETTER_FAVORITES_THEME_H
 
 #include <string>
+#include <vector>
 
 struct ThemeTextStyle
 {
     std::string fontPath;
+    // Configured faces in profile -> active -> Onion/Miyoo precedence.
+    std::vector<std::string> fontCandidates;
     int size = 20;
 
     int red = 255;
@@ -18,6 +21,8 @@ struct Theme
     // Full active theme directory, for example:
     // /mnt/SDCARD/Themes/Some Theme/
     std::string rootPath;
+    // Only these current profile/active roots may supply preferred regular faces.
+    std::vector<std::string> regularFontRoots;
 
     bool hideIcons = false;
     bool hideHints = false;

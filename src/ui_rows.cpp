@@ -3,7 +3,7 @@
 #include <cstddef>
 
 std::vector<UiRow> buildUiRows(
-    const std::vector<SystemGroup>& groups
+    const std::vector<SystemGroup>& groups, bool headings
 )
 {
     std::vector<UiRow> rows;
@@ -15,7 +15,7 @@ std::vector<UiRow> buildUiRows(
         divider.type = UiRowType::SystemDivider;
         divider.text = group.label;
 
-        rows.push_back(divider);
+        if(headings) rows.push_back(divider);
 
         for (const Favorite& favorite : group.favorites) {
             UiRow row;

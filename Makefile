@@ -4,6 +4,8 @@ TARGET := build/better-favorites
 
 SRC := \
 	src/main.cpp \
+	src/browser_preferences.cpp \
+	src/browser_model.cpp \
 	src/menu_state.cpp \
 	src/menu_renderer.cpp \
 	src/menu_text.cpp \
@@ -14,7 +16,8 @@ SRC := \
 	src/favorites_parser.cpp \
 	src/ui_rows.cpp \
 	src/navigation.cpp \
-	src/theme_loader.cpp
+	src/theme_loader.cpp \
+	src/theme_fonts.cpp
 
 SDL_ROOT := third_party/sdl2_miyoo
 SDL_INC := $(SDL_ROOT)/sdl2/include

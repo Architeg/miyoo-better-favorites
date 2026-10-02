@@ -2,29 +2,37 @@
 
 Based on hardware-verified MENU checkpoint
 `2f7571d03055c0c11de69625c98ff9d05788f031`. Navigation/removal and preceding
-presentation are user-confirmed on device across themes. Final readability
-adjustments await device verification.
+presentation are user-confirmed on device across themes. Browser Settings are also
+reported working. The latest targeted modal presentation/control changes await
+device verification.
 
 ## Controls and UI
 
-- Browser Up/Down selects games; Left/Right selects the previous/next console.
+- Browser Up/Down selects games; Left/Right selects the previous/next console
+  in grouped mode, and is disabled in flat mode.
 - A launches the selected game through the existing exit-20 Onion handoff.
 - SELECT opens the top-left, four-row action menu: Launch, Remove from Favorites,
   Settings, Help. Launch/removal are dimmed and inert without a selected game.
 - Y opens full-screen Settings directly. Automatic return ON/OFF is the first
-  selectable row; A changes the real preference and generation. Availability is
-  reported separately. The second row opens the implemented explanation page.
+  selectable row; A or Left/Right changes the real preference and generation.
+  Grouping, numeric prefixes and sorting follow; the final About action explains
+  automatic return and reports integration availability.
 - A activates a menu row; B backs one level. Browser B exits normally.
 - MENU closes all open menu pages, consuming that press; only browser MENU opens
   Onion GameSwitcher through the verified exit-21 flow.
 - Help lists these working controls. No stock-only core/reset/scraper options.
-- Removal confirmation names the game and initially selects Cancel. Down then A
-  confirms; A on Cancel or B returns to actions. MENU cancels back to the browser.
+- Removal confirmation names the game and initially selects Cancel. Left/Right
+  chooses Cancel/Remove in one horizontal row; A activates. A on Cancel or B
+  returns to actions. MENU cancels back to the browser. Up/Down only pages long
+  titles; it cannot choose Remove. Repeated activation presses are ignored.
 
 Settings/Help retain the existing header/footer geometry and theme fonts/assets.
 SELECT uses a compact top-left popup; menu selection reuses the browser highlight.
-Removal uses a measured centered modal over a subdued browser. Bounded titles page
-explicitly with LEFT/RIGHT; errors remain complete inside the dialog. Browser
+Removal uses a centered 520px-wide modal with 24px padding over a subdued browser.
+Bounded titles page explicitly with Up/Down, with matching title-page hints; errors
+remain complete and survive paging. Footer badges say A Choose, B Back. The keep-file
+note retains the full readable body size and uses a verified regular face where
+the theme supplies one; mini.os has only Nunito Bold, a documented limitation. Browser
 geometry, artwork/navigation and OSS/libpadsp initialization remain unchanged.
 The current active theme path exists; no card configuration was changed.
 See [presentation/resource resolution](menu-presentation.md).

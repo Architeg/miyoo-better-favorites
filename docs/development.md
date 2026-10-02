@@ -20,14 +20,23 @@ Tools:
 
 The native application and Onion integration layer are kept separate.
 
-Development order:
+## Authoritative plan and current status
 
-1. Build environment
-2. SDL2 proof of concept
-3. Favorites parser
-4. Console grouping
-5. UI
-6. Box art
-7. ROM launching
-8. Favorites Home tile integration
-9. Packaging
+Use [roadmap.md](roadmap.md) for the complete feature inventory, remaining milestone
+order, acceptance criteria and unresolved decisions. Use
+[development-status.md](development-status.md) for the committed/deployed checkpoint
+and hardware versus host verification status. The old high-level development order
+is superseded by this consolidated roadmap; core browser settings/title/navigation
+work remains before profiling and Home entry integration.
+
+**Maintenance rule:** update roadmap and status when a milestone changes or hardware
+verification is received. Record commit/device/Onion/theme and tested behavior.
+Do not mark a feature hardware-confirmed from a successful build or host fixture.
+Do not treat code-only support as a usable persistent Settings option.
+
+The current Makefile/Docker workflow builds a prepared checkout. Reproducible
+clean-checkout dependencies, custom SDL2/audio provenance, packaging and production
+app installation remain roadmap gates. `scripts/fetch-deps.sh` is real dependency
+preparation; the other build/install/uninstall/package script placeholders are not
+completed tooling. See [architecture](architecture.md) and
+[version-specific optional return integration](onion-return.md).

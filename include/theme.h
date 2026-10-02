@@ -31,6 +31,11 @@ struct Theme
     std::string selectedItemPath;
     std::string normalItemPath;
 
+    std::string menuLeftArrowPath;
+    std::string menuRightArrowPath;
+    std::string dialogPath;
+    std::string actionMenuPath;
+    std::string actionSelectionPath;
     std::string listSmallPath;
     std::string listLargePath;
 

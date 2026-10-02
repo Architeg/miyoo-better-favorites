@@ -1,4 +1,7 @@
 #include "favorites_parser.h"
+#include "favorite_removal.h"
+#include "menu_state.h"
+#include "menu_renderer.h"
 #include "browser_state.h"
 #include "settings.h"
 #include "launch_request.h"
@@ -225,16 +228,14 @@ int main(int argc, char* argv[])
     if (!settingsError.empty()) std::cerr << settingsError << std::endl;
     FavoritesParser parser("/mnt/SDCARD", appSettings);
 
-    const auto favorites =
-        parser.loadFavorites(
-            "/mnt/SDCARD/Roms/favourite.json"
-        );
-
-    const auto groups =
-        parser.groupFavorites(favorites);
-
-    const auto rows =
-        buildUiRows(groups);
+    const std::string favoritesPath = "/mnt/SDCARD/Roms/favourite.json";
+    FavoritesSnapshot favoritesSnapshot;
+    std::string favoritesError;
+    readFavoritesSnapshot(favoritesPath, favoritesSnapshot, favoritesError);
+    if (!favoritesError.empty()) std::cerr << favoritesError << std::endl;
+    auto favorites = parser.loadFavoritesFromText(favoritesSnapshot.bytes);
+    auto groups = parser.groupFavorites(favorites);
+    auto rows = buildUiRows(groups);
 
     std::size_t selectedRow =
         firstSelectableRow(rows);
@@ -247,8 +248,7 @@ int main(int argc, char* argv[])
     if (!stateError.empty()) std::cerr << stateError << std::endl;
 
     if (
-        theme.rootPath.empty() ||
-        selectedRow >= rows.size()
+        theme.rootPath.empty()
     ) {
         std::cerr
             << "Theme or favorites unavailable."
@@ -627,11 +627,56 @@ int main(int argc, char* argv[])
         255
     };
 
-    bool settingsOpen = false;
-    bool settingsSaveFailed = false;
+    MenuRenderer menuRenderer(theme, {background, titleBackground, footerBackground, listSmall,
+        titleFont, listFont, sectionFont, footerFont ? footerFont : sectionFont});
+    MenuState menu;
+    std::string uiError;
     bool running = true;
     bool launchRequested = false;
     bool switcherRequested = false;
+
+    auto hasFavorite = [&]() {
+        return selectedRow < rows.size() && rows[selectedRow].favorite;
+    };
+    auto reportError = [&](const std::string& message) {
+        uiError = message;
+        std::cerr << message << std::endl;
+    };
+    auto launchSelected = [&]() {
+        if (!hasFavorite()) { reportError("No game selected."); return; }
+        std::string error;
+        if (!saveBrowserState(browserStatePath, rows, selectedRow, firstRow, error) ||
+            !requestOnionLaunch(*rows[selectedRow].favorite, error)) {
+            reportError("Launch request failed: " + error); return;
+        }
+        if (navigationSound) Mix_PlayChannelTimed(-1, navigationSound, 0, -1);
+        SDL_Delay(50);
+        launchRequested = true;
+        running = false;
+    };
+    auto removeSelected = [&]() {
+        if (!hasFavorite()) return;
+        const auto ordinal = rows[selectedRow].favoriteIndex;
+        std::string backup, error;
+        if (!removeFavorite(favoritesPath, favoritesSnapshot,
+                            *rows[selectedRow].favorite, backup, error)) {
+            reportError(error); return;
+        }
+        std::cerr << "Favorite removed; verified backup: " << backup << std::endl;
+        const std::string publicationWarning = error;
+        if (!readFavoritesSnapshot(favoritesPath, favoritesSnapshot, error)) reportError(error);
+        favorites = parser.loadFavoritesFromText(favoritesSnapshot.bytes);
+        groups = parser.groupFavorites(favorites);
+        rows = buildUiRows(groups);
+        selectedRow = selectableRowAtOrdinal(rows, ordinal);
+        firstRow = rows.empty() ? 0 : std::max(0L,
+            std::min(firstRow, static_cast<long>(selectedRow)));
+        menu.close();
+        if (!publicationWarning.empty()) reportError(publicationWarning);
+        // The next render applies the existing pixel-based viewport correction.
+        // State is saved below, after that correction; empty lists need no state.
+    };
+    bool saveRemovedPosition = false;
 
     while (running) {
         SDL_Event event;
@@ -641,22 +686,51 @@ int main(int argc, char* argv[])
                 continue;
             }
 
-            if (event.key.keysym.sym == SDLK_RCTRL && event.key.repeat == 0) {
-                settingsOpen = !settingsOpen;
-                settingsSaveFailed = false;
-                continue;
-            }
-            if (settingsOpen) {
-                if (event.key.repeat != 0) continue;
-                if (event.key.keysym.sym == SDLK_LCTRL || event.key.keysym.sym == SDLK_ESCAPE) {
-                    settingsOpen = false;
-                } else if (event.key.keysym.sym == SDLK_SPACE) {
-                    settingsSaveFailed = !setAutomaticReturn(appSettingsPath,
-                        !appSettings.automaticReturn, appSettings, settingsError);
-                    if (settingsSaveFailed) std::cerr << settingsError << std::endl;
-                    else std::cerr << "Automatic return: "
-                                   << (appSettings.automaticReturn ? "on" : "off") << std::endl;
+            const auto key = event.key.keysym.sym;
+            const bool wasMenuOpen = menu.open();
+            const auto previousMenuSelection = menu.selected();
+            const auto previousPage = menu.page();
+            MenuAction action = MenuAction::None;
+            if (wasMenuOpen || key == SDLK_RCTRL || key == SDLK_LALT) {
+                bool handled = true;
+                MenuKey menuKey = MenuKey::A;
+                switch (key) {
+                case SDLK_UP: menuKey = MenuKey::Up; break;
+                case SDLK_DOWN: menuKey = MenuKey::Down; break;
+                case SDLK_SPACE: menuKey = MenuKey::A; break;
+                case SDLK_LCTRL: menuKey = MenuKey::B; break;
+                case SDLK_ESCAPE: menuKey = MenuKey::Menu; break;
+                case SDLK_RCTRL: menuKey = MenuKey::Select; break;
+                case SDLK_LALT: menuKey = MenuKey::Y; break;
+                default: handled = false; break;
                 }
+                if (wasMenuOpen && (previousPage == MenuPage::Help || previousPage == MenuPage::ReturnInfo)) {
+                    if (key == SDLK_UP) menuRenderer.movePage(-1);
+                    if (key == SDLK_DOWN) menuRenderer.movePage(1);
+                }
+                // Title paging is presentation only; keep confirmation selection intact.
+                if (wasMenuOpen && previousPage == MenuPage::RemoveConfirm &&
+                        (key == SDLK_LEFT || key == SDLK_RIGHT)) {
+                    if (!event.key.repeat) menuRenderer.movePage(key == SDLK_LEFT ? -1 : 1);
+                    continue;
+                }
+                if (handled) action = menu.handle(menuKey, event.key.repeat != 0, hasFavorite());
+                if (menu.page() != previousPage) menuRenderer.resetPage();
+                if (handled && event.key.repeat == 0) uiError.clear();
+                if (action == MenuAction::Launch) launchSelected();
+                else if (action == MenuAction::Remove) {
+                    removeSelected(); saveRemovedPosition = !menu.open();
+                } else if (action == MenuAction::ToggleReturn) {
+                    if (!setAutomaticReturn(appSettingsPath, !appSettings.automaticReturn,
+                                            appSettings, settingsError)) reportError(settingsError);
+                    else std::cerr << "Automatic return: "
+                        << (appSettings.automaticReturn ? "on" : "off") << std::endl;
+                }
+                if (navigationSound && (previousPage != menu.page() ||
+                        previousMenuSelection != menu.selected() || action == MenuAction::ToggleReturn))
+                    Mix_PlayChannelTimed(-1, navigationSound, 0, -1);
+                // Closing MENU/B must never fall through to browser handoff/exit.
+                if (!running) break;
                 continue;
             }
 
@@ -762,59 +836,10 @@ int main(int argc, char* argv[])
                * actions as it does for navigation.
                */
               case SDLK_SPACE:
-                  if (event.key.repeat != 0) {
-                      break;
-                  }
-
-                  if (navigationSound) {
-                      Mix_PlayChannelTimed(
-                          -1,
-                          navigationSound,
-                          0,
-                          -1
-                      );
-                  }
-
-                  if (
-                      selectedRow >= rows.size() ||
-                      rows[selectedRow].type !=
-                          UiRowType::Favorite ||
-                      !rows[selectedRow].favorite
-                  ) {
-                      std::cerr
-                          << "Launch request failed: No game selected."
-                          << std::endl;
-                      break;
-                  }
-
-                  {
-                      std::string error;
-
-                      if (!saveBrowserState(browserStatePath, rows,
-                                            selectedRow, firstRow, error)) {
-                          std::cerr << "Launch request failed: " << error << std::endl;
-                          break;
-                      }
-                      if (!requestOnionLaunch(
-                              *rows[selectedRow].favorite,
-                              error
-                          )) {
-                          std::cerr
-                              << "Launch request failed: "
-                              << error
-                              << std::endl;
-                          break;
-                      }
-                  }
-
-                  // The launcher acts only after all SDL/audio cleanup.
-                  SDL_Delay(50);
-                  launchRequested = true;
-                  running = false;
+                  if (event.key.repeat == 0) { uiError.clear(); launchSelected(); }
                   break;
 
               case SDLK_LSHIFT:
-              case SDLK_LALT:
                   if (
                       navigationSound &&
                       event.key.repeat == 0
@@ -829,6 +854,7 @@ int main(int argc, char* argv[])
                   break;
 
               case SDLK_LCTRL:
+                  if (event.key.repeat != 0) break;
                   if (
                       navigationSound &&
                       event.key.repeat == 0
@@ -858,7 +884,7 @@ int main(int argc, char* argv[])
                       // An empty favorites list has no browser position to save.
                       if ((!rows.empty() && !saveBrowserState(browserStatePath, rows,
                               selectedRow, firstRow, error)) || !requestOnionSwitcher(error)) {
-                          std::cerr << "GameSwitcher request failed: " << error << std::endl;
+                          reportError("GameSwitcher request failed: " + error);
                           break;
                       }
                   }
@@ -1098,7 +1124,7 @@ int main(int argc, char* argv[])
           * viewport until the complete selected row fits.
           */
          while (
-             firstRow <
+             selectedRow < rows.size() && firstRow <
              static_cast<long>(
                  selectedRow
              )
@@ -1200,6 +1226,13 @@ int main(int argc, char* argv[])
                      selectedRow
                  );
          }
+
+        if (saveRemovedPosition) {
+            saveRemovedPosition = false;
+            std::string error;
+            if (!rows.empty() && !saveBrowserState(browserStatePath, rows,
+                    selectedRow, firstRow, error)) reportError(error);
+        }
 
         /*
          * Render forward until the physical list area is full.
@@ -1984,22 +2017,17 @@ int main(int argc, char* argv[])
             }
         }
 
-        if (settingsOpen) {
-            SDL_Rect panel {60, 135, 520, 245};
-            SDL_FillRect(screen, &panel, SDL_MapRGB(screen->format, 24, 24, 24));
-            const SDL_Color color {static_cast<Uint8>(theme.list.red),
-                static_cast<Uint8>(theme.list.green), static_cast<Uint8>(theme.list.blue), 255};
-            drawTextCenteredVertically(screen, titleFont, "Settings", color, 80, 145, 40);
-            drawTextCenteredVertically(screen, listFont,
-                std::string("Automatic return: ") + (appSettings.automaticReturn ? "ON" : "OFF"),
-                color, 80, 195, 36);
-            drawTextCenteredVertically(screen, footerFont, "A: toggle   B: back", color, 80, 245, 32);
-            drawTextCenteredVertically(screen, footerFont,
-                automaticReturnAvailable() ? "Integration: available" : "Integration: unavailable (patch not active)",
-                color, 80, 285, 32);
-            if (settingsSaveFailed) drawTextCenteredVertically(screen, footerFont,
-                "Could not save; setting unchanged.", color, 80, 325, 32);
+        if (rows.empty() && !menu.open()) {
+            drawTextCenteredVertically(screen, listFont, "No favorites", listColor, 20, 100, 60);
+            drawTextCenteredVertically(screen, sectionFont, "SELECT: actions   Y: Settings", listColor, 20, 160, 60);
         }
+
+        if (menu.open()) {
+            menuRenderer.draw(screen, menu.page(), menu.selected(), hasFavorite(),
+                appSettings.automaticReturn, automaticReturnAvailable(),
+                hasFavorite() ? parser.displayLabel(*rows[selectedRow].favorite) : "", SDL_GetTicks(), uiError);
+        }
+        if (!uiError.empty() && menu.page() != MenuPage::RemoveConfirm) menuRenderer.drawError(screen, uiError, SDL_GetTicks());
 
         SDL_UpdateTexture(
             texture,
@@ -2020,6 +2048,7 @@ int main(int argc, char* argv[])
         SDL_RenderPresent(renderer);
     }
 
+    menuRenderer.release();
     if (navigationSound) {
         Mix_FreeChunk(
             navigationSound

@@ -3,90 +3,87 @@
 Updated: 2026-10-02. Native SDL2 frontend for Onion's existing
 `/mnt/SDCARD/Roms/favourite.json`.
 
-## Hardware-confirmed checkpoint
+## Hardware-confirmed behavior
 
-The user confirms the following device results for the installed session-return
-checkpoint (these are hardware reports, separate from the host checks):
+The user confirmed the preceding UI across dark and light themes, with device
+photos: SELECT actions, full-screen Settings/Help, automatic-return explanation,
+readable control labels and centered Cancel-first removal. Navigation, exact-record
+removal, A launch, MENU GameSwitcher, persistence and OSS/libpadsp audio are reported
+working. These hardware results precede the final readability adjustments below.
 
-- UI/navigation and OSS/libpadsp audio work.
-- Selected games launch through Onion with GameSwitcher registration.
-- Automatic return OFF preserves Onion's ordinary return to stock menus.
-- Automatic return ON reopens Better Favorites from GameSwitcher.
-- Switching games through GameSwitcher retains the originating session and return.
-- A resumes the running game.
-- Reopening restores the selected favorite and previous browser scroll position.
+Earlier verified behavior includes Automatic return OFF using Onion's normal
+menus, ON reopening Better Favorites after GameSwitcher B, switching games
+retaining the origin session, A resuming, and selection/viewport restoration.
+START, failure, shutdown, restart, removed-entry fallback and stock-menu isolation have
+focused host coverage; not every edge case has independent device confirmation.
+No device RAM measurement is recorded.
 
-START, direct exit/restart/shutdown edge cases, removed-favorite fallback, and
-stock-menu isolation have focused host coverage; independent device confirmation
-of every edge case is still pending. No device RAM measurements are recorded.
+## Current UI checkpoint
 
-Earlier diagnostics verified MainUI is absent during app launch:
-`launch.sh → exe → runtime.sh`; the active command is
-`.tmp_update/cmd_to_run.sh`, not `/tmp/cmd_to_run.sh`.
+Base: `2f7571d03055c0c11de69625c98ff9d05788f031` on `main`,
+`Open Onion GameSwitcher from browser MENU`. The pending checkpoint adds SELECT
+Launch/Remove/Settings/Help, Y Settings, nested explanation, measured themed menus,
+modal confirmation, guarded exact-record removal and focused tests.
 
-## Git checkpoint and checks
+Final micro-adjustments use app-owned slightly larger/heavier body/hint fonts,
+same-family heavier faces where available, otherwise SDL_ttf bold. Shared browser
+fonts are not altered. Theme-colored filled letter circles/named capsules and
+slightly stronger arrows improve readability. **These final adjustments await
+device verification**, despite passing host SDL previews and the Docker ARM build.
+Only two new previews were generated: light Help and dark removal; other render
+checks run offscreen. See [menu presentation](menu-presentation.md) and
+[removal semantics/safeguards](menu-removal.md).
 
-- Branch: `main`.
-- Previous published base: `dd708a163739fead9095dcbf46b9b44b764a9a8b` —
-  `Launch favorites through Onion with GameSwitcher registration`.
-- This checkpoint: `Add optional Onion session return with browser state restoration`.
-- Focused settings, browser-state, launch/history/rollback, runtime lifecycle, and
-  installer/uninstaller fixtures cover the feature. Runtime fixtures run with
-  both `/tmp` and macOS temporary roots. Shell syntax and Docker ARM build are
-  final gates and passed for this checkpoint; compilation is separate from the
-  hardware results above. Installer fixtures used the cached original runtime
-  after verifying its SHA-256 and source blob; the card was not mounted during
-  the final review. Deployed files were not changed.
-- Existing ARM linker warning: SDL2_ttf's `libbz2.so.1.0` is not found at link time.
-- Build outputs, app settings/state, logs, backups, caches and temporary audit/diff
-  files stay outside Git. Deployment is a separate explicit action.
+Checks: menu text/navigation, removal backup/conflict/failure fixtures, settings,
+state, A/history/rollback, MENU handoff, launcher cleanup, runtime session ownership,
+installer fixtures, actual SDL bounds/owned-font/paging checks and shell syntax.
+ARM compilation remains distinct from hardware verification; the existing
+SDL2_ttf `libbz2.so.1.0` linker warning persists.
 
-## Implementation and ownership
+Builds, previews, logs, personal settings/state, backups and temporary artifacts
+are excluded from Git. This checkpoint does not deploy or change card files.
+The last deployed binary SHA-256 is
+`57c104b6835fc3c9eea4bd5ba462db3ff82c9a191f46cfef4ec4e33534864f98`.
+Last app backup: `../miyoo-better-favorites-backups/20261002-205610-device-menu-presentation-binary`.
 
-Non-repeated A validates the selected favorite and resolved files while preserving
-stored paths, including `/../../`, and Onion's safe double-quoted command format.
-The app saves browser position, privately stages command/recent data, and exits
-20 after SDL/audio cleanup. The launcher publishes command/history on destination
-filesystems, checks ownership, rolls back failures, and sets quick_switch last.
-Normal B exit does not register history. Onion owns cores, execution, save/resume,
-activity tracking and GameSwitcher. There is no MainUI stop/kill handoff.
+## Preserved Onion lifecycle and ownership
 
-Automatic return defaults OFF in app-owned settings. SELECT opens Settings;
-A toggles, B closes. Integration availability is displayed separately from the
-preference. Installation/uninstallation does not change the preference. Changes
-rotate a generation: disable/re-enable cannot revive old ownership.
+Non-repeated A saves browser position, privately stages command/recent data and
+exits 20 after SDL/audio cleanup. Stored paths, including `/../../`, are preserved
+in Onion's double-quoted command. The launcher checks its active app command,
+publishes history/command on destination filesystems, rolls back owned changes and
+sets quick_switch last. Browser MENU stages the existing GameSwitcher request,
+exits 21 after cleanup and registers no selected favorite. Menu MENU only closes
+the menu; B backs one level, or exits from the browser normally.
 
-The optional runtime hook accepts an invocation ticket after app return and owns
-the session originating in Better Favorites, rather than one ROM. GameSwitcher
-resumes/switches retain ownership; B/START consume it before reopening the app.
-Direct game exit, ordinary MainUI return, runtime restart/reboot, non-game launch,
-and preference disable/generation mismatch invalidate it. Shutdown has priority.
-Normal app B exit cannot create a reopening loop; stock launches never adopt a
-session. No app, launcher or separate helper stays alive during gameplay.
+Onion owns cores, execution, save/resume, activity tracking and GameSwitcher.
+MainUI is absent in the verified Apps context (`launch.sh → exe → runtime.sh`);
+no MainUI stop/kill handoff remains. No app/helper stays alive during gameplay.
 
-Browser state uses selected launch/ROM identity, fallback ordinal, and viewport
-identity. Missing favorites select a nearby clamped entry; corrupt state uses
-defaults. This is app state, not a separate history system. Lifecycle diagnostics
-in `.tmp_update/logs/better-favorites-return.log` report ownership and decisions;
-logging failure does not alter the handoff. Browser MENU extension is hardware verified; see below.
+Automatic return defaults OFF. Y opens Settings; SELECT also offers Settings.
+Availability is independent of the preference and requires the active runtime
+context. Installation does not enable it; disabling rotates generation and
+invalidates ownership. Optional runtime integration retains session ownership
+through GameSwitcher switches, consumes it before reopening, and clears it on
+direct exit, MainUI return, runtime restart, non-game launch, disable/generation
+change and shutdown. Stock launches do not adopt ownership; normal app B cannot
+create a reopening loop.
 
-## Version and deployment
+Browser state records launch/ROM identity, nearby fallback ordinal and viewport.
+Removing a favorite rebuilds rows and selects the nearest remaining entry. Removal
+backs up/verifies and atomically publishes one exact source span; ROM/art/saves/
+histories and unrelated fields/records stay intact. The final snapshot-check/rename
+race with a noncooperating writer is documented, not claimed to be eliminated.
 
-Version-specific authority: mounted Onion **v4.3.1-1**, matching original runtime
-Git blob `4e2194f1b47c6c13605846002b6be0b42c1384f9`. The runtime patch is separate
-from app deployment and hash-gated; see [installation, rollback, lifecycle and
-memory measurement](onion-return.md). MainUI internals remain unverified.
+## Version reference
 
-- App backup: `../miyoo-better-favorites-backups/20261002-030930`.
-- Reviewed session helper/manifest update backup:
-  `../miyoo-better-favorites-backups/20261002-033020-return-helper`.
-- Verified original runtime and manifest:
-  `/Volumes/MIYOO/.tmp_update/config/better-favorites-return-backup/`.
-- App deployment and subsequent helper/manifest update were verified by bytes,
-  hashes and shell syntax, then synced. Libraries, favorites, histories, original
-  runtime backup and app setting were preserved during the helper update.
-- The installed helper/manifest correspond to this checkpoint. Automatic return
-  was ON at the last read-only inspection; this personal preference is not tracked.
+Mounted Onion **v4.3.1-1** is the version-specific authority. Original runtime
+SHA-256: `a8d77dcd316bc2a323b1e015aaf4b7682d2fed677af9cdadbc00e48881425d6e`;
+Git blob: `4e2194f1b47c6c13605846002b6be0b42c1384f9`.
+The optional runtime patch is separate, disabled by default and hash-gated;
+[installation/rollback/lifecycle/memory procedure](onion-return.md).
+Original backup/manifest remain in `.tmp_update/config/better-favorites-return-backup/`.
+This UI checkpoint changes no launcher/runtime/helper protocol.
 
 ## Source references
 
@@ -97,28 +94,15 @@ memory measurement](onion-return.md). MainUI internals remain unverified.
 - [MENU termination/resume actions](https://github.com/OnionUI/Onion/blob/v4.3.1-1/src/keymon/menuButtonAction.h)
 - [Mounted RandomGamePicker reference](/Volumes/MIYOO/App/RandomGamePicker/random.sh)
 
-## Roadmap and exact next step
+## Agreed roadmap and next unfinished feature
 
-Next: implement SELECT actions, full-screen Settings/Help, and guarded removal of
-one favorite. Preserve browser geometry and verified Onion launch/return/audio.
-Inspect Onion removal semantics first; no deployment of this next step yet.
+SELECT actions, full-screen Settings/Help and guarded single-favorite removal are
+complete in this checkpoint. The remaining explicitly planned feature in
+[README — Planned behavior](../README.md#planned-behavior) is launching Better
+Favorites from the normal Favorites tile on Onion's Home screen.
 
-## Hardware-verified MENU checkpoint
-
-The previous automatic-return checkpoint is `cd55c018cea2a273eef9f1feacf0cb8d27866a97`.
-MENU saves browser state, stages a private request and exits 21 after cleanup.
-The launcher removes only its captured active app command and publishes Onion's
-`.runGameSwitcher` flag. No selected favorite/history registration occurs. ON
-adopts a GameSwitcher-origin session; OFF uses Onion's normal app/menu return.
-The helper and manifest were updated alongside the binary/launcher; runtime hook
-placement is unchanged. Settings MENU closes the overlay; browser B exits.
-
-On 2026-10-02 the user confirmed the deployed MENU revision works as expected on
-hardware. This complements the earlier hardware-confirmed A launch, OFF/ON return,
-switching games, A resume and restored selection/viewport. Failure, shutdown and
-empty-history cases remain fixture-verified unless separately observed on device.
-
-Deployment backup: `../miyoo-better-favorites-backups/20261002-180751-menu`.
-Focused handoff/lifecycle, launcher, settings/state and installer checks passed.
-Shell syntax and Docker ARM build passed, with the existing libbz2 linker warning.
-No device RAM measurement has been made.
+That entry-point integration is a separate next step. Reuse this browser, Onion's
+existing favorites file/Add to Favorites workflow and verified launch/return
+handoff. Investigate the stock Favorites tile dispatch first: MainUI internals
+and a supported tile-level replacement hook are not yet verified. Do not assume
+that an app launcher or per-game Favorites GLO hook replaces the tile.

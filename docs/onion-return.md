@@ -44,8 +44,9 @@ an emulator or retain the app launcher in memory.
 
 ## App preference and ownership invalidation
 
-SELECT opens the Settings overlay; non-repeated A toggles Automatic return and
-B (or MENU/SELECT) closes it. Integration availability is shown separately from
+Y opens full-screen Settings; SELECT opens actions, including Settings and Help.
+Non-repeated A on Automatic return toggles it; B backs one level and MENU closes
+all open menu pages without opening GameSwitcher. Integration availability is shown separately from
 the preference and requires the live private runtime context, not just a helper
 file on disk or an ON preference. Installed but not active in this invocation
 shows unavailable. Browsing layout/navigation and sound remain unchanged.
@@ -315,7 +316,7 @@ One non-repeated MENU/ESC press outside Settings saves selection/viewport and
 privately stages `switcher.request`. An empty favorites list has no position to
 save and leaves any previous state file intact. The binary returns **21** only
 after all SDL/audio cleanup. A remains exit 20; B remains ordinary app exit.
-Inside Settings, MENU still only closes the overlay.
+Inside Settings and other menu pages, MENU only closes the menu.
 
 The outer launcher dispatches exit 21 to `--publish-switcher-handoff`. It verifies
 its captured active app command, runtime binary, and absent pending/quick-switch,

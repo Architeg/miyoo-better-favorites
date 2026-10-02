@@ -56,3 +56,6 @@ third_party/sdl2_miyoo/
 third_party/json-c/
 third_party/sdl2_ttf/
 third_party/sdl2_image/
+
+# App-owned favorite backups (never distribution content)
+.favourite.json.better-favorites-backup.*

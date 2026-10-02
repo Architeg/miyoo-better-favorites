@@ -4,6 +4,10 @@ TARGET := build/better-favorites
 
 SRC := \
 	src/main.cpp \
+	src/menu_state.cpp \
+	src/menu_renderer.cpp \
+	src/menu_text.cpp \
+	src/favorite_removal.cpp \
 	src/launch_request.cpp \
 	src/browser_state.cpp \
 	src/app_settings.cpp \

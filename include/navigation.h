@@ -6,6 +6,8 @@
 #include <cstddef>
 #include <vector>
 
+std::size_t selectableRowAtOrdinal(const std::vector<UiRow>& rows, std::size_t ordinal);
+
 std::size_t firstSelectableRow(
     const std::vector<UiRow>& rows
 );

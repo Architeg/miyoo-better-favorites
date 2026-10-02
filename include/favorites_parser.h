@@ -19,6 +19,8 @@ public:
         const std::string& favoritesFile
     ) const;
 
+    std::vector<Favorite> loadFavoritesFromText(const std::string& text) const;
+
     std::vector<SystemGroup> groupFavorites(
         const std::vector<Favorite>& favorites
     ) const;

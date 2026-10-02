@@ -12,6 +12,10 @@ struct Favorite
     std::string romPath;
     std::string imagePath;
 
+    // Exact source span in the snapshot loaded by FavoritesParser.
+    std::size_t sourceOffset = 0;
+    std::string sourceRecord;
+
     // Resolved dynamically from the launch path / emulator config.
     std::string systemId;
     std::string systemLabel;

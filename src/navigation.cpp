@@ -228,3 +228,15 @@ std::size_t consoleHeaderRow(
 
     return rows.size();
 }
+
+std::size_t selectableRowAtOrdinal(const std::vector<UiRow>& rows, std::size_t ordinal)
+{
+    std::size_t last = rows.size();
+    for (std::size_t i = 0; i < rows.size(); ++i) {
+        if (!rows[i].favorite) continue;
+        last = i;
+        if (!ordinal) return i;
+        --ordinal;
+    }
+    return last;
+}

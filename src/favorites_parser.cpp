@@ -113,29 +113,46 @@ std::vector<Favorite> FavoritesParser::loadFavorites(
     const std::string& favoritesFile
 ) const
 {
+    std::ifstream input(favoritesFile, std::ios::binary);
+    if (!input.is_open()) return {};
+    std::ostringstream buffer;
+    buffer << input.rdbuf();
+    return loadFavoritesFromText(buffer.str());
+}
+
+std::vector<Favorite> FavoritesParser::loadFavoritesFromText(const std::string& text) const
+{
     std::vector<Favorite> favorites;
-
-    std::ifstream input(favoritesFile);
-
-    if (!input.is_open()) {
-        return favorites;
-    }
-
+    std::istringstream input(text);
+    std::size_t offset = 0;
     std::string line;
 
     while (std::getline(input, line)) {
+        const std::size_t sourceOffset = offset;
+        const std::size_t sourceLength = line.size() + (input.eof() ? 0 : 1);
+        offset += sourceLength;
         if (line.empty()) {
             continue;
         }
 
-        json_object* root =
-            json_tokener_parse(line.c_str());
-
-        if (!root) {
+        json_tokener* tokener = json_tokener_new();
+        if (!tokener) continue;
+        json_tokener_set_flags(tokener, JSON_TOKENER_STRICT);
+        json_object* root = json_tokener_parse_ex(tokener, line.c_str(),
+                                                 static_cast<int>(line.size()) + 1);
+        const bool complete = json_tokener_get_error(tokener) == json_tokener_success;
+        json_tokener_free(tokener);
+        if (!root || !complete) {
+            if (root) json_object_put(root);
             continue;
         }
 
+        if (!json_object_is_type(root, json_type_object)) {
+            json_object_put(root); continue;
+        }
         Favorite favorite;
+        favorite.sourceOffset = sourceOffset;
+        favorite.sourceRecord = text.substr(sourceOffset, sourceLength);
 
         json_object* value = nullptr;
 

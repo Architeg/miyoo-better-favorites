@@ -189,10 +189,28 @@ Theme ThemeLoader::load() const
                 "bg-game-item-n.png"
             );
 
+        // A missing popup must derive its surface from the browser theme,
+        // not pull an unrelated stock popup/selection style into the menu.
+        for (const std::string& base : {sdRoot_ + "/Saves/CurrentProfile/theme", theme.rootPath}) {
+            for (const char* name : {"bg-pop-menu-4.png", "menu-sub-bg.png"}) {
+                const std::string candidate = base + "/skin/" + name;
+                if (theme.actionMenuPath.empty() && std::ifstream(candidate).good()) theme.actionMenuPath = candidate;
+            }
+        }
+
+        for (const std::string& base : {sdRoot_ + "/Saves/CurrentProfile/theme", theme.rootPath}) {
+            const std::string candidate = base + "/skin/pop-bg.png";
+            if (theme.dialogPath.empty() && std::ifstream(candidate).good()) theme.dialogPath = candidate;
+        }
+
         theme.listSmallPath =
             resolveThemeAsset(
                 "bg-list-s.png"
             );
+
+        theme.actionSelectionPath = theme.listSmallPath;
+        theme.menuLeftArrowPath = resolveThemeAsset("icon-left-arrow-24.png");
+        theme.menuRightArrowPath = resolveThemeAsset("icon-right-arrow-24.png");
 
         theme.listLargePath =
             resolveThemeAsset(

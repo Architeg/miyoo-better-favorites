@@ -5,6 +5,7 @@
 #include "browser_state.h"
 #include "browser_preferences.h"
 #include "browser_model.h"
+#include "browser_titles.h"
 #include "settings.h"
 #include "launch_request.h"
 #include "navigation.h"
@@ -638,6 +639,7 @@ int main(int argc, char* argv[])
 
     MenuRenderer menuRenderer(theme, {background, titleBackground, footerBackground, listSmall,
         titleFont, listFont, sectionFont, footerFont ? footerFont : sectionFont});
+    BrowserTitles browserTitles(listFont);
     MenuState menu;
     std::string uiError;
     bool running = true;
@@ -719,6 +721,9 @@ int main(int argc, char* argv[])
                 if (action == MenuAction::PageUp) menuRenderer.movePage(-1);
                 if (action == MenuAction::PageDown) menuRenderer.movePage(1);
                 if (menu.page() != previousPage) menuRenderer.resetPage();
+                // Observe even open/close events batched into a single SDL frame.
+                if (!wasMenuOpen && menu.open()) browserTitles.pause(SDL_GetTicks());
+                if (wasMenuOpen && !menu.open()) browserTitles.restartDelay(SDL_GetTicks());
                 if (handled && event.key.repeat == 0 && action != MenuAction::PageUp && action != MenuAction::PageDown) uiError.clear();
                 if (action == MenuAction::Launch) launchSelected();
                 else if (action == MenuAction::Remove) {
@@ -919,6 +924,11 @@ int main(int argc, char* argv[])
             if (!running) {
                 break;
             }
+
+            // A different row, even if another event immediately returns to it,
+            // starts a fresh reading delay. Identity/label changes are also checked
+            // by the renderer after settings rebuilds or favorite removal.
+            if (selectedRow != previousSelection) browserTitles.restartDelay(SDL_GetTicks());
 
             /*
              * Match Onion's change-sound behavior: play only when
@@ -1444,6 +1454,8 @@ int main(int argc, char* argv[])
                   ? contentTop + sectionVisualHeight
                   : contentTop;
 
+         const Uint32 titleTicks = SDL_GetTicks();
+         browserTitles.beginFrame();
          for (
              long rowNumber = firstRow;
              rowNumber <
@@ -1541,22 +1553,24 @@ int main(int argc, char* argv[])
                  );
              }
 
-             drawTextCenteredVertically(
-                 screen,
-                 listFont,
-                 parser.displayLabel(
-                     *row.favorite
-                 ),
-                 selected
-                     ? selectedTextColor
-                     : listColor,
-                 20,
-                 y,
-                 gameRowHeight
-             );
+             // Reserve the existing preview column, including transparent theme
+             // material; scrolling never paints over artwork/headings/footer.
+             const auto titleRegion = browserTitleRegion(y, gameRowHeight,
+                 previewBackground ? previewBackground->w : 0);
+             const auto& favorite = *row.favorite;
+             const std::string identity = selected
+                 ? std::to_string(favorite.launchPath.size()) + ":" + favorite.launchPath +
+                   std::to_string(favorite.romPath.size()) + ":" + favorite.romPath +
+                   ":" + std::to_string(favorite.sourceOffset)
+                 : std::string{};
+             browserTitles.draw(screen, parser.displayLabel(favorite),
+                 selected ? selectedTextColor : listColor, titleRegion,
+                 y, gameRowHeight, selected, identity, titleTicks, menu.open());
 
              y += gameRowHeight;
          }
+
+         browserTitles.endFrame();
 
          /*
           * Onion-style selected game preview.
@@ -2068,6 +2082,7 @@ int main(int argc, char* argv[])
         SDL_RenderPresent(renderer);
     }
 
+    browserTitles.clear();
     menuRenderer.release();
     if (navigationSound) {
         Mix_FreeChunk(

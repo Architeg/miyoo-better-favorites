@@ -39,6 +39,7 @@ private:
     std::map<std::string, SDL_Surface*> controls_;
     SDL_Surface* controlLabel(const std::string& key);
     SDL_Surface *popup_ = nullptr, *leftArrow_ = nullptr, *rightArrow_ = nullptr;
+    TTF_Font* returnHeadingFont_ = nullptr; // App-owned face at the existing section size.
     TTF_Font *ownedBodyFont_ = nullptr, *ownedHintFont_ = nullptr, *descriptionFont_ = nullptr, *regularBodyFont_ = nullptr;
     MenuPage previous_ = MenuPage::Browser;
     int page_ = 0, pages_ = 1;

@@ -1,10 +1,9 @@
 # Persistent browser Settings
 
-Status: the user confirms deployed browser Settings functionality and presentation
-passed hardware testing (binary `4f857eb6`). The final centered modal text,
-two-point description/About increase and reduced panel padding are included in
-the checkpoint but still need device verification. Host checks and ARM builds
-are separate evidence; no new previews were generated for this final pass.
+Status: the user confirms browser Settings functionality/presentation and M3
+passed hardware testing. The last centered-modal/larger-description/reduced-padding
+adjustments were present in that M3 build. The two new bold-white About headings
+still await device verification. Host tests/builds remain separate evidence.
 
 ## Behavior and controls
 
@@ -72,8 +71,8 @@ without the selection asset. Rows scroll above reserved space for two lines; a
 shorter description is vertically centered. Text is left-aligned and measured,
 at its existing size. Automatic return ON shows inline badges in
 `[B] / [START]: return here from GameSwitcher.` OFF shows no return note. Integration
-availability is only in About. About uses “When enabled” / “When disabled” headings with the browser console-heading
-face and color, regular-face text
+availability is only in About. About uses “When enabled” / “When disabled” headings with the existing section-heading
+font/size, bold white on this explanation page only, regular-face text
 where installed, inline B/START/A badges, and a short final direct-exit paragraph.
 No dividers or control columns; the short explanation fits on one page in the tested
 light/dark themes. Measured paging remains available if another theme needs it.

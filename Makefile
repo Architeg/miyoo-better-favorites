@@ -4,6 +4,8 @@ TARGET := build/better-favorites
 
 SRC := \
 	src/main.cpp \
+	src/title_scroll.cpp \
+	src/browser_titles.cpp \
 	src/browser_preferences.cpp \
 	src/browser_model.cpp \
 	src/menu_state.cpp \

@@ -6,19 +6,18 @@ Update roadmap/status whenever a milestone changes or hardware verification arri
 
 ## Current implementation checkpoint
 
-Browser Settings checkpoint: persistent grouping, numeric prefixes and sorting;
-independent display/sort behavior; unchanged return protocol and exact-record
-removal. This checkpoint is published on `main` after the prior documentation
-HEAD `83828b63b8be20b225f792c6c159556f6f4f5534`.
+Publishing M3 selected browser-title scrolling after Settings commit
+`79785d325c25128d53ed40234b7d82c00b6195aa`. The user confirms M3 passed hardware
+testing on 2026-10-03: everything works correctly. Accepted binary:
+`12545265ff8508bf6767b1ef3057854d54d513f6610f602490e3c0dcb7f1ce2d`.
+Its verified pre-deployment backup:
+`../miyoo-better-favorites-backups/20261002-235637-m3-title-scrolling-binary/`.
 
-The user confirms functionality and presentation of deployed binary
-`4f857eb6b9d7797cee875302450dbb33251cea32ec66ed5b260dc96047e3a62e`
-passed hardware testing. Its deployment backup is
-`../miyoo-better-favorites-backups/20261002-232707-fixed-settings-panel-binary/`.
-Final adjustments in this checkpoint center the modal heading/title/note, increase
-explanation/description text by two points, and reduce the reserved panel padding
-from 24 to 16 pixels. These final adjustments are host-checked and ARM-built;
-they await device verification. They do not change functional protocols.
+The checkpoint also changes only “When enabled” / “When disabled” in About to
+bold white, retaining the existing font family and size. All other text styling
+is unchanged; these two heading changes await device verification. Host bounds,
+font ownership, timing/clipping/cache/regression checks and ARM build are recorded
+separately from hardware acceptance.
 
 ## Verification status
 
@@ -53,17 +52,16 @@ they await device verification. They do not change functional protocols.
 
 ## Next unfinished milestone
 
-**M3: selected long browser-title horizontal scrolling.** M2 functionality and
-preceding presentation are user-confirmed on hardware. Final scoped readability
-adjustments are included in the Settings checkpoint with a short device follow-up;
-they do not block beginning M3 as explicitly requested. M3 must remain a separate
-local implementation until reviewed. See [Settings verification](browser-settings.md).
+**M4: audit and close confirmed navigation/artwork/resource gaps.** Compare the
+roadmap with implemented row/console/sticky/edge behavior, page navigation and
+missing/corrupt-resource paths. Page controls need explicit agreement; Left/Right
+remain console jumps. Do not rewrite verified geometry or implement proposals
+as agreed requirements. See [M4 scope](roadmap.md#m4--finish-core-navigation-and-artworkfallback-cases).
 
-Browser horizontal title scrolling and page-navigation/artwork completion also
-remain unfinished. Home Favorites replacement is the original primary goal, but
-it is not the only remaining feature or the immediate next implementation.
-See [ordered milestones and acceptance criteria](roadmap.md#5-ordered-remaining-milestones).
-No page-button assignment or optional setting default is assumed.
+M3 is hardware-accepted; its local timing policy remains explicit rather than a
+claim of stock MainUI equivalence. See [implementation and regression checklist](browser-title-scrolling.md).
+Home Favorites replacement remains the primary delivery goal after the ordered
+core milestones. Page-button and optional artwork settings remain unresolved.
 
 ## Version reference and detail documents
 
@@ -77,6 +75,7 @@ is not Home tile integration. Installation does not enable the app preference.
 - [Removal transaction, Onion semantics and concurrency limits](menu-removal.md)
 - [Theme/resource resolution, presentation and preview limitations](menu-presentation.md)
 - [Browser Settings, persistence and device acceptance](browser-settings.md)
+- [M3 title scrolling, source evidence, policy and device checks](browser-title-scrolling.md)
 - [Development environment and roadmap maintenance](development.md)
 
 Builds, previews, logs, personal preferences/state, backups and temporary audit/
@@ -89,5 +88,5 @@ rows scroll above it. About uses browser-style “When enabled” / “When disa
 headings. Supporting descriptions use the resolved section color where readable
 on the composited surface, otherwise normal theme text. Font priority, modal
 width/actions and all functional protocols are unchanged. Browser Settings
-functionality and preceding presentation are hardware-confirmed; only final
-centering, two-point text increase and reduced padding remain hardware-pending.
+functionality and preceding presentation are hardware-confirmed; M3 is now hardware-confirmed. The new bold-white About headings await device
+verification.

@@ -295,6 +295,8 @@ MenuRenderer::MenuRenderer(const Theme& theme,MenuResources resources):sectionHe
     if(!theme.menuLeftArrowPath.empty()) leftArrow_=IMG_Load(theme.menuLeftArrowPath.c_str());
     if(!theme.menuRightArrowPath.empty()) rightArrow_=IMG_Load(theme.menuRightArrowPath.c_str());
     // App-owned instances only. Browser resources are borrowed and never restyled.
+    returnHeadingFont_=TTF_OpenFont(theme.section.fontPath.c_str(),theme.section.size);
+    if(returnHeadingFont_)TTF_SetFontStyle(returnHeadingFont_,TTF_GetFontStyle(returnHeadingFont_)|TTF_STYLE_BOLD);
     ownedBodyFont_=readableFont(theme,theme.section);
     ownedHintFont_=readableFont(theme,theme.hint,26);
     if(ownedBodyFont_)resources_.bodyFont=ownedBodyFont_;
@@ -369,6 +371,8 @@ void MenuRenderer::release(){
     if(leftArrow_) SDL_FreeSurface(leftArrow_);
     if(rightArrow_) SDL_FreeSurface(rightArrow_);
     leftArrow_=rightArrow_=nullptr;
+    if(returnHeadingFont_)TTF_CloseFont(returnHeadingFont_);
+    returnHeadingFont_=nullptr;
     if(regularBodyFont_)TTF_CloseFont(regularBodyFont_);
     regularBodyFont_=nullptr;
     if(descriptionFont_)TTF_CloseFont(descriptionFont_);
@@ -539,21 +543,21 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
             {"[A]: resume the game. Switching games keeps the session.",false},
             {"When disabled",true},{"Use Onion's ordinary menu return.",false},
             {"Direct game exit ends the return session.",false}};
-        struct Positioned {TextFlow flow;TTF_Font* font;int y,page;};
+        struct Positioned {TextFlow flow;TTF_Font* font;int y,page;bool heading;};
         std::vector<Positioned> laidOut;int y=header+8,pageIndex=0;
         for(std::size_t i=0;i<blocks.size();++i){
-            const auto& block=blocks[i];auto* face=block.heading?sectionHeadingFont_:font;
+            const auto& block=blocks[i];auto* face=block.heading?(returnHeadingFont_?returnHeadingFont_:sectionHeadingFont_):font;
             if(block.heading)y+=12;
             auto flow=inlineFlow(face,block.value,600,[&](const std::string& key){return controlLabel(key);});
             const int height=flow.lines*flow.lineHeight;
             int keep=height;
             if(block.heading && i+1<blocks.size())keep+=4+inlineFlow(font,blocks[i+1].value,600,[&](const std::string& key){return controlLabel(key);}).lineHeight;
             if(y+keep>bottom-4){++pageIndex;y=header+8;}
-            laidOut.push_back({flow,face,y,pageIndex});y+=height+(block.heading?2:8);
+            laidOut.push_back({flow,face,y,pageIndex,block.heading});y+=height+(block.heading?2:8);
         }
         pages_=pageIndex+1;page_=std::min(page_,pages_-1);
         for(const auto& block:laidOut)if(block.page==page_){
-            const auto ink=secondaryInk(screen,{margin,block.y,600,block.flow.lines*block.flow.lineHeight},section,list);
+            const auto ink=block.heading?SDL_Color{255,255,255,255}:secondaryInk(screen,{margin,block.y,600,block.flow.lines*block.flow.lineHeight},section,list);
             drawFlow(screen,block.font,block.flow,margin,block.y,ink);
         }
         if(pages_>1)p.footer({{"UP DOWN","Page"},{"B","Back"}});else p.footer({{"B","Back"}});
@@ -590,7 +594,11 @@ void testMenuSecondaryContrast() {
 }
 bool MenuRenderer::explanationsAreRegular() const {return regularFace(regularBodyFont_) && regularFace(descriptionFont_);}
 void MenuRenderer::verifyFonts(bool expectRegular) const {
-    assert(regularBodyFont_ && descriptionFont_);
+    assert(regularBodyFont_ && descriptionFont_ && returnHeadingFont_);
+    assert(TTF_GetFontStyle(returnHeadingFont_)&TTF_STYLE_BOLD);
+    auto* heading=TTF_OpenFont(theme_.section.fontPath.c_str(),theme_.section.size);assert(heading);
+    assert(TTF_FontHeight(returnHeadingFont_)==TTF_FontHeight(heading));
+    TTF_CloseFont(heading);
     if(expectRegular)assert(regularFace(regularBodyFont_) && regularFace(descriptionFont_));
     auto* original=TTF_OpenFont(theme_.section.fontPath.c_str(),theme_.section.size+1);assert(original);
     assert(TTF_FontHeight(regularBodyFont_)>=TTF_FontHeight(original)-2);

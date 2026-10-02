@@ -95,6 +95,9 @@ and **superseded** do not add obligations to the active v1 milestone sequence.
 
 ### Implemented and hardware-confirmed
 
+M3 selected-title scrolling passed user hardware testing on 2026-10-03. Host timing,
+UTF-8 clipping and cache tests are additional evidence, not exhaustive device coverage.
+
 Browser Settings functionality (persistent grouping, numeric-prefix display and
 sorting) and presentation are user-confirmed on deployed build `4f857eb6`.
 Only the final centering, description-size and panel-padding adjustments await
@@ -142,7 +145,8 @@ Theme/device identities and test logs are not complete enough for universal clai
 
 | Feature/change | Current evidence and missing evidence |
 | --- | --- |
-| Final modal text centering, larger descriptions and reduced panel padding | Host/SDL checks and ARM build; device follow-up pending; preceding Settings presentation/controls are user-confirmed |
+| Bold-white Automatic return headings | Existing font/size preserved; host checks and ARM build; device verification pending |
+| Empty/corrupt resource and navigation boundary cases | Dedicated M4 host/device audit still required |
 | Empty favorites browsing/menu availability | Implemented and fixture-covered; complete device empty-list matrix pending |
 | Removed remembered entry → nearby selection | Identity/ordinal fallback and tests; dedicated device edge-case check pending |
 | Corrupt/missing preference/state behavior | Host fixtures; device fault cases not exhaustively observed |
@@ -165,7 +169,7 @@ Theme/device identities and test logs are not complete enough for universal clai
 
 ### Planned
 
-- Selected overflowing browser-title horizontal scrolling.
+- Audit and gap closure for page navigation and resource fallbacks (M4).
 - Browser page-at-a-time navigation after button semantics are resolved.
 - Device follow-up for the final centering/text-size/padding adjustments; optional controls remain unresolved.
 - Measured startup/memory profiling and evidence-based optimization.
@@ -190,7 +194,7 @@ still does **not** imply a usable persistent option. See [browser Settings](brow
 | Grouping | Group by console ON by default | Persistent UI; OFF is a flat list with global chosen sort, no headings or console jumps | Normal functionality user-confirmed; edge-case matrix remains |
 | Numeric prefixes | Show by default; Hide removes leading digit-dot/space prefixes for display only | Persistent UI; stored labels and sort mode remain independent | Normal functionality user-confirmed; other prefix formats not agreed |
 | Sorting | Original label default; alternate Alphabetical title ignores numeric prefix | Persistent UI; literal-label order, or ASCII-folded title keys; ties use literal label/source offset | Normal functionality user-confirmed; Unicode collation/natural numeric sorting not promised |
-| Long titles | Selected overflowing row scrolls after about one second; other rows stationary | Browser scrolling absent; dialog paging exists | Behavior is core; enable/disable/speed control proposed, exact choices/default not finalized |
+| Long titles | Selected overflowing row scrolls after about one second; other rows stationary | Selected-title scrolling hardware-accepted; dialog paging remains separate | Behavior is core; enable/disable/speed control proposed, exact choices/default not finalized |
 | Remembered position | Preserve selected identity and viewport; nearby fallback if removed | Implemented independently of a user toggle | Optional toggle proposed; default and OFF behavior/storage retention unresolved |
 | Hints | Follow theme preferences; readable menu text-control labels as accepted | Theme hideIcons/hideHints applied; no app override | App hint override proposed; defaults/precedence unresolved; preserve browser/menu distinction |
 | Artwork | Selected artwork proportionally displayed | Rendering implemented; failure presentation partial | Optional app show/hide setting proposed; not accepted as required v1 toggle; default/layout when OFF unresolved |
@@ -237,8 +241,8 @@ and remaining navigation/artwork precede profiling and Home entry integration.
   sort options, original launch/ROM selection anchors and exact-record removal identity.
   User confirms deployed functionality and presentation, including inline descriptions,
   chevrons, About and horizontal modal actions/Up-Down paging, passed hardware tests.
-  Final centered modal text, slightly larger descriptions and reduced panel padding
-  await device follow-up. Fault cases remain separately tracked.
+  The subsequent M3 hardware acceptance includes final modal centering, larger
+  descriptions and reduced padding. Fault cases remain separately tracked.
 - **Dependencies:** current menus/state/removal identity and unchanged return format.
   OFF now explicitly means no headings or console jumps, globally sorted favorites.
 - **Reuse/inspect:** parser display/sort functions, row/navigation/state helpers,
@@ -264,9 +268,12 @@ and remaining navigation/artwork precede profiling and Home entry integration.
 - **Intended behavior:** after approximately one second, an overflowing selected
   title scrolls horizontally; unselected rows remain stationary. Selection change
   resets the presentation. Dialog title paging remains a separate feature.
-- **Current/missing:** browser renders static titles; no horizontal animation/timer
-  handler. Measure the usable title region and add bounded selected-row behavior.
-  Dialog Up/Down paging does not satisfy this milestone.
+- **Current/missing:** implemented and user-confirmed on hardware on 2026-10-03
+  (“everything works correctly”). Selected overflow moves using cached whole UTF-8
+  text, clipped before preview/content boundaries; identity/label changes reset,
+  menus pause and return restarts the delay. Host timing/SDL/resource checks and
+  ARM build pass. Dialog Up/Down paging remains independent. Exhaustive device/
+  theme/failure coverage is not implied.
 - **Dependencies:** M2 display labels and model/state changes; current artwork area,
   sticky headings and stable browser geometry.
 - **Reuse/inspect:** SDL_ttf width measurement, cached selected text, SDL timing and
@@ -277,9 +284,12 @@ and remaining navigation/artwork precede profiling and Home entry integration.
 - **Host/device verification:** timing/bounds/reset fixtures, numeric-prefix changes,
   very long/Unicode labels, missing artwork and frame behavior; on device check
   readability, input latency, audio and light/dark fonts.
-- **Exclusions/decisions:** no general animation redesign. Exact speed, end pause,
-  wrap/bounce/restart behavior and any Settings control/default remain unresolved;
-  inspect stock behavior before deciding. Do not silently choose those policies.
+- **Exclusions/decisions:** no general animation redesign or new Settings control.
+  Inspected v4.3.1-1 shared renderer crops static labels; mounted MainUI is a bind
+  target for stripped binaries, so exact stock timing is unknown. Explicit local
+  review policy: 1000ms delay, 30px/s, 1000ms end hold, snap to start and repeat with
+  delay. Readability/speed remain subject to device feedback; optional Settings
+  controls/defaults remain unresolved. See [M3 evidence and checklist](browser-title-scrolling.md).
 
 ### M4 — Finish core navigation and artwork/fallback cases
 
@@ -432,12 +442,13 @@ Evidence gaps and limitations to retain until resolved:
 
 - Final readability is confirmed by supplied device photos for the screens shown;
   browser Settings functionality and preceding presentation are hardware-confirmed.
-  Final modal centering, description-size and padding adjustments are hardware pending. mini.os has
+  Only the new bold-white About headings are hardware pending. mini.os has
   no matching regular Nunito face; native bold is retained without a false weight claim.
 - Grouping/prefix/sort are now persistent UI controls in a separate file. Optional
   long-title/hint/artwork/remember-position controls remain proposals, not implemented.
   Return setting's compact format/helper compatibility remains unchanged.
-- Browser long titles are static; dialog paging is not horizontal browser scrolling.
+- Browser title scrolling is hardware-accepted for the reported test;
+  dialog paging is a separate presentation feature.
   Browser page controls are not defined. Flat mode disables console jumps.
 - Valid paths with `&` and other excluded characters cannot currently launch;
   broader compatibility must satisfy shell execution and Onion's parser together.

@@ -40,3 +40,6 @@ app installation remain roadmap gates. `scripts/fetch-deps.sh` is real dependenc
 preparation; the other build/install/uninstall/package script placeholders are not
 completed tooling. See [architecture](architecture.md) and
 [version-specific optional return integration](onion-return.md).
+
+M3 host timing/SDL resource checks and its separate device checklist are documented
+in [browser-title-scrolling.md](browser-title-scrolling.md).

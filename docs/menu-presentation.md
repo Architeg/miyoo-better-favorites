@@ -274,3 +274,11 @@ increases the existing description/About font by two points, and reduces panel
 padding to 8px above/below its two reserved lines. Controls, safeguards and browser
 geometry are unchanged. These last adjustments need device verification. Native
 SDL bounds checks use `menu-preview ... --checks-only`; no previews are generated.
+
+### M3 closeout: About headings only
+
+“When enabled” and “When disabled” now use an app-owned copy of the same resolved
+section font at the same size, with bold styling and white ink, only on the
+Automatic return explanation page. Borrowed browser fonts and all other colors/
+text styles stay unchanged. These heading changes need device verification; the
+preceding M3 scrolling implementation is user-confirmed on hardware.

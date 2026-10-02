@@ -1,4 +1,5 @@
 #include "launch_request.h"
+#include "settings.h"
 
 #include <cassert>
 #include <cstdlib>
@@ -420,6 +421,61 @@ int main()
     assert(unlink(flag.c_str()) == 0);
     setOnionHandoffTestHook(nullptr);
 #endif
+
+    // Runtime origin tickets join the transaction, before quick_switch.
+    char returnTemplate[] = "/tmp/better-favorites-return.XXXXXX";
+    char* returnDir = mkdtemp(returnTemplate);
+    assert(returnDir);
+    const std::string ticket = std::string(returnDir) + "/request.sh";
+    const std::string generationFile = std::string(returnDir) + "/generation";
+    const std::string settingsPath = std::string(destinationDir) + "/settings.conf";
+    AppSettings appSettings;
+    assert(setenv("BETTER_FAVORITES_SETTINGS", settingsPath.c_str(), 1) == 0);
+    assert(setAutomaticReturn(settingsPath, true, appSettings, error));
+    assert(setenv("BETTER_FAVORITES_RETURN_DIR", returnDir, 1) == 0);
+    writeFile(captured, appCommand);
+    writeFile(active, appCommand);
+    writeFile(hidden, oldHistory);
+    assert(stageOnionLaunchCommand(game, record, requestDir, error));
+    assert(!publishOnionLaunchCommand(requestDir, active, impossibleFlag, destinationDir, error));
+    assert(access(ticket.c_str(), F_OK) != 0);
+    assert(access(generationFile.c_str(), F_OK) != 0);
+    assert(readFile(active) == appCommand && readFile(hidden) == oldHistory);
+    assert(cancelOnionLaunchCommand(requestDir, error));
+    writeFile(captured, appCommand);
+    assert(stageOnionLaunchCommand(game, record, requestDir, error));
+    assert(publishOnionLaunchCommand(requestDir, active, flag, destinationDir, error));
+    assert(readFile(ticket) == game);
+    assert(readFile(generationFile) == appSettings.returnGeneration + "\n");
+    assert(cancelOnionLaunchCommand(requestDir, error));
+    assert(readFile(ticket) == game); // The runtime owns this ticket, not launcher cleanup.
+    assert(unlink(flag.c_str()) == 0);
+    writeFile(active, appCommand);
+    writeFile(captured, appCommand);
+    assert(stageOnionLaunchCommand(game, record, requestDir, error));
+    assert(!publishOnionLaunchCommand(requestDir, active, flag, destinationDir, error));
+    assert(readFile(ticket) == game && readFile(active) == appCommand);
+    assert(access(flag.c_str(), F_OK) != 0);
+    assert(cancelOnionLaunchCommand(requestDir, error));
+    assert(unlink(ticket.c_str()) == 0);
+    assert(unlink(generationFile.c_str()) == 0);
+    assert(rmdir(returnDir) == 0);
+    assert(setenv("BETTER_FAVORITES_RETURN_DIR", "/tmp/unrelated", 1) == 0);
+    writeFile(captured, appCommand);
+    assert(stageOnionLaunchCommand(game, record, requestDir, error));
+    assert(!publishOnionLaunchCommand(requestDir, active, flag, destinationDir, error));
+    assert(readFile(active) == appCommand);
+    assert(cancelOnionLaunchCommand(requestDir, error));
+    // Off/default settings never publish origin, but game/history still launch.
+    assert(setAutomaticReturn(settingsPath, false, appSettings, error));
+    writeFile(captured, appCommand);
+    assert(stageOnionLaunchCommand(game, record, requestDir, error));
+    assert(publishOnionLaunchCommand(requestDir, active, flag, destinationDir, error));
+    assert(cancelOnionLaunchCommand(requestDir, error));
+    assert(unlink(flag.c_str()) == 0);
+    assert(unlink(settingsPath.c_str()) == 0);
+    assert(unsetenv("BETTER_FAVORITES_SETTINGS") == 0);
+    assert(unsetenv("BETTER_FAVORITES_RETURN_DIR") == 0);
 
     assert(unlink(visible.c_str()) == 0);
     assert(unlink(hidden.c_str()) == 0);

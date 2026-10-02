@@ -1,0 +1,24 @@
+--- runtime.sh
++++ runtime.sh
+@@ -5,0 +6,8 @@
++
++# Optional Better Favorites return integration; app preference defaults off.
++if [ -r "$sysdir/script/better_favorites_return.sh" ]; then
++    . "$sysdir/script/better_favorites_return.sh"
++else
++    bf_return() { :; }
++fi
++bf_return init
+@@ -195,0 +204 @@
++    bf_return menu
+@@ -298,0 +308 @@
++    bf_return before-launch "$cmd"
+@@ -338,0 +349 @@
++    bf_return resolved-game "$rompath" "$is_game"
+@@ -474,0 +486 @@
++        bf_return game-ended "$retval"
+@@ -477,0 +490 @@
++        bf_return after-app "$cmd" "$retval"
+@@ -538,0 +552,2 @@
++    bf_switcher_status=$?
++    bf_return after-switcher "$bf_switcher_status"

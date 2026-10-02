@@ -55,6 +55,8 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
+export BETTER_FAVORITES_SETTINGS="$APP_DIR/settings.conf"
+export BETTER_FAVORITES_BROWSER_STATE="$APP_DIR/browser-state"
 export LD_LIBRARY_PATH="$APP_DIR:/config/lib:/customer/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 echo "Starting Better Favorites binary." >> "$LOG"
 SDL_AUDIODRIVER=dsp \

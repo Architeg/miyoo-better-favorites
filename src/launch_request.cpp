@@ -1,4 +1,5 @@
 #include "launch_request.h"
+#include "settings.h"
 
 #include <cerrno>
 #include <cstdlib>
@@ -769,6 +770,47 @@ bool publishOnionLaunchCommand(
     const mode_t historyMode = history.before.exists
         ? history.before.details.st_mode & 0777 : 0600;
 
+    // Only the patched runtime exports a fresh, invocation-private context.
+    // Stock runtime installs retain the existing launch behavior.
+    Replacement origin;
+    const char* returnDir = std::getenv("BETTER_FAVORITES_RETURN_DIR");
+    AppSettings appSettings;
+    const char* settingsEnvironment = std::getenv("BETTER_FAVORITES_SETTINGS");
+    const std::string settingsPath = settingsEnvironment && *settingsEnvironment
+        ? settingsEnvironment : sdRoot + "/App/BetterFavoritesTest/settings.conf";
+    std::string settingsError;
+    loadAppSettings(settingsPath, appSettings, settingsError);
+    if (!settingsError.empty()) std::cerr << settingsError << '\n';
+    const bool registerOrigin = returnDir && *returnDir && appSettings.automaticReturn;
+    Replacement originGeneration;
+    if (registerOrigin) {
+        const std::string directory = returnDir;
+        const std::string prefix = "/tmp/better-favorites-return.";
+        struct stat details {};
+        if (!startsWith(directory, prefix) || directory.size() == prefix.size() ||
+            directory.find('/', prefix.size()) != std::string::npos ||
+            lstat(directory.c_str(), &details) != 0 ||
+            !S_ISDIR(details.st_mode) || details.st_uid != geteuid() ||
+            (details.st_mode & 077) != 0) {
+            error = "Invalid runtime return context.";
+            return false;
+        }
+        origin.path = directory + "/request.sh";
+        origin.contents = command.contents;
+        if (!readSnapshot(origin.path, origin.before, error)) return false;
+        if (origin.before.exists) {
+            error = "Runtime return context already contains a ticket.";
+            return false;
+        }
+        originGeneration.path = directory + "/generation";
+        originGeneration.contents = appSettings.returnGeneration + "\n";
+        if (!readSnapshot(originGeneration.path, originGeneration.before, error)) return false;
+        if (originGeneration.before.exists) {
+            error = "Runtime return context already contains a generation."; return false;
+        }
+        if (!origin.prepare(error, 0600) || !originGeneration.prepare(error, 0600)) return false;
+    }
+
     // Prepare all files on their destination filesystem before mutating
     // either active path. Existing recent records remain byte-for-byte.
     if (!command.prepare(error, 0700) ||
@@ -777,11 +819,17 @@ bool publishOnionLaunchCommand(
     auto rollback = [&]() {
         std::string historyError;
         std::string commandError;
+        std::string originError;
+        std::string generationError;
+        const bool generationOkay = originGeneration.rollback(generationError);
+        const bool originOkay = origin.rollback(originError);
         const bool historyOkay = history.rollback(historyError, recentRecord);
         const bool commandOkay = command.rollback(commandError);
         if (!historyError.empty()) error += "; history rollback: " + historyError;
         if (!commandError.empty()) error += "; command rollback: " + commandError;
-        if (historyOkay && commandOkay)
+        if (!originError.empty()) error += "; origin rollback: " + originError;
+        if (!generationError.empty()) error += "; generation rollback: " + generationError;
+        if (historyOkay && commandOkay && originOkay && generationOkay)
             std::cerr << "Handoff rollback completed; unrelated changes preserved.\n";
     };
 
@@ -793,7 +841,12 @@ bool publishOnionLaunchCommand(
     }
     handoffTestPoint("after-history");
 
-    if (!command.stillPublished(error) || !history.stillPublished(error)) {
+    if (registerOrigin && (!origin.publish(error) || !originGeneration.publish(error))) {
+        rollback();
+        return false;
+    }
+    if (!command.stillPublished(error) || !history.stillPublished(error) ||
+        (registerOrigin && (!origin.stillPublished(error) || !originGeneration.stillPublished(error)))) {
         rollback();
         return false;
     }

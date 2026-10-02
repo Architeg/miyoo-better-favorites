@@ -1,4 +1,6 @@
 #include "favorites_parser.h"
+#include "browser_state.h"
+#include "settings.h"
 #include "launch_request.h"
 #include "navigation.h"
 #include "theme_loader.h"
@@ -14,6 +16,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -211,7 +214,14 @@ int main(int argc, char* argv[])
     ThemeLoader themeLoader("/mnt/SDCARD");
     const Theme theme = themeLoader.load();
 
-    FavoritesParser parser("/mnt/SDCARD");
+    const char* settingsEnvironment = std::getenv("BETTER_FAVORITES_SETTINGS");
+    const std::string appSettingsPath = settingsEnvironment && *settingsEnvironment
+        ? settingsEnvironment : "/mnt/SDCARD/App/BetterFavoritesTest/settings.conf";
+    AppSettings appSettings;
+    std::string settingsError;
+    loadAppSettings(appSettingsPath, appSettings, settingsError);
+    if (!settingsError.empty()) std::cerr << settingsError << std::endl;
+    FavoritesParser parser("/mnt/SDCARD", appSettings);
 
     const auto favorites =
         parser.loadFavorites(
@@ -226,6 +236,13 @@ int main(int argc, char* argv[])
 
     std::size_t selectedRow =
         firstSelectableRow(rows);
+    long firstRow = 0;
+    const char* stateEnvironment = std::getenv("BETTER_FAVORITES_BROWSER_STATE");
+    const std::string browserStatePath = stateEnvironment && *stateEnvironment
+        ? stateEnvironment : "/mnt/SDCARD/App/BetterFavoritesTest/browser-state";
+    std::string stateError;
+    restoreBrowserState(browserStatePath, rows, selectedRow, firstRow, stateError);
+    if (!stateError.empty()) std::cerr << stateError << std::endl;
 
     if (
         theme.rootPath.empty() ||
@@ -608,16 +625,35 @@ int main(int argc, char* argv[])
         255
     };
 
+    bool settingsOpen = false;
+    bool settingsSaveFailed = false;
     bool running = true;
     bool launchRequested = false;
-
-    long firstRow = 0;
 
     while (running) {
         SDL_Event event;
 
         while (SDL_PollEvent(&event)) {
             if (event.type != SDL_KEYDOWN) {
+                continue;
+            }
+
+            if (event.key.keysym.sym == SDLK_RCTRL && event.key.repeat == 0) {
+                settingsOpen = !settingsOpen;
+                settingsSaveFailed = false;
+                continue;
+            }
+            if (settingsOpen) {
+                if (event.key.repeat != 0) continue;
+                if (event.key.keysym.sym == SDLK_LCTRL || event.key.keysym.sym == SDLK_ESCAPE) {
+                    settingsOpen = false;
+                } else if (event.key.keysym.sym == SDLK_SPACE) {
+                    settingsSaveFailed = !setAutomaticReturn(appSettingsPath,
+                        !appSettings.automaticReturn, appSettings, settingsError);
+                    if (settingsSaveFailed) std::cerr << settingsError << std::endl;
+                    else std::cerr << "Automatic return: "
+                                   << (appSettings.automaticReturn ? "on" : "off") << std::endl;
+                }
                 continue;
             }
 
@@ -751,6 +787,11 @@ int main(int argc, char* argv[])
                   {
                       std::string error;
 
+                      if (!saveBrowserState(browserStatePath, rows,
+                                            selectedRow, firstRow, error)) {
+                          std::cerr << "Launch request failed: " << error << std::endl;
+                          break;
+                      }
                       if (!requestOnionLaunch(
                               *rows[selectedRow].favorite,
                               error
@@ -1927,6 +1968,23 @@ int main(int argc, char* argv[])
                     labelCenterY
                 );
             }
+        }
+
+        if (settingsOpen) {
+            SDL_Rect panel {60, 135, 520, 245};
+            SDL_FillRect(screen, &panel, SDL_MapRGB(screen->format, 24, 24, 24));
+            const SDL_Color color {static_cast<Uint8>(theme.list.red),
+                static_cast<Uint8>(theme.list.green), static_cast<Uint8>(theme.list.blue), 255};
+            drawTextCenteredVertically(screen, titleFont, "Settings", color, 80, 145, 40);
+            drawTextCenteredVertically(screen, listFont,
+                std::string("Automatic return: ") + (appSettings.automaticReturn ? "ON" : "OFF"),
+                color, 80, 195, 36);
+            drawTextCenteredVertically(screen, footerFont, "A: toggle   B: back", color, 80, 245, 32);
+            drawTextCenteredVertically(screen, footerFont,
+                automaticReturnAvailable() ? "Integration: available" : "Integration: unavailable (patch not active)",
+                color, 80, 285, 32);
+            if (settingsSaveFailed) drawTextCenteredVertically(screen, footerFont,
+                "Could not save; setting unchanged.", color, 80, 325, 32);
         }
 
         SDL_UpdateTexture(

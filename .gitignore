@@ -28,6 +28,15 @@ out/
 *.log
 *.tmp
 *.bak
+__pycache__/
+*.pyc
+
+# Device-local app executable and preferences/browser state
+/App/BetterFavoritesTest/better-favorites
+/App/BetterFavoritesTest/settings.conf
+/App/BetterFavoritesTest/settings.conf.*
+/App/BetterFavoritesTest/browser-state
+/App/BetterFavoritesTest/browser-state.*
 
 # Local Miyoo / SD test folders
 sdcard/

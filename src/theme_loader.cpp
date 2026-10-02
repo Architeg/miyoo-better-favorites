@@ -138,25 +138,15 @@ Theme ThemeLoader::load() const
                     "/Saves/CurrentProfile/theme/skin/" +
                     filename;
 
-                if (std::ifstream(profilePath).good()) {
-                    return profilePath;
-                }
-
-                const std::string activePath =
-                    theme.rootPath +
-                    "/skin/" +
-                    filename;
-
-                if (std::ifstream(activePath).good()) {
-                    return activePath;
-                }
-
-                const std::string fallbackPath =
-                    sdRoot_ +
-                    "/miyoo/app/skin/" +
-                    filename;
-
-                return fallbackPath;
+                const std::string activePath=theme.rootPath+"/skin/"+filename;
+                const std::string fallbackPath=sdRoot_+"/miyoo/app/skin/"+filename;
+                std::vector<std::string> candidates;
+                for(const auto& path:{profilePath,activePath,fallbackPath})
+                    if(std::find(candidates.begin(),candidates.end(),path)==candidates.end())candidates.push_back(path);
+                std::string resolved=fallbackPath;
+                for(const auto& path:candidates)if(std::ifstream(path).good()){resolved=path;break;}
+                theme.imageCandidates[resolved]=candidates;
+                return resolved;
             };
 
         theme.backgroundPath =
@@ -201,6 +191,19 @@ Theme ThemeLoader::load() const
         for (const std::string& base : {sdRoot_ + "/Saves/CurrentProfile/theme", theme.rootPath}) {
             const std::string candidate = base + "/skin/pop-bg.png";
             if (theme.dialogPath.empty() && std::ifstream(candidate).good()) theme.dialogPath = candidate;
+        }
+
+        // Popup/dialog resources retain their established profile/active-only
+        // policy. Corrupt overrides can still use a compatible active material.
+        for(const auto& selected:{theme.actionMenuPath,theme.dialogPath})if(!selected.empty()){
+            std::vector<std::string> candidates;
+            for(const auto& base:{sdRoot_+"/Saves/CurrentProfile/theme",theme.rootPath}){
+                const std::vector<std::string> names=selected==theme.dialogPath
+                    ?std::vector<std::string>{"pop-bg.png"}
+                    :std::vector<std::string>{"bg-pop-menu-4.png","menu-sub-bg.png"};
+                for(const auto& name:names)candidates.push_back(base+"/skin/"+name);
+            }
+            theme.imageCandidates[selected]=candidates;
         }
 
         theme.listSmallPath =
@@ -665,6 +668,10 @@ Theme ThemeLoader::load() const
             auto ensureFont =
                 [&](ThemeTextStyle& style) {
                     if(style.fontCandidates.empty())style.fontCandidates.push_back(fallbackFont);
+                    // Onion v4.3.1-1 theme_loadFont's firmware fallback, used only
+                    // after unusable profile/theme/card fonts, never for weight.
+                    const std::string firmwareFont="/customer/app/Exo-2-Bold-Italic.ttf";
+                    if(std::find(style.fontCandidates.begin(),style.fontCandidates.end(),firmwareFont)==style.fontCandidates.end())style.fontCandidates.push_back(firmwareFont);
                     for(const auto& candidate:style.fontCandidates) {
                         if(std::ifstream(candidate).good()){style.fontPath=candidate;break;}
                     }

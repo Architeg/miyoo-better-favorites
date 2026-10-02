@@ -146,7 +146,7 @@ Theme/device identities and test logs are not complete enough for universal clai
 | Feature/change | Current evidence and missing evidence |
 | --- | --- |
 | Bold-white Automatic return headings | Existing font/size preserved; host checks and ARM build; device verification pending |
-| Empty/corrupt resource and navigation boundary cases | Dedicated M4 host/device audit still required |
+| M4 shoulder paging/resource fallback | Combined deployed binary hardware-accepted 2026-10-03; exhaustive fault combinations remain host-only, see [audit](m4-audit.md) |
 | Empty favorites browsing/menu availability | Implemented and fixture-covered; complete device empty-list matrix pending |
 | Removed remembered entry → nearby selection | Identity/ordinal fallback and tests; dedicated device edge-case check pending |
 | Corrupt/missing preference/state behavior | Host fixtures; device fault cases not exhaustively observed |
@@ -169,7 +169,7 @@ Theme/device identities and test logs are not complete enough for universal clai
 
 ### Planned
 
-- Audit and gap closure for page navigation and resource fallbacks (M4).
+- M4 page navigation and resource gap closure is complete; M5 measurement is next.
 - Browser page-at-a-time navigation after button semantics are resolved.
 - Device follow-up for the final centering/text-size/padding adjustments; optional controls remain unresolved.
 - Measured startup/memory profiling and evidence-based optimization.
@@ -295,10 +295,16 @@ and remaining navigation/artwork precede profiling and Home entry integration.
 
 - **Intended behavior:** page-at-a-time movement complements row movement and console
   jumps; missing/corrupt artwork and empty/incomplete resource cases stay usable.
-- **Current/missing:** row/console/sticky/edge navigation and proportional artwork
-  work; no browser page handler. Image failures do not have a fully verified fallback
-  presentation, and full-browser theme startup fallbacks are incomplete.
-- **Dependencies:** explicit page-control agreement; M2 grouped/flat settings and M3
+- **Current/missing:** row/console/sticky/edge navigation and no-stale artwork
+  behavior already exist; focused host boundaries/cache/decode checks now cover
+  them. Separate local corrections retry corrupt image candidates, provide
+  theme-derived missing required surfaces and fit tall art to content bounds.
+  Approved L1/R1 now pages by visible pixel height with heading accounting,
+  selectable targets and no-wrap clamps. Repeats/menu shoulders are ignored.
+  **M4 complete:** user hardware acceptance on 2026-10-03, tested binary SHA-256
+  `aa486abad4e3272f86605945109bf0a0f76159ab373f87c1e57c38abd034b328`. Acceptance covers the deployed
+  build; exhaustive corrupt/missing-resource fault combinations remain host-only; see [requirement-by-requirement audit](m4-audit.md).
+- **Dependencies:** approved L1/R1 page controls; M2 grouped/flat settings and M3
   title behavior. Left/Right is already reserved for console jumps.
 - **Reuse/inspect:** selectable rows/viewport helpers, sticky divider treatment,
   SDL_image/error paths, existing theme preview backgrounds and stock page behavior.
@@ -309,9 +315,9 @@ and remaining navigation/artwork precede profiling and Home entry integration.
 - **Host/device verification:** boundary/group/flat/partial-page/empty fixtures,
   image decode/missing paths, unusual aspect ratios and incomplete-theme startup
   tests; device paging, long titles and artwork changes while rapidly navigating.
-- **Exclusions/decisions:** page button assignment, selection retention within a page,
-  wrap/no-wrap details and flat-mode console jumps are unfinalized. Do not repurpose
-  Left/Right or assume X/START is free without checking actual mappings. Artwork
+- **Exclusions/decisions:** L1/R1 mapping and no-wrap policy are now agreed. Flat mode
+  disables console jumps. Left/Right remain console navigation; X/START are not
+  repurposed. Artwork
   placeholder versus blank presentation and optional hide-artwork layout are unresolved.
 
 ### M5 — Profile startup and memory; optimize measured bottlenecks

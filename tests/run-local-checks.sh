@@ -9,6 +9,7 @@ compile_run() {
     c++ -std=c++17 -Wall -Wextra -Iinclude "$@" -o "$output/$name"
     "$output/$name"
 }
+compile_run navigation-boundaries tests/navigation_boundaries_test.cpp src/navigation.cpp src/ui_rows.cpp
 compile_run title-scroll tests/title_scroll_test.cpp src/title_scroll.cpp
 compile_run text tests/menu_text_test.cpp src/menu_text.cpp
 compile_run menu tests/menu_state_test.cpp src/menu_state.cpp src/navigation.cpp src/ui_rows.cpp
@@ -16,7 +17,7 @@ compile_run removal -DBETTER_FAVORITES_REMOVAL_TESTING tests/favorite_removal_te
 compile_run browser-preferences -DBETTER_FAVORITES_PREFERENCES_TESTING tests/browser_preferences_test.cpp src/browser_preferences.cpp src/app_settings.cpp
 compile_run browser-model tests/browser_model_test.cpp src/browser_model.cpp src/ui_rows.cpp src/navigation.cpp src/favorite_removal.cpp
 compile_run settings tests/app_settings_test.cpp src/app_settings.cpp
-compile_run state tests/browser_state_test.cpp src/browser_state.cpp src/ui_rows.cpp
+compile_run state tests/browser_state_test.cpp src/browser_state.cpp src/ui_rows.cpp src/navigation.cpp
 compile_run launch -DBETTER_FAVORITES_HANDOFF_TESTING tests/launch_request_test.cpp src/launch_request.cpp src/app_settings.cpp
 compile_run switcher -DBETTER_FAVORITES_HANDOFF_TESTING tests/switcher_request_test.cpp src/launch_request.cpp src/app_settings.cpp
 python3 tests/launcher_handoff_test.py

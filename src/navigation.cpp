@@ -240,3 +240,37 @@ std::size_t selectableRowAtOrdinal(const std::vector<UiRow>& rows, std::size_t o
     }
     return last;
 }
+
+int browserRowHeight(const UiRow& row, int headingHeight)
+{
+    return row.type == UiRowType::SystemDivider ? headingHeight : 60;
+}
+
+std::size_t pageSelectableRow(const std::vector<UiRow>& rows, std::size_t current,
+    long firstRow, int direction, int contentHeight, int headingHeight, bool repeated)
+{
+    if (current >= rows.size() || rows[current].type != UiRowType::Favorite ||
+        direction == 0 || contentHeight <= 0 || repeated) return current;
+    // Match the renderer's sticky-header reservation for the current viewport.
+    int budget = contentHeight;
+    if (firstRow >= 0 && static_cast<std::size_t>(firstRow) < rows.size() &&
+        rows[firstRow].type == UiRowType::Favorite &&
+        consoleHeaderRow(rows, firstRow) < rows.size()) budget -= headingHeight;
+    std::size_t result = current;
+    int distance = 0;
+    while (true) {
+        const auto next = direction > 0 ? nextSelectableRow(rows, result)
+                                        : previousSelectableRow(rows, result);
+        if (next == result) break; // Ends never wrap.
+        int step = 0;
+        const auto begin = direction > 0 ? result : next;
+        const auto end = direction > 0 ? next : result;
+        for (auto i = begin; i < end; ++i) step += browserRowHeight(rows[i], headingHeight);
+        // A partial page still moves at least one game, even across empty groups.
+        if (result != current && distance + step > budget) break;
+        distance += step;
+        result = next;
+        if (distance >= budget) break;
+    }
+    return result;
+}

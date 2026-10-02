@@ -1,4 +1,5 @@
 #include "browser_state.h"
+#include "navigation.h"
 #include "ui_rows.h"
 #include <cassert>
 #include <fstream>
@@ -28,6 +29,15 @@ int main() {
     assert(saveBrowserState(path, rows, 3, 2, error));
     assert(restoreBrowserState(path, rows, selected, first, error));
     assert(selected == 3 && first == 2);
+
+    // Page-selected identity and viewport use the existing saved-state protocol.
+    auto paged=pageSelectableRow(rows,1,0,1,360,50);
+    assert(paged==4);
+    assert(saveBrowserState(path,rows,paged,2,error));
+    selected=1;first=0;
+    assert(restoreBrowserState(path,rows,selected,first,error));
+    assert(selected==paged && first==2);
+    assert(saveBrowserState(path,rows,3,2,error));
 
     // Insertion preserves selected and top identities rather than raw indices.
     auto inserted = group.favorites.front(); inserted.romPath = "inserted";

@@ -37,4 +37,9 @@ std::size_t consoleHeaderRow(
     std::size_t current
 );
 
+// Pixel geometry shared with the browser renderer; sticky headings consume space.
+int browserRowHeight(const UiRow& row, int headingHeight);
+std::size_t pageSelectableRow(const std::vector<UiRow>& rows, std::size_t current,
+    long firstRow, int direction, int contentHeight, int headingHeight, bool repeated = false);
+
 #endif

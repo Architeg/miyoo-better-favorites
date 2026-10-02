@@ -6,6 +6,7 @@
 #include "browser_preferences.h"
 #include "browser_model.h"
 #include "browser_titles.h"
+#include "browser_resources.h"
 #include "settings.h"
 #include "launch_request.h"
 #include "navigation.h"
@@ -357,31 +358,23 @@ int main(int argc, char* argv[])
     }
 
     SDL_Surface* background =
-        IMG_Load(
-            theme.backgroundPath.c_str()
-        );
+        loadThemeImage(theme,theme.backgroundPath);
 
     SDL_Surface* titleBackground =
-        IMG_Load(
-            theme.titleBackgroundPath.c_str()
-        );
+        loadThemeImage(theme,theme.titleBackgroundPath);
 
     SDL_Surface* footerBackground = nullptr;
 
     if (!theme.footerBackgroundPath.empty()) {
         footerBackground =
-            IMG_Load(
-                theme.footerBackgroundPath.c_str()
-            );
+            loadThemeImage(theme,theme.footerBackgroundPath);
     }
 
     SDL_Surface* previewBackground = nullptr;
 
     if (!theme.previewBackgroundPath.empty()) {
         previewBackground =
-            IMG_Load(
-                theme.previewBackgroundPath.c_str()
-            );
+            loadThemeImage(theme,theme.previewBackgroundPath);
 
         if (!previewBackground) {
             std::cerr
@@ -407,9 +400,7 @@ int main(int argc, char* argv[])
 
     if (!theme.buttonAPath.empty()) {
         buttonA =
-            IMG_Load(
-                theme.buttonAPath.c_str()
-            );
+            loadThemeImage(theme,theme.buttonAPath);
 
         if (!buttonA) {
             std::cerr
@@ -423,9 +414,7 @@ int main(int argc, char* argv[])
 
     if (!theme.buttonBPath.empty()) {
         buttonB =
-            IMG_Load(
-                theme.buttonBPath.c_str()
-            );
+            loadThemeImage(theme,theme.buttonBPath);
 
         if (!buttonB) {
             std::cerr
@@ -441,10 +430,11 @@ int main(int argc, char* argv[])
 
     if (!theme.listSmallPath.empty()) {
         listSmall =
-            IMG_Load(
-                theme.listSmallPath.c_str()
-            );
+            loadThemeImage(theme,theme.listSmallPath);
     }
+
+    if(!background)background=createThemeBackground(theme);
+    if(!listSmall)listSmall=createThemeSelection(theme);
 
     SDL_Surface* selectedPreview = nullptr;
     std::string selectedPreviewPath;
@@ -524,9 +514,7 @@ int main(int argc, char* argv[])
 
     if (!theme.horizontalDividerPath.empty()) {
         divider =
-            IMG_Load(
-                theme.horizontalDividerPath.c_str()
-            );
+            loadThemeImage(theme,theme.horizontalDividerPath);
     }
 
     TTF_Font* titleFont =
@@ -782,6 +770,15 @@ int main(int argc, char* argv[])
                       );
                   break;
 
+              case SDLK_e: // Onion L1: one page per physical press.
+              case SDLK_t: // Onion R1.
+                  navigationKey = true;
+                  selectedRow = pageSelectableRow(rows, selectedRow, firstRow,
+                      key == SDLK_e ? -1 : 1, 420 - 60,
+                      8 + 40 + (divider ? std::min(2, divider->h) : 2), event.key.repeat != 0);
+                  // Existing visibility correction moves firstRow only as needed.
+                  break;
+
               case SDLK_LEFT:
                   if(!appSettings.groupByConsole)break;
                   navigationKey = true;
@@ -978,38 +975,7 @@ int main(int argc, char* argv[])
                   rows[selectedRow].favorite->imagePath;
           }
 
-          if (
-              newPreviewPath !=
-              selectedPreviewPath
-          ) {
-              if (selectedPreview) {
-                  SDL_FreeSurface(
-                      selectedPreview
-                  );
-
-                  selectedPreview =
-                      nullptr;
-              }
-
-              selectedPreviewPath =
-                  newPreviewPath;
-
-              if (!selectedPreviewPath.empty()) {
-                  selectedPreview =
-                      IMG_Load(
-                          selectedPreviewPath.c_str()
-                      );
-
-                  if (!selectedPreview) {
-                      std::cerr
-                          << "Preview image failed: "
-                          << selectedPreviewPath
-                          << " : "
-                          << IMG_GetError()
-                          << std::endl;
-                  }
-              }
-          }
+          updateFavoriteArtwork(selectedPreview,selectedPreviewPath,newPreviewPath);
 
           SDL_Rect fullScreen {
             0,
@@ -1098,28 +1064,10 @@ int main(int argc, char* argv[])
          *
          *   spacing + title + divider
          */
-        auto rowHeight =
-            [&](const UiRow& row) -> int {
-                if (
-                    row.type ==
-                    UiRowType::SystemDivider
-                ) {
-                    const int dividerHeight =
-                        divider
-                            ? std::min(
-                                fallbackDividerHeight,
-                                divider->h
-                            )
-                            : fallbackDividerHeight;
-
-                    return
-                        sectionTopGap +
-                        sectionTitleHeight +
-                        dividerHeight;
-                }
-
-                return gameRowHeight;
-            };
+        auto rowHeight = [&](const UiRow& row) -> int {
+            return browserRowHeight(row, sectionTopGap + sectionTitleHeight +
+                (divider ? std::min(fallbackDividerHeight, divider->h) : fallbackDividerHeight));
+        };
 
          /*
           * Keep the scroll position stable while the selection moves.
@@ -1613,49 +1561,10 @@ int main(int argc, char* argv[])
              );
 
              if (selectedPreview) {
-                 int previewDrawWidth =
-                     selectedPreview->w;
-
-                 int previewDrawHeight =
-                     selectedPreview->h;
-
-                 if (
-                     previewDrawWidth >
-                     previewWidth
-                 ) {
-                     const double scale =
-                         static_cast<double>(
-                             previewWidth
-                         ) /
-                         static_cast<double>(
-                             selectedPreview->w
-                         );
-
-                     previewDrawWidth =
-                         static_cast<int>(
-                             selectedPreview->w *
-                             scale
-                         );
-
-                     previewDrawHeight =
-                         static_cast<int>(
-                             selectedPreview->h *
-                             scale
-                         );
-                 }
-
-                 SDL_Rect previewRect {
-                     640 -
-                         previewWidth +
-                         (
-                             previewWidth -
-                             previewDrawWidth
-                         ) / 2,
-                     240 -
-                         previewDrawHeight / 2,
-                     previewDrawWidth,
-                     previewDrawHeight
-                 };
+                 SDL_Rect previewRect=fitFavoriteArtwork(
+                     selectedPreview->w,selectedPreview->h,previewWidth);
+                 const int previewDrawWidth=previewRect.w;
+                 const int previewDrawHeight=previewRect.h;
 
                  selectedPreviewRect =
                      previewRect;

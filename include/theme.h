@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 struct ThemeTextStyle
 {
@@ -23,6 +24,9 @@ struct Theme
     std::string rootPath;
     // Only these current profile/active roots may supply preferred regular faces.
     std::vector<std::string> regularFontRoots;
+
+    // Image decode fallback order keyed by the existing resolved resource path.
+    std::map<std::string,std::vector<std::string>> imageCandidates;
 
     bool hideIcons = false;
     bool hideHints = false;

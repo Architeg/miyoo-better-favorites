@@ -43,3 +43,6 @@ completed tooling. See [architecture](architecture.md) and
 
 M3 host timing/SDL resource checks and its separate device checklist are documented
 in [browser-title-scrolling.md](browser-title-scrolling.md).
+
+Use [m4-audit.md](m4-audit.md) to distinguish verified existing behavior, local
+resource corrections, approved shoulder paging and user hardware acceptance.

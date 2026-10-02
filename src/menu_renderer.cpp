@@ -1,5 +1,6 @@
 #include "menu_renderer.h"
 #include "menu_text.h"
+#include "browser_resources.h"
 #include <SDL_image.h>
 #include <algorithm>
 #include <cmath>
@@ -291,9 +292,9 @@ struct Painter {
 };
 }
 MenuRenderer::MenuRenderer(const Theme& theme,MenuResources resources):sectionHeadingFont_(resources.bodyFont),theme_(theme),resources_(resources) {
-    if(!theme.actionMenuPath.empty()) popup_=IMG_Load(theme.actionMenuPath.c_str());
-    if(!theme.menuLeftArrowPath.empty()) leftArrow_=IMG_Load(theme.menuLeftArrowPath.c_str());
-    if(!theme.menuRightArrowPath.empty()) rightArrow_=IMG_Load(theme.menuRightArrowPath.c_str());
+    if(!theme.actionMenuPath.empty()) popup_=loadThemeImage(theme,theme.actionMenuPath);
+    if(!theme.menuLeftArrowPath.empty()) leftArrow_=loadThemeImage(theme,theme.menuLeftArrowPath);
+    if(!theme.menuRightArrowPath.empty()) rightArrow_=loadThemeImage(theme,theme.menuRightArrowPath);
     // App-owned instances only. Browser resources are borrowed and never restyled.
     returnHeadingFont_=TTF_OpenFont(theme.section.fontPath.c_str(),theme.section.size);
     if(returnHeadingFont_)TTF_SetFontStyle(returnHeadingFont_,TTF_GetFontStyle(returnHeadingFont_)|TTF_STYLE_BOLD);
@@ -317,7 +318,7 @@ MenuRenderer::MenuRenderer(const Theme& theme,MenuResources resources):sectionHe
     backgroundColor_=sample(resources_.background,contrastBase(ink));
     panelColor_=popupColor(backgroundColor_,ink);
     if(!theme.dialogPath.empty()) {
-        auto* asset=IMG_Load(theme.dialogPath.c_str());
+        auto* asset=loadThemeImage(theme,theme.dialogPath);
         // Some themes bake CANCEL/OK into the dialog footer. Only reuse the
         // interior material; our measured text controls remain authoritative.
         if(asset) {
@@ -329,7 +330,7 @@ MenuRenderer::MenuRenderer(const Theme& theme,MenuResources resources):sectionHe
     }
     const auto popupInk=sample(popup_,panelColor_);
     usePopup_=popup_ && std::abs(luminance(popupInk)-luminance(backgroundColor_))>=12 && std::abs(luminance(popupInk)-luminance(ink))>=80;
-    if(!theme.horizontalDividerPath.empty())divider_=IMG_Load(theme.horizontalDividerPath.c_str());
+    if(!theme.horizontalDividerPath.empty())divider_=loadThemeImage(theme,theme.horizontalDividerPath);
     shade_=SDL_CreateRGBSurfaceWithFormat(0,640,480,32,SDL_PIXELFORMAT_RGBA32);
     if(shade_){SDL_FillRect(shade_,nullptr,SDL_MapRGBA(shade_->format,backgroundColor_.r,backgroundColor_.g,backgroundColor_.b,170));SDL_SetSurfaceBlendMode(shade_,SDL_BLENDMODE_BLEND);}
 }
@@ -339,12 +340,15 @@ SDL_Surface* MenuRenderer::controlLabel(const std::string& key) {
     const int h=std::max(28,TTF_FontHeight(font)+6);
     const bool direction=key=="UP"||key=="DOWN"||key=="LEFT"||key=="RIGHT"||key=="UP DOWN"||key=="LEFT RIGHT";
     const bool face=key.size()==1 && std::string("ABXY").find(key)!=std::string::npos;
-    const int w=direction?(key.find(' ')==std::string::npos?h:h*2+8):face?h:width(font,key)+16;
+    const int w=key=="L1 R1"?width(font,"L1")+width(font,"R1")+40:direction?(key.find(' ')==std::string::npos?h:h*2+8):face?h:width(font,key)+16;
     auto* surface=SDL_CreateRGBSurfaceWithFormat(0,w,h,32,SDL_PIXELFORMAT_RGBA32);
     if(!surface)return nullptr;
     SDL_FillRect(surface,nullptr,SDL_MapRGBA(surface->format,0,0,0,0));
     SDL_SetSurfaceBlendMode(surface,SDL_BLENDMODE_BLEND);
-    if(direction) {
+    if(key=="L1 R1") {
+        auto* left=controlLabel("L1");auto* right=controlLabel("R1");
+        if(left && right){blit(left,surface,{0,0,left->w,h});blit(right,surface,{left->w+8,0,right->w,h});}
+    } else if(direction) {
         std::istringstream parts(key);std::string part;int x=0;
         while(parts>>part){
             auto* asset=part=="LEFT"?leftArrow_:part=="RIGHT"?rightArrow_:nullptr;
@@ -518,7 +522,7 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
         pages_=2;page_=std::min(page_,pages_-1);
         const bool browser=page_==0;
         const std::vector<std::pair<std::string,std::string>> browserRows={
-            {"UP DOWN","Move selection"},{"LEFT RIGHT",settings.groupByConsole?"Change console":"Console jumps disabled"},{"A","Launch"},{"B","Exit"},
+            {"UP DOWN","Move selection"},{"L1 R1","Page up / down"},{"LEFT RIGHT",settings.groupByConsole?"Change console":"Console jumps disabled"},{"A","Launch"},{"B","Exit"},
             {"SELECT","Actions"},{"Y","Settings"},{"MENU","GameSwitcher"}};
         const std::vector<std::pair<std::string,std::string>> menuRows={
             {"UP DOWN","Move selection"},{"A","Choose"},{"B","Back"},{"LEFT RIGHT","Change value"},{"MENU","Close menu"}};
@@ -529,6 +533,10 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
         int y=dividerY+10;
         const auto& controls=browser?browserRows:menuRows;
         const int h=std::max(38,lineHeight(resources_.bodyFont)+8);
+#ifdef BETTER_FAVORITES_MENU_RENDER_TESTING
+        assert(y+int(controls.size())*h<=bottom);
+        assert(controlLabel("L1 R1")->w<190);
+#endif
         for(const auto& item:controls){
             control(screen,controlLabel(item.first),margin,y+h/2);
             text(screen,resources_.bodyFont,item.second,list,210,y+(h-TTF_FontHeight(resources_.bodyFont))/2);y+=h;

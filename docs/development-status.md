@@ -1,23 +1,33 @@
 # Development status
 
-Updated: 2026-10-02. The [authoritative roadmap](roadmap.md) contains the complete
+Updated: 2026-10-03. The [authoritative roadmap](roadmap.md) contains the complete
 feature inventory, accepted defaults, unresolved choices and ordered milestones.
 Update roadmap/status whenever a milestone changes or hardware verification arrives.
 
 ## Current implementation checkpoint
 
-Publishing M3 selected browser-title scrolling after Settings commit
-`79785d325c25128d53ed40234b7d82c00b6195aa`. The user confirms M3 passed hardware
-testing on 2026-10-03: everything works correctly. Accepted binary:
-`12545265ff8508bf6767b1ef3057854d54d513f6610f602490e3c0dcb7f1ce2d`.
-Its verified pre-deployment backup:
-`../miyoo-better-favorites-backups/20261002-235637-m3-title-scrolling-binary/`.
+M4 publication checkpoint: shoulder paging and resilient theme resources.
+User hardware acceptance received 2026-10-03; tested binary is identified below.
 
-The checkpoint also changes only “When enabled” / “When disabled” in About to
-bold white, retaining the existing font family and size. All other text styling
-is unchanged; these two heading changes await device verification. Host bounds,
-font ownership, timing/clipping/cache/regression checks and ARM build are recorded
-separately from hardware acceptance.
+Previous committed/pushed M3 on `main`:
+`1768c7a902ef33513adbd54c290188451652e1be` —
+`Scroll selected favorite titles with cached UTF-8 rendering`. Remote main matched.
+The user confirms M3 passed hardware testing on 2026-10-03. Accepted pre-heading
+binary SHA-256: `12545265ff8508bf6767b1ef3057854d54d513f6610f602490e3c0dcb7f1ce2d`.
+
+The M3 heading-only binary was deployed and verified, then backed up before the
+combined M4 test deployment. Its SHA-256 is
+`12ab1c2ce572c3462a8ff183f285f177cfa588325162996f0341f204f570dafc`.
+The combined M4 acceptance includes the deployed bold-white About headings.
+
+Combined M4 test binary: 347932 bytes, SHA-256
+`aa486abad4e3272f86605945109bf0a0f76159ab373f87c1e57c38abd034b328`.
+Backup: `../miyoo-better-favorites-backups/20261003-003910-m4-paging-resources-binary/`.
+Only the binary was replaced; bytes, ARM format, executable permissions, unchanged
+launcher syntax, 30 protected paths and sync passed. Preferences/state, launcher,
+Onion integration, favorites and history were preserved. The user accepted this
+combined M4 binary on 2026-10-03: “everything works.” M4 is complete; exhaustive
+fault combinations remain host fixtures, not implied device measurements. No previews or historical temporary cleanup occurred.
 
 ## Verification status
 
@@ -36,8 +46,9 @@ separately from hardware acceptance.
   Presentation feedback (photo `5E91BA02-BF85-4838-BDA8-E4A3A39E626E.heic`) is
   recorded separately. The new inline descriptions/chevrons/About and horizontal
   modal controls have now passed user-reported hardware testing. The final centering,
-  text-size and panel-padding adjustments remain hardware-pending; no exhaustive
-  fault-case claim follows.
+  text-size and panel-padding adjustments are also accepted with M3. Only the two
+  new bold-white About headings await device verification; no exhaustive fault-case
+  claim follows.
   The supplied consolidated report records B/START return as
   confirmed; older status classified START as fixture-only. Record START explicitly
   in the versioned device matrix; no exhaustive edge-case claim follows.
@@ -52,16 +63,20 @@ separately from hardware acceptance.
 
 ## Next unfinished milestone
 
-**M4: audit and close confirmed navigation/artwork/resource gaps.** Compare the
-roadmap with implemented row/console/sticky/edge behavior, page navigation and
-missing/corrupt-resource paths. Page controls need explicit agreement; Left/Right
-remain console jumps. Do not rewrite verified geometry or implement proposals
-as agreed requirements. See [M4 scope](roadmap.md#m4--finish-core-navigation-and-artworkfallback-cases).
+**M5: establish startup and memory baselines before optimizing.** Inspect existing
+loader/parser/SDL boundaries and the [runtime memory procedure](onion-return.md).
+Use opt-in instrumentation, repeatable cold/warm runs and RSS/PSS/process evidence.
+Compare Automatic return OFF/ON; never infer RAM from file size. No speculative
+refactoring, Home integration or persistent profiling process.
+
+M4 is complete, including approved L1/R1 pixel paging, non-repeated presses,
+selectable/no-wrap clamps, theme decode fallbacks and bounded artwork. See
+[acceptance, evidence and retained compatibility checklist](m4-audit.md).
 
 M3 is hardware-accepted; its local timing policy remains explicit rather than a
 claim of stock MainUI equivalence. See [implementation and regression checklist](browser-title-scrolling.md).
 Home Favorites replacement remains the primary delivery goal after the ordered
-core milestones. Page-button and optional artwork settings remain unresolved.
+core milestones. Optional artwork settings remain unresolved.
 
 ## Version reference and detail documents
 
@@ -88,5 +103,5 @@ rows scroll above it. About uses browser-style “When enabled” / “When disa
 headings. Supporting descriptions use the resolved section color where readable
 on the composited surface, otherwise normal theme text. Font priority, modal
 width/actions and all functional protocols are unchanged. Browser Settings
-functionality and preceding presentation are hardware-confirmed; M3 is now hardware-confirmed. The new bold-white About headings await device
-verification.
+functionality, preceding presentation and M3 are hardware-confirmed. The new
+bold-white About headings were included in combined M4 device acceptance.

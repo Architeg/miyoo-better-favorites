@@ -35,3 +35,14 @@ func TestWindowsReparseRefusal(t *testing.T) {
 		t.Fatal("reparse ancestor followed")
 	}
 }
+
+func TestWindowsArchiveDriveSafety(t *testing.T) {
+	for _, pair := range [][2]string{{`E:\`, `e:\backup`}, {`E:\`, `E:\folder\archive`}, {`E:\`, `\\server\share\archive`}} {
+		if e := outsideCard(pair[0], pair[1]); e == nil {
+			t.Fatal("unsafe archive destination", pair)
+		}
+	}
+	if e := outsideCard(`E:\`, `C:\BetterFavorites-Test\archive`); e != nil {
+		t.Fatal("different local drive refused", e)
+	}
+}

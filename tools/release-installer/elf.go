@@ -140,7 +140,9 @@ func patchHome(original, payload []byte, name string) ([]byte, error) {
 	if len(name) >= 24 || tagoff < 512 || tagoff+24 > len(segment) {
 		return nil, fmt.Errorf("bad variant tag")
 	}
-	clear(segment[tagoff : tagoff+24])
+	for i := tagoff; i < tagoff+24; i++ {
+		segment[i] = 0
+	}
 	copy(segment[tagoff:], name)
 	a, e := entries(f)
 	if e != nil {

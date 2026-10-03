@@ -367,7 +367,7 @@ func loadPackage(dir string) (Package, HomeSpec, ReturnSpec, error) {
 	if e = json.Unmarshal(d, &pkg); e != nil {
 		return pkg, home, ret, e
 	}
-	if pkg.Format != 1 || pkg.Version != "1.0.0-rc.1" || len(pkg.Commit) != 40 {
+	if pkg.Format != 1 || (pkg.Version != "1.0.0-rc.1" && pkg.Version != "1.0.0-rc.2") || len(pkg.Commit) != 40 {
 		return pkg, home, ret, fmt.Errorf("unsupported package")
 	}
 	seen := map[string]bool{}
@@ -692,22 +692,13 @@ func installRank(p string) int {
 	return 5
 }
 func saveRecovery(root, host string, changes []change, pkg Package) (string, error) {
-	absHost, err := filepath.Abs(host)
-	if err != nil {
-		return "", err
+	if e := outsideCard(root, host); e != nil {
+		return "", e
 	}
-	absRoot, err := filepath.Abs(root)
-	if err != nil {
-		return "", err
+	host, e := filepath.Abs(host)
+	if e != nil {
+		return "", e
 	}
-	rel, err := filepath.Rel(absRoot, absHost)
-	if err != nil {
-		return "", err
-	}
-	if rel == "." || (rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator))) {
-		return "", fmt.Errorf("host recovery must be outside the SD card")
-	}
-	host = absHost
 	if _, e := os.Lstat(host); !errors.Is(e, os.ErrNotExist) {
 		return "", fmt.Errorf("recovery directory must be NEW: %s", host)
 	}
@@ -790,21 +781,17 @@ func install(root, dir, recovery string, homeOn, returnOn bool, hook func(string
 	fmt.Println("Install verified. Saved preferences unchanged. Optional integrations take effect after reboot.")
 	return nil
 }
-func restore(root, recovery, dir string, interrupted bool, hook func(string, string) error) error {
+func prepareRestore(root, recovery, dir string, interrupted bool) ([]change, error) {
 	_, home, ret, err := loadPackage(dir)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if e := cardVersion(root); e != nil {
-		return e
+		return nil, e
 	}
-	data, e := read(recovery, "recovery.json")
+	r, e := loadRecovery(recovery)
 	if e != nil {
-		return e
-	}
-	var r Recovery
-	if e = json.Unmarshal(data, &r); e != nil || r.Format != 1 {
-		return fmt.Errorf("invalid recovery manifest")
+		return nil, e
 	}
 	var changes []change
 	seen := map[string]bool{}
@@ -813,32 +800,32 @@ func restore(root, recovery, dir string, interrupted bool, hook func(string, str
 			continue
 		}
 		if seen[s.Path] || !allowedRestorePath(s.Path) || s.Mode > 0777 {
-			return fmt.Errorf("unsafe restore entry")
+			return nil, fmt.Errorf("unsafe restore entry")
 		}
 		seen[s.Path] = true
 		if s.Path == system+"runtime.sh" && (s.Stock != ret.Original || s.After != ret.Patched) {
-			return fmt.Errorf("unknown recovery runtime")
+			return nil, fmt.Errorf("unknown recovery runtime")
 		}
 		if s.Path == system+"script/better_favorites_return.sh" && (s.Stock != "absent" || (s.After != ret.Helper && s.After != ret.Previous)) {
-			return fmt.Errorf("unknown recovery helper")
+			return nil, fmt.Errorf("unknown recovery helper")
 		}
 		if s.Path == app+"home-integration.conf" && (s.Stock != "absent" || s.After != digest(receipt(home))) {
-			return fmt.Errorf("unknown recovery receipt")
+			return nil, fmt.Errorf("unknown recovery receipt")
 		}
 		for _, name := range names {
 			if s.Path == system+"bin/"+name && (s.Stock != home.Original[name] || s.After != home.Patched[name]) {
-				return fmt.Errorf("unknown recovery MainUI")
+				return nil, fmt.Errorf("unknown recovery MainUI")
 			}
 			if strings.Contains(s.Path, "better-favorites-home-backup-") && strings.HasSuffix(s.Path, "/"+name) && s.After != home.Original[name] {
-				return fmt.Errorf("unknown original backup")
+				return nil, fmt.Errorf("unknown original backup")
 			}
 		}
 		if s.Path == returnBackup+"runtime.sh" && s.After != ret.Original {
-			return fmt.Errorf("unknown runtime original backup")
+			return nil, fmt.Errorf("unknown runtime original backup")
 		}
 		current, e := optional(root, s.Path)
 		if e != nil {
-			return e
+			return nil, e
 		}
 		h := hashOrAbsent(current)
 		ownUninstalled := false
@@ -853,13 +840,13 @@ func restore(root, recovery, dir string, interrupted bool, hook func(string, str
 			}
 		}
 		if !ownUninstalled && h != s.After && h != s.Stock && !(interrupted && h == s.Before) {
-			return fmt.Errorf("changed installed file preserved: %s", s.Path)
+			return nil, fmt.Errorf("changed installed file preserved: %s", s.Path)
 		}
 		var target []byte
 		if s.Stock != "absent" {
 			target, e = read(recovery, "files/"+s.Path)
 			if e != nil || digest(target) != s.Stock {
-				return fmt.Errorf("recovery backup checksum mismatch: %s", s.Path)
+				return nil, fmt.Errorf("recovery backup checksum mismatch: %s", s.Path)
 			}
 		}
 		// Integration backup originals are retained; metadata is made inert rather
@@ -868,7 +855,7 @@ func restore(root, recovery, dir string, interrupted bool, hook func(string, str
 			if strings.HasSuffix(s.Path, "manifest.json") && current != nil {
 				var m map[string]any
 				if json.Unmarshal(current, &m) != nil {
-					return fmt.Errorf("bad return journal")
+					return nil, fmt.Errorf("bad return journal")
 				}
 				m["status"] = "uninstalled"
 				target = encode(m)
@@ -879,7 +866,7 @@ func restore(root, recovery, dir string, interrupted bool, hook func(string, str
 		if s.Path == homeManifest && current != nil {
 			var m map[string]any
 			if json.Unmarshal(current, &m) != nil {
-				return fmt.Errorf("bad home journal")
+				return nil, fmt.Errorf("bad home journal")
 			}
 			m["status"] = "uninstalled"
 			target = encode(m)
@@ -887,10 +874,17 @@ func restore(root, recovery, dir string, interrupted bool, hook func(string, str
 		changes = append(changes, change{s.Path, current, target, os.FileMode(s.Mode), nil, true})
 	}
 	sort.SliceStable(changes, func(i, j int) bool { return restoreRank(changes[i].Path) < restoreRank(changes[j].Path) })
+	return changes, nil
+}
+func restore(root, recovery, dir string, interrupted bool, hook func(string, string) error) error {
+	changes, e := prepareRestore(root, recovery, dir, interrupted)
+	if e != nil {
+		return e
+	}
 	if e = transact(root, changes, hook); e != nil {
 		return e
 	}
-	fmt.Println("Verified stock integrations restored. App, preferences, all backups and data retained. Reboot before removing app.")
+	fmt.Println("Verified stock integrations restored. App/data and backups retained (integrations-only operation). Reboot for restored binaries.")
 	return nil
 }
 func restoreRank(p string) int {
@@ -924,7 +918,7 @@ func allowedRestorePath(p string) bool {
 
 func allowedAppFile(name string) bool {
 	switch name {
-	case "better-favorites", "launch.sh", "config.json", "release.json", "libSDL2-2.0.so.0", "libSDL2_image-2.0.so.0", "libSDL2_mixer-2.0.so.0", "libSDL2_ttf-2.0.so.0", "libjson-c.so.5", "libpng16.so.16", "libz.so.1", "libEGL.so", "libGLESv2.so":
+	case "better-favorites", "launch.sh", "config.json", "release.json", "icon.png", "libSDL2-2.0.so.0", "libSDL2_image-2.0.so.0", "libSDL2_mixer-2.0.so.0", "libSDL2_ttf-2.0.so.0", "libjson-c.so.5", "libpng16.so.16", "libz.so.1", "libEGL.so", "libGLESv2.so":
 		return true
 	}
 	return false

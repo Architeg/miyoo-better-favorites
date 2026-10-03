@@ -1,0 +1,100 @@
+#!/usr/bin/env python3
+"""Execute Unix wrappers with mocked OS probes; not other-OS acceptance."""
+import argparse, hashlib, json, os, struct, subprocess, sys, tempfile
+from pathlib import Path
+ROOT=Path(__file__).resolve().parents[1]
+
+def check_package(root):
+ sys.path.insert(0,str(ROOT/'tools'))
+ from host_packaging import inspect_linux,inspect_mac
+ report=json.loads((root/'HOST-BUILDS.json').read_text())
+ assert len(report['files'])==10
+ expected={'windows7':{'386','amd64'},'windows':{'386','amd64','arm64'},'darwin':{'amd64','arm64'},'linux':{'amd64','arm64'}}
+ seen={k:set() for k in expected}
+ for item in report['files']:
+  path=root/item['file'];data=path.read_bytes();assert hashlib.sha256(data).hexdigest()==item['sha256']
+  if item.get('role'):assert item['toolchain']=='go1.20.14';continue
+  group='windows7' if 'windows7-' in path.name else item['os'];seen[group].add(item['arch'])
+  if item['os']=='linux':
+   assert inspect_linux(path)['dynamic_libraries']==[]
+   assert struct.unpack_from('<H',data,18)[0]==(62 if item['arch']=='amd64' else 183)
+   # Focused rejection: convert one program header into PT_INTERP.
+   bad=bytearray(data);offset=struct.unpack_from('<Q',bad,32)[0];struct.pack_into('<I',bad,offset,3)
+   with tempfile.TemporaryDirectory() as tmp:
+    fixture=Path(tmp)/'dynamic';fixture.write_bytes(bad)
+    try:inspect_linux(fixture)
+    except RuntimeError:pass
+    else:raise AssertionError('Accepted dynamically loaded Linux executable')
+  elif item['os']=='darwin':
+   assert inspect_mac(path)['minimum_macos']=='12.0.0'
+   assert struct.unpack_from('<I',data,4)[0]==(0x1000007 if item['arch']=='amd64' else 0x100000c)
+  else:
+   offset=struct.unpack_from('<I',data,60)[0];assert data[offset:offset+4]==b'PE\0\0'
+   assert struct.unpack_from('<H',data,offset+4)[0]=={'386':0x14c,'amd64':0x8664,'arm64':0xaa64}[item['arch']]
+ assert seen==expected
+ print('Packaged 10 host executables: hashes, architectures, Monterey load minima and static Linux linkage PASS')
+
+def main():
+ parser=argparse.ArgumentParser();parser.add_argument('--package',type=Path);a=parser.parse_args()
+ if a.package:check_package(a.package)
+ with tempfile.TemporaryDirectory(prefix='bf-dispatch-tests-') as tmp:
+  t=Path(tmp); mock=t/'probes';mock.mkdir(); package=t/'package';package.mkdir()
+  probe="""#!/bin/sh
+case "$1" in
+-s) echo "$BF_SYSTEM";; -m) echo "$BF_MACHINE";; -r) echo "$BF_KERNEL";;
+-productVersion) echo "$BF_VERSION";;
+-n) case "$2" in hw.optional.arm64) [ "$BF_ARM" != absent ] || exit 1; echo "$BF_ARM";; sysctl.proc_translated) [ "$BF_TRANSLATED" != absent ] || exit 1; echo "$BF_TRANSLATED";; hw.cputype) echo "$BF_CPUTYPE";; *) exit 1;; esac;;
+*) exit 1;; esac
+"""
+  for n in ('uname','sysctl','sw_vers'):(mock/n).write_text(probe);(mock/n).chmod(0o755)
+  for host,name in [('darwin','Install-macOS.command'),('linux','Install-Linux.sh')]:
+   script=(ROOT/'packaging'/name).read_text()
+   # Only the test copy substitutes absolute system probe paths.
+   for original in ('/usr/bin/uname','/usr/bin/sw_vers','/usr/sbin/sysctl'):script=script.replace(original,str(mock/Path(original).name))
+   (package/name).write_text(script);(package/name).chmod(0o755)
+   for arch in ('amd64','arm64'):
+    p=package/('better-favorites-installer-'+host+'-'+arch)
+    p.write_text('#!/bin/sh\nprintf "%s\\n" "$0" "$@" > "$BF_RESULT"\nexit "$BF_CHILD_STATUS"\n');p.chmod(0o755)
+  defaults=dict(BF_SYSTEM='Darwin',BF_MACHINE='arm64',BF_VERSION='12.7.6',BF_ARM='1',BF_TRANSLATED='0',BF_CPUTYPE='16777228',BF_KERNEL='6.1.0',BF_CHILD_STATUS='0',BF_RESULT=str(t/'result'))
+  cases=[
+   ('Install-macOS.command',{},'darwin-arm64'),
+   ('Install-macOS.command',dict(BF_MACHINE='x86_64',BF_TRANSLATED='1'),'darwin-arm64'),
+   ('Install-macOS.command',dict(BF_MACHINE='x86_64',BF_ARM='0',BF_TRANSLATED='absent'),'darwin-amd64'),
+   ('Install-macOS.command',dict(BF_MACHINE='x86_64',BF_ARM='absent',BF_TRANSLATED='absent',BF_CPUTYPE='16777223'),'darwin-amd64'),
+   ('Install-macOS.command',dict(BF_MACHINE='x86_64',BF_TRANSLATED='1',BF_ARM='0'),'darwin-arm64'),
+   ('Install-macOS.command',dict(BF_MACHINE='x86_64',BF_TRANSLATED='1',BF_ARM='absent'),'darwin-arm64'),
+   ('Install-macOS.command',dict(BF_VERSION='26.0'),'darwin-arm64'),
+   ('Install-macOS.command',dict(BF_VERSION='11.7.10'),None),
+   ('Install-macOS.command',dict(BF_VERSION='unknown'),None),
+   ('Install-macOS.command',dict(BF_ARM='absent'),None),
+   ('Install-macOS.command',dict(BF_MACHINE='x86_64',BF_ARM='1',BF_TRANSLATED='absent'),None),
+   ('Install-macOS.command',dict(BF_MACHINE='ppc'),None),
+   ('Install-macOS.command',dict(BF_SYSTEM='Linux'),None),
+   ('Install-Linux.sh',dict(BF_SYSTEM='Linux',BF_MACHINE='x86_64',BF_KERNEL='3.2.0'),'linux-amd64'),
+   ('Install-Linux.sh',dict(BF_SYSTEM='Linux',BF_MACHINE='aarch64',BF_KERNEL='3.7.0'),'linux-arm64'),
+   ('Install-Linux.sh',dict(BF_SYSTEM='Linux',BF_MACHINE='arm64',BF_KERNEL='6.12.9-generic'),'linux-arm64'),
+   ('Install-Linux.sh',dict(BF_SYSTEM='Linux',BF_MACHINE='x86_64',BF_KERNEL='6.1.0+deb12'),'linux-amd64'),
+   ('Install-Linux.sh',dict(BF_SYSTEM='Linux',BF_MACHINE='aarch64',BF_KERNEL='3.2.0'),None),
+   ('Install-Linux.sh',dict(BF_SYSTEM='Linux',BF_MACHINE='x86_64',BF_KERNEL='2.6.32'),None),
+   ('Install-Linux.sh',dict(BF_SYSTEM='Linux',BF_MACHINE='i686'),None),
+   ('Install-Linux.sh',dict(BF_SYSTEM='Linux',BF_MACHINE='x86_64',BF_KERNEL='unknown'),None),
+   ('Install-Linux.sh',dict(BF_SYSTEM='Linux',BF_MACHINE='x86_64',BF_KERNEL='3'),None),
+   ('Install-Linux.sh',{},None),
+  ]
+  for script,over,expected in cases:
+   result=t/'result'
+   if result.exists():result.unlink()
+   e={**os.environ,**defaults,**over};e['PATH']=str(mock)+os.pathsep+os.environ['PATH']
+   p=subprocess.run([str(package/script),'install','--sd-root','SD path with spaces'],env=e,capture_output=True,text=True,timeout=10)
+   assert (p.returncode==0)==(expected is not None),(script,over,p.stderr)
+   if expected is None:assert not result.exists(),over
+   else:
+    lines=result.read_text().splitlines();assert lines[0].endswith(expected);assert lines[1:]==['install','--sd-root','SD path with spaces']
+  for name in ('Install-macOS.command','Install-Linux.sh'):
+   e={**os.environ,**defaults,'BF_CHILD_STATUS':'17'};e['PATH']=str(mock)+os.pathsep+os.environ['PATH']
+   if name.endswith('.sh'):e.update(BF_SYSTEM='Linux',BF_MACHINE='x86_64')
+   p=subprocess.run([str(package/name),'uninstall'],env=e,capture_output=True,timeout=10);assert p.returncode==17
+  p=package/'better-favorites-installer-darwin-arm64';p.unlink()
+  e=dict(os.environ,**defaults);assert subprocess.run([str(package/'Install-macOS.command'),'install'],env=e,capture_output=True).returncode!=0
+  print('Unix dispatch: 23 simulated OS/version/native/Rosetta/kernel combinations, unsupported-before-invocation, arguments and failure status PASS; not native acceptance')
+if __name__=='__main__':main()

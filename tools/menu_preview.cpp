@@ -51,7 +51,7 @@ static SDL_Surface* render(const char* root,MenuPage page,bool longTitle,bool er
         }
         if(page==MenuPage::Help && longTitle){renderer.movePage(1);renderer.draw(screen,page,0,true,true,true,game,5000,message);}
         assert(TTF_GetFontStyle(body)==originalBodyStyle && TTF_GetFontStyle(hint)==originalHintStyle && TTF_GetFontStyle(list)==originalListStyle);
-        // Automatic return OFF has no contextual note or integration status.
+        // OFF and ON have explicit destinations; availability is absent from both notes.
         underlay();renderer.draw(screen,MenuPage::Settings,0,true,false,false,game,5000);
         auto* off=SDL_ConvertSurface(screen,screen->format,0);assert(off);
         underlay();renderer.draw(screen,MenuPage::Settings,0,true,false,true,game,5000);

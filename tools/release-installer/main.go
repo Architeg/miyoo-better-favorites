@@ -149,57 +149,83 @@ func trace(root string, on bool) error {
 	return transact(root, []change{{p, old, after, 0600, nil, false}}, nil)
 }
 func run(args []string) error {
+	in := bufio.NewReader(os.Stdin)
+	ask := func(prompt string) (string, error) {
+		fmt.Print(prompt)
+		answer, e := in.ReadString('\n')
+		if e != nil && len(answer) == 0 {
+			return "", fmt.Errorf("input required: %s", prompt)
+		}
+		return strings.Trim(strings.TrimSpace(answer), "\""), nil
+	}
 	if len(args) == 0 {
-		in := bufio.NewReader(os.Stdin)
-		fmt.Println("Better Favorites — offline card tool\n1 Install app + optional Home/return patches\n2 Uninstall patches (retain app/data)\n3 Restore interrupted installation\n4 Export diagnostics\nPower the Miyoo OFF and close other card writers.")
-		fmt.Print("Action (1–4): ")
-		a, _ := in.ReadString('\n')
-		actions := map[string]string{"1": "install", "2": "uninstall", "3": "restore", "4": "export-diagnostics"}
-		action := actions[strings.TrimSpace(a)]
+		fmt.Println("Better Favorites — offline card tool\n1 Install app + optional integrations\n2 Complete uninstall (remove app/preferences/logs after verified stock restoration)\n3 Restore interrupted integrations (retain app/data)\n4 Export diagnostics\n5 Remove integrations only (retain app/data)\nPower the Miyoo OFF and close other card writers.")
+		a, e := ask("Action (1–5): ")
+		if e != nil {
+			return e
+		}
+		action := map[string]string{"1": "install", "2": "uninstall", "3": "restore", "4": "export-diagnostics", "5": "remove-integrations"}[a]
 		if action == "" {
 			return fmt.Errorf("invalid action")
 		}
-		fmt.Print("SD-card root: ")
-		sd, _ := in.ReadString('\n')
-		sd = strings.Trim(strings.TrimSpace(sd), "\"")
-		args = []string{action, "--sd-root", sd}
-		if action != "export-diagnostics" {
-			fmt.Print("Powered off, exclusive card access? Type OFF: ")
-			answer, _ := in.ReadString('\n')
-			if strings.TrimSpace(answer) != "OFF" {
-				return fmt.Errorf("cancelled")
-			}
-			args = append(args, "--powered-off")
-		}
-		if action == "install" {
-			for _, n := range []string{"home", "return"} {
-				fmt.Printf("Install optional %s integration? (y/N): ", n)
-				a, _ = in.ReadString('\n')
-				if strings.EqualFold(strings.TrimSpace(a), "y") {
-					args = append(args, "--"+n)
-				}
-			}
-		}
-		if action == "uninstall" || action == "restore" {
-			fmt.Print("Verified recovery folder (host or card mirror): ")
-			p, _ := in.ReadString('\n')
-			args = append(args, "--recovery", strings.Trim(strings.TrimSpace(p), "\""))
-		}
+		args = []string{action}
 	}
+	interactive := len(args) == 1
 	action := args[0]
+	switch action {
+	case "install", "uninstall", "restore", "remove-integrations", "export-diagnostics", "status", "trace-on", "trace-off":
+	default:
+		return fmt.Errorf("unknown action: %s", action)
+	}
 	f := flag.NewFlagSet(action, flag.ContinueOnError)
 	root := f.String("sd-root", "", "mounted card root")
 	dir := f.String("package", "", "extracted release directory")
 	recovery := f.String("recovery", "", "new host recovery directory for Install; retained recovery directory for Uninstall/Restore")
 	output := f.String("output", "", "new diagnostics ZIP")
+	archive := f.String("archive", "", "new computer archive directory for complete uninstall")
 	off := f.Bool("powered-off", false, "confirm Miyoo is powered off and no other writer is using the card")
 	home := f.Bool("home", false, "install optional Home Favorites redirect")
 	ret := f.Bool("return", false, "install optional session return")
 	if e := f.Parse(args[1:]); e != nil {
 		return e
 	}
-	if f.NArg() != 0 || *root == "" {
-		return fmt.Errorf("specify --sd-root; use --help for options")
+	if f.NArg() != 0 {
+		return fmt.Errorf("unexpected arguments")
+	}
+	if *root == "" {
+		var e error
+		*root, e = ask("SD-card root: ")
+		if e != nil {
+			return e
+		}
+		interactive = true
+	}
+	if *root == "" {
+		return fmt.Errorf("empty SD-card root")
+	}
+	if interactive && action != "export-diagnostics" && action != "status" && !*off {
+		answer, e := ask("Powered off, exclusive card access? Type OFF: ")
+		if e != nil {
+			return e
+		}
+		if answer != "OFF" {
+			return fmt.Errorf("cancelled")
+		}
+		*off = true
+	}
+	if interactive && action == "install" {
+		for _, choice := range []struct {
+			name  string
+			value *bool
+		}{{"Home", home}, {"Automatic return", ret}} {
+			if !*choice.value {
+				answer, e := ask("Install optional " + choice.name + " integration? (y/N): ")
+				if e != nil {
+					return e
+				}
+				*choice.value = strings.EqualFold(answer, "y")
+			}
+		}
 	}
 	var e error
 	*root, e = filepath.Abs(*root)
@@ -256,9 +282,26 @@ func run(args []string) error {
 			*recovery = filepath.Join(*dir, "recovery-"+stamp)
 		}
 		return install(*root, *dir, *recovery, *home, *ret, nil)
-	case "uninstall", "restore":
+	case "uninstall", "restore", "remove-integrations":
 		if *recovery == "" {
-			return fmt.Errorf("specify --recovery; preserve originals before deleting the app")
+			selected, err := discoverRecovery(*root, *dir)
+			if err != nil {
+				if !interactive {
+					return err
+				}
+				fmt.Println(err)
+				selected, err = ask("This card's verified recovery folder: ")
+				if err != nil {
+					return err
+				}
+			}
+			*recovery = selected
+		}
+		if action == "uninstall" {
+			if *archive == "" {
+				*archive = freshUninstallArchive(*dir)
+			}
+			return completeUninstall(*root, *recovery, *dir, *archive, nil)
 		}
 		return restore(*root, *recovery, *dir, action == "restore", nil)
 	case "trace-on", "trace-off":

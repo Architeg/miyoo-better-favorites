@@ -509,7 +509,7 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
 #ifdef BETTER_FAVORITES_MENU_RENDER_TESTING
         assert(y<=rowsBottom && descriptionPanel.y+descriptionPanel.h==bottom);
 #endif
-        const std::string descriptions[]={returnOn?"[B] / [START]: return here from GameSwitcher.":"",
+        const std::string descriptions[]={returnOn?"[B]/[START] return to Better Favorites from GameSwitcher.":"[B]/[START] return to the main menu from GameSwitcher.",
             settings.groupByConsole?"Group games under console headings.":"Flat list. Console jumps are disabled.",
             settings.showNumericPrefixes?"Show numeric prefixes in displayed titles.":"Hide leading numeric prefixes. Sorting is unchanged.",
             settings.sortMode==SortMode::OriginalLabel?"Sort by literal stored labels.":"Sort titles without leading numeric prefixes.",
@@ -557,17 +557,17 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
             {settings.homeIntegrationAvailable?"Home access: Available":settings.homeIntegrationStatus==HomeIntegrationStatus::NotInstalled?"Home access: Not installed":"Home access: Unavailable on this system",false},
             {"From Home",true},{"Enable Replace stock Favorites, then choose Favorites on Home.",false},
             {"From Apps",true},{"Open Apps > Better Favorites.",false},
-            {"Going back",true},{"[B] returns to Home when opened from Home.",false},
+            {"Going Back",true},{"[B] returns to Home when opened from Home.",false},
             {"Automatic return controls where you go after GameSwitcher.",false}}:std::vector<Block>{
             {available?"Integration: available":"Integration: unavailable (optional patch required)",false},
-            {"When enabled",true},{"[B] / [START]: return here from GameSwitcher.",false},
+            {"When enabled",true},{"[B]/[START] return to Better Favorites from GameSwitcher.",false},
             {"[A]: resume the game. Switching games keeps the session.",false},
-            {"When disabled",true},{"Use Onion's ordinary menu return.",false},
+            {"When disabled",true},{"[B]/[START] return to the main menu from GameSwitcher.",false},
             {"Direct game exit ends the return session.",false}};
         struct Positioned {TextFlow flow;TTF_Font* font;int y,page;bool heading;};
         std::vector<Positioned> laidOut;int y=header+8,pageIndex=0;
         for(std::size_t i=0;i<blocks.size();++i){
-            const auto& block=blocks[i];auto* face=block.heading?(page==MenuPage::ReturnInfo && returnHeadingFont_?returnHeadingFont_:sectionHeadingFont_):font;
+            const auto& block=blocks[i];auto* face=block.heading?(returnHeadingFont_?returnHeadingFont_:sectionHeadingFont_):font;
             if(block.heading)y+=12;
             auto flow=inlineFlow(face,block.value,600,[&](const std::string& key){return controlLabel(key);});
             const int height=flow.lines*flow.lineHeight;
@@ -578,7 +578,7 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
         }
         pages_=pageIndex+1;page_=std::min(page_,pages_-1);
         for(const auto& block:laidOut)if(block.page==page_){
-            const auto ink=block.heading?(page==MenuPage::ReturnInfo?SDL_Color{255,255,255,255}:section):secondaryInk(screen,{margin,block.y,600,block.flow.lines*block.flow.lineHeight},section,list);
+            const auto ink=block.heading?SDL_Color{255,255,255,255}:secondaryInk(screen,{margin,block.y,600,block.flow.lines*block.flow.lineHeight},section,list);
             drawFlow(screen,block.font,block.flow,margin,block.y,ink);
         }
         if(pages_>1)p.footer({{"UP DOWN","Page"},{"B","Back"}});else p.footer({{"B","Back"}});

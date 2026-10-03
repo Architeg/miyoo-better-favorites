@@ -3,6 +3,7 @@
 package main
 
 import (
+	"os"
 	"path/filepath"
 	"syscall"
 	"testing"
@@ -23,5 +24,20 @@ func TestNonblockingFIFO(t *testing.T) {
 		}
 	case <-time.After(time.Second):
 		t.Fatal("FIFO open blocked")
+	}
+}
+
+func TestArchiveAliasCannotEnterCard(t *testing.T) {
+	card := root(t)
+	host := root(t)
+	alias := filepath.Join(host, "alias")
+	if e := os.Symlink(card, alias); e != nil {
+		t.Fatal(e)
+	}
+	if e := outsideCard(card, filepath.Join(alias, "recovery")); e == nil {
+		t.Fatal("card alias accepted as external archive")
+	}
+	if e := outsideCard(card, filepath.Join(host, "recovery")); e != nil {
+		t.Fatal(e)
 	}
 }

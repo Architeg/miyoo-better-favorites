@@ -1,0 +1,22 @@
+[
+  {
+    "component": "libpng-1.6.37",
+    "commit": "a40189cf881e9f0db80511c382292a5604c3c3d1",
+    "url": "https://codeload.github.com/pnggroup/libpng/tar.gz/a40189cf881e9f0db80511c382292a5604c3c3d1",
+    "archive": "libpng-1.6.37-source.tar.gz",
+    "sha256": "ed747514984fddf095142aa85e983111f13d64b877b1065ed0d990f7adb31eb7",
+    "notice_file": "libpng-1.6.37-LICENSE.txt",
+    "notice_sha256": "bf5e22b9dce8464064ae17a48ea1133c3369ac9e1d80ef9e320e5219aa14ea9b",
+    "correspondence": "Binary version strings match upstream version; exact build/source correspondence not proven"
+  },
+  {
+    "component": "zlib-1.2.11",
+    "commit": "cacf7f1d4e3d44d871b605da3b647f07d718623f",
+    "url": "https://codeload.github.com/madler/zlib/tar.gz/cacf7f1d4e3d44d871b605da3b647f07d718623f",
+    "archive": "zlib-1.2.11-source.tar.gz",
+    "sha256": "6d4d6640ca3121620995ee255945161821218752b551a1a180f4215f7d124d45",
+    "notice_file": "zlib-1.2.11-README.txt",
+    "notice_sha256": "7960b6b1cc63e619abb77acaea5427159605afee8c8b362664f4effc7d7f7d15",
+    "correspondence": "Binary version strings match upstream version; exact build/source correspondence not proven"
+  }
+]

@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0-rc.2 — prepared 2026-10-04, private review
+
+- Limited How to Open headings and explicit GameSwitcher destinations; restore the
+  exact supplied icon through Onion app configuration.
+- Prompting action-only commands; accurate wrapper status; default complete verified
+  uninstall with computer recovery/archive, conflict refusal and retry. Optional
+  integrations-only action retains app/data.
+- Separate official Go 1.20.14 Windows 7 x64/x86 test-only executables; normal module
+  and Go 1.26.2 builds unchanged. Windows execution/reader acceptance remains pending.
+- RC1 packaged device checks accepted on M1 / Ventura 13.7.8; stock restoration
+  independently verified; post-uninstall device boot pending. RC2 is not accepted.
+
 ## 1.0.0-rc.1 — prepared 2026-10-03, not stable
 
 - Existing Onion favorites browser with grouping, independent numeric-prefix
@@ -15,3 +27,12 @@
 - Per-parse emulator labels reduce host-observed reads 70 → 3; no measured device
   startup gain is claimed. Gameplay memory/process evidence remains deferred.
 - All global shortcuts deferred for v1.0; Home tile/theme and stock X/Y stay unchanged.
+
+RC2 host dispatch review: unified OS/version/native-architecture selection, legacy
+Windows7/8/8.1 backends, modern Windows x86/x64/ARM64, Monterey-compatible native Mac
+variants and verified static Linux binaries. Native target qualification remains pending.
+
+Documentation review: user/contributor guides and notices rewritten against the
+implementation; Windows7 SP1 x64 and Windows10 x64 normal install/uninstall plus
+stock boot accepted. Exact exported RC2 payload and later-host-dispatch evidence
+limits are recorded; no new release is published.

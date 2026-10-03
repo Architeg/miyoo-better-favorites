@@ -107,7 +107,7 @@ this does not imply exhaustive fault-injection or theme coverage.
 Final readability confirmation: supplied 2026-10-02 device photos show the deployed
 SELECT menu, removal modal, Settings, About and Help. This is screen-specific
 evidence, not an exhaustive theme/fault/lifecycle matrix. Photo identifiers are
-recorded in [status](development-status.md#verification-status).
+recorded in [status](development-status.md#accepted-checkpoint).
 
 The supplied report and preceding device reports confirm the following major
 behaviors. This does not imply every failure case/device/theme/version was tested.
@@ -564,3 +564,40 @@ ZIP device install→OFF/ON→game/return→uninstall/stock→reinstall, prebuil
 license correspondence. Until these pass the candidate is private review material;
 M9 stable publication is pending. Screenshots/banner remain user-supplied future
 materials, not a packaging blocker. [Current status](development-status.md).
+
+## RC2 preparation update — 2026-10-04
+
+RC1 six packaged-install device checks passed per user on MacBook Air M1 / Ventura
+13.7.8, with hashes matching the actual RC1 artifact. Post-uninstall device boot is
+pending at that RC1 review; later Windows testing confirms stock boot and
+stock mounted-card hashes/integration removal are independently verified.
+The retained RC1 app/installation artifacts were archived and fully cleaned after
+stock verification. [Evidence](release/rc1-mac-acceptance.md).
+
+M7/M8 prepare a fresh RC2 review snapshot: exact supplied icon, limited wording/three
+headings, action-only host commands, complete verified default uninstall and separate
+Windows 7 x64/x86 Go 1.20.14 test bundle. No release toolchain downgrade. Native
+Windows/reader execution was pending at this preparation point. The later Windows
+acceptance update below records normal-flow passes; exact later dispatcher/ZIP and
+license closure remain gates. [RC2 gates](release/rc.2.md). No M9 publication or shortcut work yet.
+
+Host compatibility update: Windows7 through current releases, macOS Monterey+
+Intel/Apple Silicon, Linux x64/ARM64; one automatic-dispatch entry per platform.
+See [targets, minima, dispatch and pending native qualification](release/host-dispatch.md).
+Legacy builds remain isolated; every host uses the same payload/safety implementation.
+
+Windows acceptance update: user passed Windows7 SP1 x64 and Windows10 x64
+packaged installation/use/uninstallation and confirmed stock Onion boot. All five
+mounted system files equal verified stock originals; app/active integrations are
+absent. [Sanitized evidence and payload/dispatcher limits](release/windows-acceptance.md).
+Other targets, exact later dispatcher hashes and fault matrices remain separate gates.
+
+### RC2 documentation and bootstrap preparation — 2026-10-04
+
+Focused documentation presentation, current Windows evidence and the unchanged
+offline one-command/full-uninstall interface are consolidated. The online bootstrap
+is separate and has no advertised download URL or native Windows online acceptance.
+libpng/zlib source/notices narrow prior gaps; custom SDL link reproduction and
+extension/SwiftShader correspondence still block binary publication. RC2 source
+checkpoint/tag and a draft prerelease do not constitute stable v1.0.0 or final-byte
+hardware acceptance. [Details](release/rc.2.md), [audit](release/dependency-audit.md).

@@ -1,32 +1,57 @@
-# Compatibility
+# Compatibility and test evidence
 
 **Designed for Mini and Mini Plus; hardware tested on Mini Plus.**
+Target support and recorded tests are separate. Builds, simulation and an installer
+message do not substitute for a device boot or native filesystem test.
 
-| Layer | Accepted evidence | Limits |
+## Miyoo and Onion
+
+| Configuration | Evidence | Limits |
 | --- | --- | --- |
-| Native app | Mini Plus MY354, firmware 202306282128, Onion v4.3.1-1; navigation/theme/audio/launch/removal/return accepted | Latest release wording/logging/package await device test; Mini needs community testing |
-| Home redirect | Same Mini Plus; actually executed 354-clean; OFF stock, ON app, B Home/no-loop twice, Apps and X/Y passed | Four exact binary variants pass ARM fixtures; this is not four-device hardware acceptance |
-| Session return | Onion v4.3.1-1 exact runtime/helper hashes; user OFF/ON, switching, resume/restored position accepted | Restart/shutdown/storage fault matrix mostly host fixtures |
-| Native host installer | macOS filesystem fixtures and exact generated outputs; Linux fixture checks | Native Windows binary exists but execution/FAT reader qualification pending |
+| Mini Plus MY354, firmware 202306282128, Onion v4.3.1-1 | User-confirmed browsing/themes/audio/settings/removal/launch/GameSwitcher/return and packaged installation checks | Hardware revision unknown; MY354 is the model/platform code |
+| Home Favorites redirect | OFF stock/ON app, B return without loops, Apps/X/Y accepted; 354-clean actually exercised | Four exact binary variants have ARM fixtures, not four hardware combinations |
+| Automatic session return | OFF/ON, A resume, B/START return, game switching and restored browser position accepted | Storage/shutdown/restart fault coverage is mostly host fixtures |
+| Mini / other firmware and theme combinations | Source/binary catalogue includes 283 variants | Community hardware testing required |
 
-MY354 identifies the Mini Plus platform/model; **hardware revision is unknown**.
-Firmware is user supplied, separate from Onion. See [accepted deployed hashes and
-log coverage](m6-acceptance.md). The official [latest Onion release](https://github.com/OnionUI/Onion/releases/latest)
-resolved to v4.3.1-1 on 2026-10-03; this does not qualify other forks or prereleases.
+Optional integrations accept exact hashes from the Home and return catalogues.
+Unknown or independently patched MainUI/runtime files are refused. Original files
+are backed up per card; existing verified preferences/original backups are retained
+on updates. Availability is separate from saved ON/OFF switches; installation and
+restoration of system files require reboot.
 
-Optional patch compatibility is an exact allowlist in
-`integration/mainui-home/package.json` and `integration/onion-return/hashes.json`.
-Unknown MainUI/runtime bytes, symlinks/reparse points and foreign changes are
-refused. Prior exact Better Favorites installations can be adopted only with
-verified manifests, receipts/helpers and original backups. Existing permanent
-return backups and preferences are preserved during installation/update.
+Mini Flip/Flip V2, other operating systems and unaudited Onion versions/forks are
+not qualified for these optional integrations. App-only use does not establish
+compatibility. There is no separate Home tile or global shortcut in this release.
 
-Mini 283, other firmware/theme combinations need testing. Mini Flip/Flip V2,
-other OSes/Onion versions and independently patched MainUI/runtime are unsupported
-for these optional integrations. Copying the app does not establish compatibility.
-Availability shown in Settings is independent of an ON preference. Installation
-and removal take effect after reboot; settings activation does not repatch binaries.
+## Installation computers
 
-DLL/ELF sizes and mapped payload size do not establish RAM consumption. Startup
-pilot/cache-read evidence is in [M5](m5-profiling.md); no measured cache speedup is
-claimed. Gameplay/ON-OFF/process absence measurements remain deferred.
+| Target | Requirements | Recorded execution/acceptance |
+| --- | --- | --- |
+| Windows 7/8/8.1 x86/x64 | Legacy Go1.20.14 binaries; SSE2 for x86; local writable card drive | Windows 7 SP1 x64 user passed install/use/uninstall/stock device boot |
+| Windows 10 through current releases, x86/x64 and modern ARM64 | Modern executables; native version/architecture dispatch; ARM64 needs x86 bootstrap emulation | Windows 10 x64 user passed the same flow; exact build/tool hash not supplied |
+| macOS Monterey onward, Intel/Apple Silicon | OS-provided shell/tools/libraries; native executable selection including Rosetta | MacBook Air M1 / Ventura13.7.8 packaged device checks; native fixture roundtrips and actual Rosetta selection/status |
+| Linux x64 | Kernel3.2+, POSIX sh/uname, writable mount; static executable | Docker package/installer fixtures only |
+| Linux ARM64 | Little-endian ARMv8.0, kernel3.7+, otherwise same | Docker/simulated architecture checks; physical reader qualification pending |
+
+Native Windows x86/ARM64/8/8.1, physical Intel Mac/Monterey and both physical Linux
+architecture/reader combinations still need testing. The diagnostic export verifies
+the earlier RC2 Miyoo payload, **not an exact later host dispatcher hash**. Do not
+extend that evidence to every compiled branch. [Windows report analysis](release/windows-acceptance.md),
+[Mac RC1 evidence](release/rc1-mac-acceptance.md), [host dispatch/minima](release/host-dispatch.md).
+
+All hosts install the same payload at the same SD paths. Unsupported/ambiguous
+host probes fail before installer writes. Linux binaries have no dynamic-library
+requirements; Mac/Windows use OS-supplied libraries. Native target qualification
+is distinct from code support, cross-compilation and Docker/QEMU execution.
+
+## Current release limits
+
+User-confirmed Windows uninstall/stock boot is independently supported by mounted-card
+verification: all five system files match this card's verified stock originals,
+with the app and active integration files absent. Fault tests do not become hardware
+acceptance merely because the normal flow passed.
+
+Unsigned distribution/quarantine/SmartScreen behavior, exact prebuilt/source/license
+closure and the later candidate's complete host/device matrix remain release gates.
+[Remaining gates](release/rc.2.md). Disk sizes are not RAM measurements; no measured
+cache speedup or gameplay/ON-OFF process-memory result is claimed. [Profiling evidence](m5-profiling.md).

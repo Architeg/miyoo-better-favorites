@@ -1,6 +1,6 @@
 # Development status
 
-Updated 2026-10-03. [Authoritative roadmap](roadmap.md); update both documents when
+Updated 2026-10-04. [Authoritative roadmap](roadmap.md); update both documents when
 milestones or hardware acceptance change.
 
 ## Accepted checkpoint
@@ -31,12 +31,23 @@ device speedup. Later M6 acceptance covers the actual cache-containing deployed 
 
 ## Release preparation
 
-M7/M8 now prepare **v1.0.0-rc.1**, not stable. Post-acceptance Home wording/status/
-recovery and new release logging/package code have host/ARM checks only.
-The native Go offline installer replaces Python/WSL as the proposed user route;
-Windows cross-compilation is implemented but native Windows execution/SD-reader
-qualification remains pending. The actual extracted ZIP installer roundtrip passes on native macOS arm64 and
-Linux amd64 in the isolated existing Docker image; final ZIP hardware install/uninstall/reinstall is pending.
+M7/M8 prepare **v1.0.0-rc.2**, not stable. Complete default uninstall now restores
+and verifies originals, archives recovery on the computer, and removes owned app/data.
+Optional remove-integrations retains app/data. The native offline installer is
+implemented; end users need no Python/WSL/developer tools.
+
+Windows7 SP1 x64 and Windows10 x64 installation/use/uninstallation and stock Onion
+boot passed per user. The diagnostics match the earlier RC2 complete payload;
+current card originals and integration removal are byte-verified. Exact later
+host ZIP/dispatcher hashes are not present in that export. Other native versions,
+architectures/readers and fault outcomes remain separate gates.
+[Windows analysis](release/windows-acceptance.md).
+
+RC1 Mac packaged device checks passed on MacBook Air M1 / Ventura13.7.8; actual
+Mac ZIP fixture roundtrips and real Rosetta selection/status also passed. Linux
+has Docker fixtures, not physical reader acceptance.
+[Mac evidence](release/rc1-mac-acceptance.md), [targets/minima](release/host-dispatch.md).
+Go1.26.2 remains normal; Go1.20.14 is isolated for legacy Windows/dispatch.
 
 Basic current/previous logs are bounded to128KiB total; Export diagnostics is a
 host action, detailed tracing remains OFF. Short-lived logging modes leave no
@@ -48,11 +59,36 @@ redistribution gate. Candidate is private review material until cleared.
 
 ## Exact next step
 
-Review the pinned candidate/checksums, then qualify native Windows and the **actual
-ZIP** on device using [release gates](release/rc.1.md). Complete dependency audit
+Review documentation and coordinate the next exact package/checksums, then qualify
+its identified dispatcher/ZIP and remaining native targets using [release gates](release/rc.2.md). Complete dependency audit
 before public distribution. No shortcut, profiling session, broad cleanup or new
 feature is authorized by this release pass. All global shortcuts are deferred
 beyond v1.0; existing Apps/Home and MainUI X/Y remain.
 
 [Quick start](install.md) · [Recovery](uninstall.md) · [Compatibility](compatibility.md)
 · [Technical guide](development.md) · [Historical evidence](developer-index.md)
+
+Host compatibility update: Windows7 through current releases, macOS Monterey+
+Intel/Apple Silicon, Linux x64/ARM64; one automatic-dispatch entry per platform.
+See [targets, minima, dispatch and pending native qualification](release/host-dispatch.md).
+Legacy builds remain isolated; every host uses the same payload/safety implementation.
+
+## RC2 source/tag preparation — 2026-10-04
+
+The supplied focused documentation presentation patch is applied over the current
+rewrite. Newer Windows/device evidence is preserved. Three static badges and the
+exact supplied icon remain; dynamic badges reporting “repo not found” were removed.
+Relative links/anchors and GitHub GFM output are checked; isolated headless layout
+inspection supplements the unavailable app browser tool.
+
+Offline wrappers/full-uninstall remain the implemented route. A separate
+[bootstrap preparation](../tools/bootstrap/README.md) has isolated host fixtures
+and modern/legacy cross-builds, not Windows online acceptance or working public
+URLs. Uninstall requires an explicit matching release/recovery.
+
+libpng/zlib embedded versions and original upstream notices/sources are recovered.
+Custom SDL fresh linking fails on MI system/graphics symbols; original link inputs
+and extension/SwiftShader prebuilt correspondence remain binary publication gates.
+Prepare the annotated RC2 tag and **draft prerelease without assets**. Local final
+packages must identify the exact committed tree and keep new-byte qualification
+separate from previous accepted candidate bytes. No stable release or SD deployment.

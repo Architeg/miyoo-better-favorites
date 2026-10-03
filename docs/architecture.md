@@ -1,61 +1,52 @@
 # Architecture
 
-## Principle
+Better Favorites is a native C++17/SDL2 wrapper around Onion's existing
+`/mnt/SDCARD/Roms/favourite.json`. It does not create another favorites database,
+emulator lifecycle or history system.
 
-Better Favorites does not replace Onion's favorites database.
+## Ownership boundaries
 
-The existing Onion favorites file remains the source of truth:
+| Layer | Responsibility |
+| --- | --- |
+| Browser | Parse favorites, group/sort/display, navigate, render theme/artwork, remember position |
+| App-owned files | Persist browser options and independent Home/return preferences |
+| Guarded removal | Remove exactly one captured source record, preserve other fields and game data |
+| Binary → outer launcher | Privately stage a request, save position and finish SDL/audio cleanup |
+| Onion runtime | Execute game commands, choose cores, manage saves/resume/activity/recent history/GameSwitcher |
+| Optional return integration | Reopen an owned Better Favorites session after GameSwitcher; no resident app during gameplay |
+| Optional Home integration | Redirect only the existing Home Favorites activation via native AppAction |
+| Host installer | Verify, back up, install/restore and completely remove positively owned files |
 
-`/mnt/SDCARD/Roms/favourite.json`
+## Browser and data flow
 
-Stock Add to Favorites remains the adding workflow. Stock removal remains
-available; Better Favorites also supports guarded removal of exactly the selected
-original record with a verified backup and atomic replacement. ROMs, artwork,
-saves, recent history and unrelated records/fields are preserved.
+1. Parse existing favorite records, preserving stored paths and exact source identity.
+2. Resolve console labels with a per-parse cache and artwork with bounded fallbacks.
+3. Build grouped or flat rows, applying independent display/sort preferences.
+4. Restore selection by launch/ROM identity and adjust the viewport.
+5. Render using current profile/theme resources before Onion/Miyoo fallbacks.
+6. For A or MENU, stage privately, exit the loop and clean SDL/audio before handoff.
 
-The [authoritative roadmap](roadmap.md) records accepted defaults, unresolved
-settings and the complete milestone order; [status](development-status.md) records
-implementation and verification evidence.
+Stock Onion menus still add favorites. Removal backs up original bytes and refuses
+conflicting changes; ROM/artwork/saves/recent history are never deletion targets.
+Favorite/title display settings never write favorite/history data.
 
-## Application flow
+## Independent entry and return integrations
 
-1. Read `favourite.json`
-2. Resolve each favorite to its console/system
-3. Resolve the ROM path
-4. Resolve matching box art
-5. Build console groups (default) or a genuine flat list from persistent browser preferences
-6. Sort within groups, or globally in flat mode, by literal original label (default) or prefix-ignoring alphabetical title
-7. Render a stock-like Favorites interface using SDL2
-8. Privately stage the selected game/history request; finish SDL/audio cleanup
-9. Hand off through the outer launcher to Onion's existing runtime mechanisms
+The app works from Apps without either patch. Home replacement keeps the existing
+tile, label/theme resources and X/Y shortcuts; disabled/unavailable paths follow
+stock behavior. Automatic return owns the session originating here, retains it
+through game switching, and consumes ownership before reopening. B app exit does
+not create a loop. Both switches default OFF and report installation separately.
 
-Onion owns cores, saves/resume, activity tracking and GameSwitcher. Optional
-session-return integration restores the app/browser position; it is distinct from
-the unfinished Home Favorites entry integration. Browser preferences are stored
-separately from the return protocol; see [browser Settings](browser-settings.md).
+These are implemented reversible layers, restricted to audited Onion/MainUI bytes,
+not generic shell hooks or a new frontend. No separate tile/global shortcut is
+included. [Detailed lifecycle and source map](development.md).
 
-## UI
+## Release boundaries
 
-The application will be a native C/C++ SDL2 application.
+Every host installer variant shares the same Miyoo payload and safety logic. Host
+selection/path handling differs by OS; a platform target is not hardware acceptance.
+No proprietary originals or user data belong in Git/packages. Source/notice
+correspondence and exact-package qualification remain explicit release work.
 
-Shell scripts are reserved for:
-
-- installation
-- uninstallation
-- backups
-- integration with Onion
-- Favorites Home tile handoff
-
-## Favorites tile integration
-
-The native application must work independently before modifying the Onion Home screen.
-
-Favorites tile integration will therefore be a separate, reversible layer.
-
-Target flow:
-
-Onion Home
-→ Favorites
-→ Better Favorites
-→ selected game
-→ Onion/RetroArch launch mechanism
+[Roadmap](roadmap.md) · [Status](development-status.md) · [Compatibility](compatibility.md).

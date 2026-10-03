@@ -1,0 +1,2 @@
+# Windows entry scripts intentionally retain CRLF; it is not trailing whitespace.
+*.cmd whitespace=cr-at-eol

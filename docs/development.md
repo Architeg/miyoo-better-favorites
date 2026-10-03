@@ -104,16 +104,20 @@ creating verified host/card recovery trees. Stock originals and pre-operation
 snapshots are distinct. All replacements are staged/flushed first. Order: backup,
 app, helper, runtime, MainUI, availability/installed metadata. Rollback only restores
 an invocation's exact published bytes; foreign modifications are retained.
-Uninstall/Restore preflight all originals/destinations, restore runtime/MainUI first,
-then remove owned helper/receipt and mark journals inert. Preferences and backups
-remain. Multi-file publication is not one atomic filesystem transaction.
+Default uninstall preflights restoration and owned-file cleanup, verifies an external
+computer recovery/removal archive, restores/checks stock runtime/MainUI, then removes
+owned app/preferences/logs/helpers/receipts/journals/on-card backups. Only empty owned
+directories are removed. Unknown changes fail, including late conflicts, without
+claiming complete removal. remove-integrations/restore instead retain app/data. Multi-file publication is not one atomic filesystem transaction.
 
 Unix opens O_NOFOLLOW|O_NONBLOCK then validates the descriptor as a regular file.
 Windows uses CreateFileW OPEN_REPARSE_POINT, rejects directory/reparse handles and
 special/network paths, and publishes same-directory stages with MoveFileExW
 REPLACE_EXISTING|WRITE_THROUGH, without COPY_ALLOWED. This is not a guarantee of
 FAT physical power-loss immunity. [Microsoft API behavior](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-movefileexw).
-Native Windows execution/reader qualification remains pending. Exclusive offline
+Windows7 SP1 x64 and Windows10 x64 packaged install/uninstall and stock boot are
+user-confirmed; exact later dispatcher/tool hashes and other native targets remain
+unqualified. [Evidence limits](release/windows-acceptance.md). Exclusive offline
 card access is required; separate rechecks are conflict detection, not CAS.
 
 Per-card recovery retains exact SD paths and checksums. Host/card copies work
@@ -133,7 +137,23 @@ tracing. Filesystem/proc RAM evidence cannot be inferred from the mounted card.
 `tools/package-release.py` requires a clean commit, builds native host tools and
 creates app-only/installer ZIPs plus source/notices/checksums. Generated binaries,
 previews, logs, personal settings, backups and vendor fixtures stay out of Git.
-[Build/provenance](release/build.md), [rc.1 gates](release/rc.1.md),
+[Build/provenance](release/build.md), [rc.2 gates](release/rc.2.md),
 [contributing/tests](../CONTRIBUTING.md). Candidate acceptance requires the exact
 ZIP, native host filesystem tests and hardware installation roundtrip; compilation
 or emulation alone is insufficient.
+
+Default release uninstall now plans restoration and cleanup together, validates
+all owned paths, writes/verifies an external computer recovery/removal archive,
+restores/verifies stock system files, then removes owned files transactionally.
+Unknown changes fail without reporting complete removal. Explicit
+remove-integrations/restore retains app/data; incomplete cleanup is retryable.
+Only empty owned directories are removed; shared directories are never removed.
+
+## Start contributing
+
+Use the copyable [contributor build/check commands](../CONTRIBUTING.md). Ordinary
+checks need no proprietary fixtures. Exact MainUI/ARM harness and actual-package
+checks are opt-in; fixture setup is described in the linked Home/return guides.
+The fetch script does not extract SDL_mixer headers; the contributor recipe does.
+Clean custom OSS-library reproduction is separate from app compilation.
+[Dependency audit](release/dependency-audit.md) identifies the public-distribution gaps.

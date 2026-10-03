@@ -63,3 +63,11 @@ libraries match the accepted card bytes; audio has not been swapped. Runtime
 script and generated MainUI outputs remain identical to the accepted hashes;
 only candidate return trace gating/helper manifest and app/launcher wording/logging
 change. No candidate was deployed.
+
+### Evidence received 2026-10-04
+
+[User-confirmed RC1 Mac/device acceptance](rc1-mac-acceptance.md) matches these exact
+package hashes. Mounted-card stock restoration is independently verified; device
+boot after uninstall remains pending. RC1 integrations-only uninstall retained the
+app/artifacts; the authorized subsequent clean baseline archived and removed them.
+[RC2](rc.2.md) corrects default complete removal and contains separate new gates.

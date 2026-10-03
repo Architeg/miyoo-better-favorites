@@ -1,63 +1,51 @@
-# Uninstall and failed-menu recovery
+# Complete uninstall and failed-menu recovery
 
-**Deleting BetterFavoritesTest does not undo MainUI/runtime patches. Restore the
-integrations first, then optionally delete the app.** Keep all originals/backups.
-No recovery step requires MainUI, Miyoo Terminal, network access or firmware writes.
+Power the Miyoo OFF and mount its card. From the extracted installer folder:
 
-## Normal uninstall
+- macOS: `./Install-macOS.command uninstall`
+- Linux: `./Install-Linux.sh uninstall`
+- Windows 7 onward: `.\Install-Windows.cmd uninstall`
+- Windows 7 test bundle: `.\Install-Windows7.cmd uninstall`
 
-Power off and mount the card on Windows/macOS/Linux. Open the packaged host tool,
-choose **Uninstall**, give the card root and this card's **latest successful Install/Update recovery folder**. Older bundles retain stock originals for manual copy-back, but automatic restore refuses a stale expected installed manifest.
-It verifies every applicable backup and destination before changing anything,
-restores stock runtime/MainUI first, then removes its own receipts/helper and makes
-journals inert. Reboot and confirm stock Home Favorites and GameSwitcher behavior.
-The app, preferences, browser state and backups remain. You may now remove the app
-folder. Favorites, history, themes, libraries, saves and firmware are untouched.
+The tool prompts for the card and OFF confirmation. It locates and validates recovery
+only when one matching identity exists; otherwise it asks for this card's retained
+recovery folder. Multiple identities are never resolved by choosing the first/newest.
+The no-argument menu and fully specified commands still work.
 
-## If MainUI will not open
+**Default uninstall is complete removal in one operation:** preflight every file;
+keep a verified recovery/removal archive on the computer; restore stock MainUI/runtime;
+automatically verify hashes; remove the owned app (including preferences/state/logs),
+helpers, receipts, journals, on-card backups/mirrors and app-generated removal backups.
+Favorites/history, ROMs, saves, artwork, themes, shared system libraries, shortcuts
+and unrelated files/directories are preserved. App-private libraries are removed
+with the app. Unknown/modified files cause failure and identify unresolved paths;
+partial cleanup is never reported as complete. Keep the printed computer archive.
 
-1. Power the Miyoo off. Remove/mount the card on a computer.
-2. Open the same packaged host tool. Choose **Restore**, select this card and its
-   recovery folder. This accepts exact known original/installed mixtures left by
-   interruption. Foreign files are preserved and reported.
-3. Reboot after successful verification. Use Apps or stock Favorites.
+## Retain app/preferences: optional operation
 
-Host recovery is `recovery-<timestamp>` beside the extracted tool by default.
-A mirror is `.tmp_update/config/better-favorites-recovery-<timestamp>` on-card.
-Neither is automatically deleted. `before/` is the pre-operation snapshot;
-`after/` records expected installed outputs; **`files/` is the stock integration
-copy-back tree**. Earlier permanent return/Home backups remain in place.
+Use the same wrapper with `remove-integrations` instead of `uninstall`. This restores
+stock integrations and retains the app/data/backups. Installation and removal of
+system binaries take effect after reboot. Deleting the app alone cannot undo patches.
 
-## Manual copy-back without the tool
+## Missing MainUI or interrupted operation
 
-Use this **specific card's** verified bundle. Show hidden files (macOS Cmd+Shift+.,
-Windows Explorer View → Show → Hidden items, Linux Ctrl+H). Read `RESTORE.txt` and
-verify `SHA256SUMS` before copying. Hash tools are optional for navigation but
-required for claiming verified restoration:
+No Miyoo menu, Terminal, compiler, Python, Docker, WSL or network is needed. Power off,
+mount the card and use the same tool with `restore` to restore known original/patched
+mixtures while retaining app/data. Use `uninstall` to finish complete removal.
+A failed cleanup can be retried with its retained computer recovery bundle. Do not
+use an older bundle if a later update changed the expected outputs; conflict checks
+will refuse it. If recovery is missing/corrupt, nothing is guessed or blindly deleted.
 
-- Windows PowerShell: `Get-FileHash -Algorithm SHA256 "<backup file>"`.
-- macOS Terminal: `shasum -a 256 "<backup file>"`.
-- Linux: `sha256sum "<backup file>"`.
+## Manual recovery if the host tool cannot run
 
-Copy **only files actually present under `files/`**, preserving exact paths:
-
-- `files/.tmp_update/runtime.sh` → card `.tmp_update/runtime.sh`.
-- `files/.tmp_update/bin/MainUI-283-clean`, `MainUI-283-expert`, `MainUI-354-clean`,
-  `MainUI-354-expert` → matching card `.tmp_update/bin/` files.
-
-Check copied hashes against the bundle. Once originals are verified restored,
-remove only the known owned `App/BetterFavoritesTest/home-integration.conf` and
-`.tmp_update/script/better_favorites_return.sh` if their expected hashes match the
-manifest. Keep journals, backups and personal data. An inert journal can be handled
-by the tool before reinstalling; do not manually edit it. Do not copy `after/`,
-delete shared `.tmp_update`, or restore another card's files. If current files
-contain a later unrelated patch, archive them and seek support before replacement.
-
-## Limits
-
-The card must be offline with exclusive writer access. Check-then-rename detects
-observed conflicts; it is not filesystem compare-and-swap. Staged files are flushed
-and replaced on the same filesystem. Multi-file installation is not one atomic
-transaction. Verified journals/rollback handle known failures and interruptions;
-physical power loss, a failing card/reader, Windows FAT behavior and manual copying
-are separate risks requiring qualification. Preserve both host/card originals.
+Use this card's retained recovery bundle. Show hidden files. Read RESTORE.txt;
+`files/` is the stock integration copy-back tree. `before/` and `after/` must not be
+copied blindly. Copy only verified `files/.tmp_update/runtime.sh` and existing
+`files/.tmp_update/bin/MainUI-*` to identical SD paths. Never overwrite a foreign
+patch without preserving it and seeking support. Never delete shared .tmp_update.
+Mac `shasum -a 256` / Linux `sha256sum` / Windows `certutil -hashfile FILE SHA256`
+can verify individual files. Windows 7's bundled PowerShell lacks Get-FileHash and
+Expand-Archive; use Explorer's Extract All for the portable test ZIP.
+Keep the entire recovery bundle. Reboot and confirm stock behavior afterward.
+The updated automatic uninstall does all routine verification/removal; manual copying
+is an emergency fallback, not the normal installation procedure.

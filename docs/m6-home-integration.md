@@ -1,6 +1,8 @@
 > Release route: the packaged native Go tool now provides Install, Uninstall,
 > Restore and Export diagnostics. See [quick start](install.md) and [recovery](uninstall.md).
-> Native Windows execution qualification is pending; the Python implementation
+> Historical development route: current release installation uses the native host
+> tools. [Windows normal-flow acceptance](release/windows-acceptance.md) does not
+> qualify every later dispatcher/version. The Python implementation
 > below remains POSIX-only developer tooling. WSL is not a supported v1 user route.
 
 # Optional Home Favorites integration

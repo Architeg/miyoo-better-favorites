@@ -1,35 +1,162 @@
-# Contributing
+<div align="center">
+  <h1>Contributing to Better Favorites</h1>
+  <p><em>Help improve the app, the instructions, or compatibility.</em></p>
+</div>
 
-Bug reports, feature ideas and device/theme test reports are welcome. Use the issue
-templates, include exact app/Onion/model/firmware where known, and attach reviewed
-host-exported diagnostics if helpful. No Terminal access on the Miyoo is required.
-MY354 is a model/platform code; do not infer hardware revision.
+<p align="center">
+  <a href="README.md">About the app</a> ·
+  <a href="#report-a-useful-bug">Report a bug</a> ·
+  <a href="#get-the-source">Get started</a> ·
+  <a href="#run-ordinary-checks-first">Run checks</a> ·
+  <a href="docs/developer-index.md">Developer guides</a>
+</p>
 
-## Work on the code
+You do not need firmware binaries or a development environment to help.
 
-Read the [technical guide](docs/development.md), [roadmap](docs/roadmap.md) and
-[verification status](docs/development-status.md). Preserve the wrapper boundary:
-Onion owns game execution, cores, save/resume, history and GameSwitcher. Do not
-replace working audio or global theme settings to fix an unrelated issue.
+| How to help | Where to start |
+| --- | --- |
+| 🐛 Report a bug | Describe what happened and how to reproduce it |
+| 🎨 Test a theme or device | Share readability, missing-resource and control results |
+| 📖 Improve the docs | Fix unclear steps, missing information or confusing errors |
+| 💡 Suggest a feature | Explain the user need and existing Onion behavior |
+| 🛠️ Contribute code | Read the [architecture](docs/architecture.md) and [development guide](docs/development.md) |
 
-Prepare the pinned dependencies with `sh scripts/fetch-deps.sh`, then follow
-[build/package provenance](docs/release/build.md). Docker builds the ARM app;
-Go 1.24+ builds offline host tools with the standard library only. Development
-Python is for fixtures/package generation, not a user installation dependency.
+Use the [issue templates](https://github.com/Architeg/miyoo-better-favorites/issues/new/choose).
+Check the [roadmap](docs/roadmap.md) before starting a substantial feature.
 
-Run `sh tests/run-local-checks.sh`; use `tests/mainui-home/run-arm-checks.sh` only
-inside the isolated Docker fixture container. Run `go test ./...` in
-`tools/release-installer`. Exact binary tests require **private read-only** audited
-fixtures supplied through `BF_FIXTURE_REPO`; do not commit vendor binaries, card
-backups, game data, logs, settings, credentials or generated outputs.
+<a id="report-a-useful-bug"></a>
+## 🐛 Report a useful bug
 
-Qualify the **actual extracted ZIP** with `BF_RELEASE_PACKAGE` and the native host
-installer tests, then the release checklist. Native Windows execution and SD
-reader testing are separate from cross-compilation/Linux emulation. New devices,
-versions or hashes need audited source/ABI/layout and appropriate device evidence;
-never bypass an allowlist to claim compatibility.
+Include:
 
-Keep PRs scoped. Separate cosmetic cleanup from measured performance work. Include
-changes, risks, relevant checks and missing hardware evidence. Update roadmap and
-status on milestone or hardware acceptance changes. GPL-3.0-or-later applies to
-project sources; preserve separate dependency notices/source obligations.
+1. App version and candidate ZIP SHA-256, when available.
+2. Miyoo model, firmware and Onion version; hardware revision only if known.
+3. Active theme; whether optional integrations are installed and enabled.
+4. Steps, expected behavior, actual behavior and whether it repeats.
+5. For installation: computer OS/version/architecture, shell, SD reader/filesystem,
+   command/action and exact error. Note install/update/uninstall and post-uninstall boot separately.
+6. A relevant photo or reviewed diagnostic export if useful.
+
+MY354 identifies a model/platform, not a hardware revision. Unknown information is
+better than a guess. A successful build is not a device test.
+
+Export diagnostics with the normal installer script and powered-off card; no Miyoo
+Terminal is needed. **Inspect before uploading.** Reports can include game filenames,
+theme paths and preferences. Never upload ROMs, BIOS, saves, credentials, complete
+card images or private recovery originals. [Diagnostic contents/privacy](docs/diagnostics.md).
+
+<a id="get-the-source"></a>
+## 🧰 Get the source
+
+```sh
+git clone https://github.com/Architeg/miyoo-better-favorites.git
+cd miyoo-better-favorites
+```
+
+<a id="developer-prerequisites"></a>
+### What you need
+
+| Work | Requirements |
+| --- | --- |
+| Ordinary browser/core checks | Git, POSIX shell, C++17 compiler, Python (3.11 recommended) |
+| Installer tests | Go 1.26.2; standard library only, no external modules |
+| Windows legacy/dispatcher qualification | Isolated official Go 1.20.14; keep normal Go/module unchanged |
+| ARM app build | Docker and the existing pinned Miyoo toolchain image; prepared dependency headers |
+| Optional SDL resource checks | Existing SDL2/freetype/libpng development tools; see detailed guide |
+
+macOS contributors need developer command-line tools for host C++ checks; end users
+do not. Linux needs a host C++ compiler. Native Windows supports Go tests directly;
+POSIX C++/shell scripts need a suitable developer environment such as Git Bash or
+Linux/WSL2. That is a contributor option, **not** the user installation route.
+A container or cross-build does not qualify a native reader/filesystem.
+
+<a id="run-ordinary-checks-first"></a>
+## ✅ Run ordinary checks first
+
+These do not require a card or proprietary firmware fixtures:
+
+```sh
+sh tests/run-local-checks.sh
+(cd tools/release-installer && go test ./...)
+(cd tools/host-dispatch && go test ./...)
+python3 tests/host_dispatch_test.py
+```
+
+The C++/Python suite exercises browser navigation/settings/state, removal, handoff,
+return lifecycle and profiling utilities with temporary fixtures. Its optional
+emulator-label test explicitly skips if the existing host libcjson bridge is absent.
+Go tests skip exact vendor/package cases unless their fixture variables are supplied.
+The dispatch suite simulates host probes; it does not run every target OS.
+
+<a id="prepare-and-build-the-arm-app"></a>
+## 🔨 Prepare and build the ARM app
+
+Dependency preparation downloads the pinned SDL Miyoo fork and extracts headers;
+it writes only generated `third_party` directories. It is a developer network step.
+The current script prepares json-c, SDL_ttf and SDL_image headers. SDL_mixer's header
+must also be extracted from its existing pinned archive:
+
+```sh
+sh scripts/fetch-deps.sh
+mkdir -p third_party/sdl2_mixer/include
+tar -xzf third_party/sdl2_miyoo/sdl2/dependency/SDL2_mixer-2.6.3.tar.gz \
+  --strip-components=2 -C third_party/sdl2_mixer/include \
+  SDL2_mixer-2.6.3/include/SDL_mixer.h
+sh scripts/build.sh
+```
+
+`build/better-favorites` is the ARM output. The build also assembles the audited Home
+adapter; no MainUI binary fixture is needed for compilation. The image digest and
+version/source literals are set by the script. This produces a compiled executable,
+not hardware acceptance or a fully reproducible public release.
+
+**Packaging has an additional prerequisite:** the verified custom OSS SDL library
+and dependency hashes. Fresh cloning does not reproduce that library today. Do not
+silently substitute a different audio build. See [build/provenance](docs/release/build.md)
+and the [dependency audit](docs/release/dependency-audit.md).
+
+<a id="source-map"></a>
+## 🗂️ Source map
+
+| Location | Responsibility |
+| --- | --- |
+| `src/`, `include/` | Favorites parsing/model, navigation, theme/rendering/audio, menus, persistence and launch requests |
+| `App/BetterFavoritesTest/` | Onion app config, icon and outer handoff launcher |
+| `integration/onion-return/` | Optional runtime/session return hooks |
+| `integration/mainui-home/` | Optional exact-binary Home Favorites adapter and catalogue |
+| `tools/release-installer/`, `tools/host-dispatch/` | Installation/restoration/full removal and Windows host selection |
+| `packaging/`, `tools/package-release.py` | Entry scripts, package inventory, native builds and source companions |
+| `tests/` | Host fixtures, lifecycle/navigation/storage tests and isolated ARM harnesses |
+| `docs/` | User guides, architecture, roadmap and evidence |
+
+<a id="integration-and-hardware-qualification"></a>
+## 🧪 Integration and hardware qualification
+
+Ordinary contributions do not need private firmware. Exact MainUI patch output,
+displaced instructions and runtime hashes use legally obtained, read-only audited
+fixtures supplied through `BF_FIXTURE_REPO`. Actual extracted ZIP tests additionally
+use `BF_RELEASE_PACKAGE`. Do not commit or redistribute those originals.
+
+The main ARM harness refuses mounted cards and runs only in an isolated Docker
+container. It requires generated exact-binary prototypes and QEMU; the complete
+procedure is in [development](docs/development.md) and [Home integration](docs/m6-home-integration.md).
+Do not run it on the device or treat emulation as acceptance.
+
+Release qualification tests the **actual package**: install, optional Home OFF/ON,
+Apps/X/Y, game/GameSwitcher/return, complete uninstall, stock boot and reinstall.
+Record package/tool/deployed hashes, device/host/theme and missing evidence. New
+versions need an audited compatibility decision; never bypass an allowlist.
+
+<a id="send-a-focused-pull-request"></a>
+## 🤝 Send a focused pull request
+
+- Explain the user problem, scope, behavior change and regression risk.
+- List commands/results and distinguish simulation, host execution and hardware tests.
+- Preserve Onion's game/core/save/history/GameSwitcher ownership and working audio.
+- Keep geometry, theme resolution and exact-record identity intact unless the task explicitly changes them.
+- Update guides, roadmap/status and acceptance evidence when behavior or verification changes.
+- Exclude binaries, logs, personal preferences, backups, ROMs and firmware fixtures.
+- Keep cleanup separate from measured performance work; avoid unrequested restructuring.
+
+Project code is GPL-3.0-or-later. Preserve upstream notices and identify any new
+dependency/source obligations. Documentation and test reports are valuable PRs too.

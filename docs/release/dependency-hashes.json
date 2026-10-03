@@ -1,0 +1,56 @@
+[
+  {
+    "file": "libSDL2-2.0.so.0",
+    "sha256": "f103f5439d62a570b8977dcd7352779404cfb5112fc79008899c91c718a85d8a",
+    "size": 1344724,
+    "matches_accepted_card": true
+  },
+  {
+    "file": "libSDL2_image-2.0.so.0",
+    "sha256": "987f7326276c251010591cde4d0e3c627d2601a5e375e5a717896b4eb8a8da1d",
+    "size": 144960,
+    "matches_accepted_card": true
+  },
+  {
+    "file": "libSDL2_mixer-2.0.so.0",
+    "sha256": "0ef3183ccb52d7761296e76b9346cc5ac8715c676f40702bd3cbf64ca051af3b",
+    "size": 141776,
+    "matches_accepted_card": true
+  },
+  {
+    "file": "libSDL2_ttf-2.0.so.0",
+    "sha256": "e78fae7da6c688e16004a8c2343cacb7053d66cf7b2e01a71fe84448328a4762",
+    "size": 41452,
+    "matches_accepted_card": true
+  },
+  {
+    "file": "libjson-c.so.5",
+    "sha256": "52977c53de8cbe7f230f0956931b3040fdbab7a6b70400d99fae67512e3bdef4",
+    "size": 85936,
+    "matches_accepted_card": true
+  },
+  {
+    "file": "libpng16.so.16",
+    "sha256": "07d588538e7922145f163fbbba33806269e345de4c7d292c2ac44b128b3b217d",
+    "size": 222568,
+    "matches_accepted_card": true
+  },
+  {
+    "file": "libz.so.1",
+    "sha256": "480907f680d4feea4d98a10aa0355fd73fa8aacf21fd67ce84b1a65d4de24e73",
+    "size": 120352,
+    "matches_accepted_card": true
+  },
+  {
+    "file": "libEGL.so",
+    "sha256": "58e07aec9d59058b02c3ab8478038eec7e7c7964bedb8707f369998425692570",
+    "size": 55100,
+    "matches_accepted_card": true
+  },
+  {
+    "file": "libGLESv2.so",
+    "sha256": "80374f563291d83042f1fe1970f9c99063bcd48f1578cfec83ea8613d36382fe",
+    "size": 21775928,
+    "matches_accepted_card": true
+  }
+]

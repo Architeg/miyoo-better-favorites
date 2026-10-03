@@ -40,7 +40,7 @@ Layers:
 5. **Optional return integration:** separately installed, hash-gated runtime hook
    and session helper in `integration/onion-return/`. Installation is distinct from
    enabling the default-OFF preference. No app/helper process stays alive in play.
-6. **Future Home entry:** separate reversible integration, still unimplemented.
+6. **Home entry:** separate reversible exact-hash integration, user hardware-accepted on the tested Mini Plus/card.
    Return integration does not supply a Home tile entry hook.
 
 Onion retains emulator/core choices and overrides, save/resume, activity tracking,
@@ -169,11 +169,11 @@ Theme/device identities and test logs are not complete enough for universal clai
 
 ### Planned
 
-- M4 is hardware-complete; M5 measurement pass is closed with documented deferrals. M6 read-only entry-point investigation is next.
+- M4 is hardware-complete; M5 measurement pass is closed with documented deferrals. M6 Home Favorites redirect is hardware-accepted and committed as `60b34b6` on Mini Plus MY354 / firmware 202306282128 / Onion v4.3.1-1; hardware revision unknown. Broader compatibility remains unverified.
 - Browser page-at-a-time navigation after button semantics are resolved.
 - Device follow-up for the final centering/text-size/padding adjustments; optional controls remain unresolved.
 - Measured startup/memory profiling and evidence-based optimization.
-- Normal Home Favorites tile entry; direct Home shortcut investigation as alternative.
+- Normal Home Favorites tile entry is hardware-accepted on the tested card; independent L1+Y investigation is separate.
 - Explicit device/Onion/theme compatibility matrix and filename compatibility audit.
 - Remaining targeted cleanup, reproducible package, application install/upgrade/remove,
   production documentation, license/notices and versioned release.
@@ -199,6 +199,7 @@ still does **not** imply a usable persistent option. See [browser Settings](brow
 | Hints | Follow theme preferences; readable menu text-control labels as accepted | Theme hideIcons/hideHints applied; no app override | App hint override proposed; defaults/precedence unresolved; preserve browser/menu distinction |
 | Artwork | Selected artwork proportionally displayed | Rendering implemented; failure presentation partial | Optional app show/hide setting proposed; not accepted as required v1 toggle; default/layout when OFF unresolved |
 | Automatic return | OFF by default; separate optional integration; availability independent of preference | Persistent setting/generation, live-context status and explanation | Retain verified behavior; not blocked on Home integration; broader compatibility verification pending |
+| Use Better Favorites on Home / Home Favorites | OFF by default; independent of Automatic return | Separate persistent Home preference and exact-file availability; tested redirect, later wording host-only | Keep Apps and ordinary X/Y; shortcut is independent and unimplemented |
 
 Settings changes must not write favorite labels/order, lose selection identity,
 change Onion core settings or accidentally rotate/revive return ownership. Expand
@@ -336,7 +337,7 @@ full performance certification or new hardware acceptance of the cache build.
 - **Isolated change:** per-parse emulator-label cache; host exact-output, failure
   fallback and reload checks verify 70 → 3 config reads on this corpus. Regression
   suite/ARM build pass; cache binary deployed with production launcher and profiling
-  disabled. **Device speedup and this build's behavior are unverified.** See
+  disabled. **Device speedup remains unverified.** The original cache build was not tested; later M6 acceptance covers normal behavior of the actual cache-containing deployed bytes. See
   [cache scope and checks](m5-emulator-label-cache.md).
 - **Deferred evidence:** gameplay memory, ON/OFF comparison, post-scroll/menu memory
   and process-absence measurement. No more profiling sessions, Terminal commands
@@ -353,27 +354,42 @@ full performance certification or new hardware acceptance of the cache build.
 
 ### M6 — Implement a verified reversible Home entry point
 
-- **Intended behavior:** original target remains normal Home Favorites → Better
-  Favorites → Onion game launch. Investigate a direct Home shortcut as an alternative.
-- **Current/missing:** Apps test entry and return integration work; neither replaces
-  the Home tile. No supported tile dispatch/shortcut hook has been established.
-- **Dependencies:** stable M2–M4 browser and closed M5 pass (deferrals do not block investigation); exact target device/runtime/source and safe
-  integration design; inventory stock dispatch before choosing a mechanism.
-- **Reuse/inspect:** mounted v4.3.1-1 `runtime.sh` MainUI launch/mount/command handoff,
-  actual MainUI tile dispatch, state/keymon/GLO mechanisms, existing Apps launcher,
-  verified A/MENU/return protocol and any documented SD-card shortcut facilities.
-  Favorites GLO scripts are per-game actions, not a verified Home tile override.
-- **Acceptance:** chosen agreed entry opens the existing browser; stock adding/data,
-  launch/recent/GameSwitcher/return remain intact; B returns appropriately without
-  loops; enabling/upgrading/removing the entry is reversible with verified backups
-  and stock restoration. Stock games/apps continue working; no NAND/firmware writes.
-- **Host/device verification:** ownership/version/hash/failure/rollback fixtures and
-  installation dry runs, then actual Home entry/B/game/return/stock launch/reboot/
-  uninstall checks on each claimed device/version.
-- **Exclusions/decisions:** do not infer success from runtime-return installation.
-  Supported tile hook, shortcut mechanism, preference precedence, fallback behavior,
-  installed app name/path and final selection between replacement/alternative need
-  investigation and agreement. MainUI reverse-engineering is not a promised feature.
+- **Intended behavior:** optional `Use Better Favorites on Home: On/Off` (compact label `Home Favorites`), default Off,
+  independent of Automatic return. Home's existing Favorites tile opens Better
+  Favorites when enabled and available; otherwise stock activation. Keep its label,
+  theme artwork/layout, Apps entry and X/Y assignments. No separate tile.
+- **Current/missing:** exact installed v4.3.1-1 MainUI hashes and dispatch have been
+  audited. The reviewed implementation guards Home activation, uses native AppAction,
+  stages privately and publishes without replacing a competing pending command.
+  Four exact ARM variants and existing handoff guards pass host fixtures. The user confirms all four hardware checks on Mini Plus / v4.3.1-1: OFF/ON,
+  B Home/no-loop twice, Apps/X/Y, A/MENU/GameSwitcher/Automatic return. See
+  [actual hashes and evidence gaps](m6-acceptance.md). Diagnostics are archived and
+  disabled. Other variants, devices, uninstall and fault cases remain unqualified.
+  Separate default-OFF Settings preference,
+  exact-hash installation status, reversible installer/uninstaller and optional
+  bounded lifecycle diagnostics are implemented and host-tested locally.
+  Nonblocking descriptor opens and bounded ARM FIFO fixtures close the blocking-file gap. See [evidence and limits](m6-mainui-prototype.md).
+- **Dependencies:** stable M2–M4 browser and closed M5 pass; audited exact binaries,
+  reviewed ELF/ABI/concurrency design and verified backups/rollback before deployment.
+- **Reuse/inspect:** existing MainUI Favorites row, native AppAction and Home state
+  save/restore, runtime MainUI exit/command move, existing Apps launcher, A/MENU
+  handoff and session-return protocol. Do not weaken existing ownership guards.
+- **Acceptance:** Home redirect opens the existing browser; disabled/malformed/
+  unavailable conditions retain stock behavior; Home selection restores on B
+  without reopening loops. Stock games/apps/X/Y, data, audio, themes, launch/recent/
+  GameSwitcher/return remain intact. Enabling, updating and uninstalling are
+  reversible with verified originals; no NAND/firmware writes or watcher.
+- **Host/device verification:** exact hashes, ELF placement/permissions/unwind,
+  native ABI/replay/cleanup/result, command conflict and failure fixtures first;
+  installer backup/publication/rollback and Settings dry runs pass; device Home/B/A/MENU/
+  stock launch/reboot/disable/uninstall checks for each claimed device/version.
+- **Exclusions/decisions:** separate-tile implementation is dropped. Independent L1+Y is now a separately requested investigation; it must not
+  replace Apps, disable Home or alter ordinary X/Y. No shortcut implementation
+  is qualified; see [conflicts and command compatibility](m6-shortcut-investigation.md).
+  Runtime-return installation does not prove Home integration. Unmodified external
+  writers and stock runtime move remain documented concurrency limits. Final
+  installer recovery and broader supported-version matrix remain host-only; post-acceptance wording awaits device verification; no broad
+  MainUI replacement or general patcher features.
 
 ### M7 — Compatibility and targeted maintainability cleanup
 
@@ -406,8 +422,7 @@ full performance certification or new hardware acceptance of the cache build.
   upgrade and uninstall the app with optional integrations separately controlled.
 - **Current/missing:** Docker builds the prepared checkout; `fetch-deps.sh` pins SDL
   source, but custom SDL/audio binary provenance and full reproduction are incomplete.
-  `scripts/build.sh`, `install.sh`, `uninstall.sh`, `package.sh`, install/uninstall docs
-  and `LICENSE` are empty. The working return manager is not an app installer.
+  `scripts/build.sh`/`package.sh` and native Go installer now prepare rc.1; install/uninstall, recovery and license docs are present. Native Windows execution, final ZIP device roundtrip and dependency/source correspondence remain gates.
 - **Dependencies:** M6 integration design, M7 supported matrix, dependency/license
   decisions, version/layout/defaults and reproducible custom SDL2/audio procedure.
 - **Reuse/inspect:** existing toolchain/Makefile/fetch-deps, verified OSS/libpadsp SDL
@@ -424,8 +439,7 @@ full performance certification or new hardware acceptance of the cache build.
   install/upgrade/reboot/uninstall tests including optional integrations OFF/ON.
 - **Exclusions/decisions:** no shipping developer logs/previews/backups/credentials.
   A successful existing-checkout build does not prove reproduction. Application name,
-  package layout/version scheme, settings retention on uninstall, license and exact
-  toolchain pinning still require decisions; do not invent defaults.
+  package layout/version scheme, settings retention on uninstall, GPL-3.0-or-later and pinned toolchain are selected; prebuilt provenance and final qualification remain; do not invent defaults.
 
 ### M9 — Publish a versioned release; revisit deferred ideas afterward
 
@@ -459,14 +473,14 @@ Evidence gaps and limitations to retain until resolved:
 
 - Final readability is confirmed by supplied device photos for the screens shown;
   browser Settings functionality and preceding presentation are hardware-confirmed.
-  Only the new bold-white About headings are hardware pending. mini.os has
+  The bold-white About headings were accepted in M4; later Home wording/logging/package changes await candidate device verification. mini.os has
   no matching regular Nunito face; native bold is retained without a false weight claim.
 - Grouping/prefix/sort are now persistent UI controls in a separate file. Optional
   long-title/hint/artwork/remember-position controls remain proposals, not implemented.
   Return setting's compact format/helper compatibility remains unchanged.
 - Browser title scrolling is hardware-accepted for the reported test;
   dialog paging is a separate presentation feature.
-  Browser page controls are not defined. Flat mode disables console jumps.
+  L1/R1 page controls are approved and hardware-accepted in M4. Flat mode disables console jumps.
 - Valid paths with `&` and other excluded characters cannot currently launch;
   broader compatibility must satisfy shell execution and Onion's parser together.
   Resolved existing traversal paths are supported without changing their strings.
@@ -482,9 +496,10 @@ Evidence gaps and limitations to retain until resolved:
 - Limited pre-cache startup and idle ON RSS/PSS are measured; full gameplay/OFF-ON/process-absence evidence is deferred. Resource/file sizes do not measure RAM.
 - Existing SDL_ttf `libbz2.so.1.0` linker warning and private library provenance are
   packaging gaps. Do not change working audio/dependencies merely to silence it.
-- Home dispatch/hook remains unknown; MainUI internals are not verified. Return helper
+- Home dispatch/ABI/ELF have exact-binary host/emulated evidence; real startup, Home
+  restoration and no-loop return are user accepted on Mini Plus v4.3.1-1 only. Return helper
   availability does not imply Home integration, and preference ON does not imply installation.
-- No complete application installer/reproducible release/license selection yet.
+- Release candidate installer/package and GPL-3.0-or-later selection now exist; native Windows/device ZIP qualification and complete prebuilt provenance remain gates.
 
 Host gates include `tests/run-local-checks.sh`, `tests/runtime_installer_test.py`
 with the pinned runtime reference, shell syntax and Docker ARM compilation. SDL
@@ -530,3 +545,22 @@ Further visual polish is deferred after M1 absent a demonstrated usability probl
 
 No deferred choice may change the accepted mapping, data rules or Onion lifecycle
 without an explicit update to this authoritative roadmap and development status.
+
+## v1 release preparation update — 2026-10-03
+
+Accepted M6 checkpoint is committed. Public wording: **Designed for Mini and Mini
+Plus; hardware tested on Mini Plus.** Mini Plus MY354, firmware202306282128,
+Onionv4.3.1-1; revision unknown. [M6 evidence](m6-acceptance.md).
+
+All global shortcuts are deferred entirely for v1.0; independent shortcut research
+is historical, not the next implementation. Existing Home tile/theme, Apps and
+X/Y remain. M7/M8 prioritize app-only ZIP, self-contained offline native host
+installer, verified uninstall/manual recovery, bounded diagnostics, contributor/
+release docs and license/source audit. Candidate version is **1.0.0-rc.1**.
+
+Host/emulated checks and accepted earlier deployment do not accept rebuilt rc.1.
+[Exact remaining gates](release/rc.1.md): native Windows/reader execution, final
+ZIP device install→OFF/ON→game/return→uninstall/stock→reinstall, prebuilt/source/
+license correspondence. Until these pass the candidate is private review material;
+M9 stable publication is pending. Screenshots/banner remain user-supplied future
+materials, not a packaging blocker. [Current status](development-status.md).

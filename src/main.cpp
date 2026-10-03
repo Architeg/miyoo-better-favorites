@@ -1,3 +1,4 @@
+#include "diagnostics.h"
 #include "home_entry_settings.h"
 #include "profiled_sdl.h"
 #include "favorites_parser.h"
@@ -193,6 +194,9 @@ void blitScaled(
 
 int main(int argc, char* argv[])
 {
+    if (argc == 2 && std::strcmp(argv[1], "--rotate-log") == 0) { diagnostics::rotate(); return 0; }
+    if (argc == 3 && std::strcmp(argv[1], "--log-event") == 0) { diagnostics::event(argv[2]); return 0; }
+    diagnostics::Streams boundedLogs;
     if (argc == 3) {
         std::string error;
         bool success = false;
@@ -219,6 +223,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    diagnostics::event("startup version=" BETTER_FAVORITES_VERSION " commit=" BETTER_FAVORITES_COMMIT);
     startup_profile::Session profileSession;
 
     constexpr int width = 640;
@@ -243,6 +248,8 @@ int main(int argc, char* argv[])
     const std::string homePreferencePath=(preferenceSlash==std::string::npos?".":appSettingsPath.substr(0,preferenceSlash))+"/home-entry.conf";
     loadHomeEntryPreference(homePreferencePath,appSettings,settingsError);
     if(!settingsError.empty())std::cerr<<settingsError<<std::endl;
+
+    diagnostics::event("theme="+theme.rootPath+" automatic_return="+(appSettings.automaticReturn?"on":"off")+" home="+(appSettings.replaceStockFavorites?"on":"off"));
 
     FavoritesParser parser("/mnt/SDCARD", appSettings);
 
@@ -741,8 +748,10 @@ int main(int argc, char* argv[])
                 if (action == MenuAction::PageUp) menuRenderer.movePage(-1);
                 if (action == MenuAction::PageDown) menuRenderer.movePage(1);
                 if (menu.page() != previousPage) menuRenderer.resetPage();
-                if (menu.page()==MenuPage::Settings && previousPage!=MenuPage::Settings)
-                    appSettings.homeIntegrationAvailable=homeEntryAvailable("/mnt/SDCARD",homePreferencePath.substr(0,homePreferencePath.find_last_of('/')));
+                if (menu.page()==MenuPage::Settings && previousPage!=MenuPage::Settings) {
+                    appSettings.homeIntegrationStatus=homeEntryStatus("/mnt/SDCARD",homePreferencePath.substr(0,homePreferencePath.find_last_of('/')));
+                    appSettings.homeIntegrationAvailable=appSettings.homeIntegrationStatus==HomeIntegrationStatus::Available;
+                }
                 // Observe even open/close events batched into a single SDL frame.
                 if (!wasMenuOpen && menu.open()) browserTitles.pause(SDL_GetTicks());
                 if (wasMenuOpen && !menu.open()) browserTitles.restartDelay(SDL_GetTicks());
@@ -977,10 +986,6 @@ int main(int argc, char* argv[])
                 selectedRow != previousSelection &&
                 navigationSound
             ) {
-
-              std::cerr
-                  << "Playing navigation sound."
-                  << std::endl;
 
                 Mix_PlayChannelTimed(
                     -1,
@@ -2098,6 +2103,7 @@ int main(int argc, char* argv[])
     IMG_Quit();
     SDL_Quit();
 
+    diagnostics::event(std::string("SDL/audio cleanup complete; exit=")+(switcherRequested?"21":launchRequested?"20":"0"));
     return switcherRequested ? kSwitcherRequestedExitCode :
         (launchRequested ? kLaunchRequestedExitCode : 0);
 }

@@ -3,6 +3,7 @@ CXX := $(CROSS_COMPILE)g++
 TARGET := build/better-favorites
 
 SRC := \
+	src/diagnostics.cpp \
 	src/main.cpp \
 	src/browser_resources.cpp \
 	src/title_scroll.cpp \
@@ -48,6 +49,8 @@ CXXFLAGS := \
 	-I$(SDL_TTF_INC) \
 	-I$(SDL_IMAGE_INC) \
 	-I$(SDL_MIXER_INC)
+
+CXXFLAGS += $(RELEASE_DEFINES)
 
 LDFLAGS := \
 	$(SDL_LIB) \

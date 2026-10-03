@@ -1,0 +1,17 @@
+name: Native installer core
+on: [push, pull_request]
+jobs:
+  host:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.2'
+      - run: go test -v ./...
+        working-directory: tools/release-installer
+      # Exact MainUI and actual ZIP tests need private audited fixtures; this
+      # job does not qualify SD readers, FAT faults or final device installation.

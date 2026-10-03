@@ -31,7 +31,7 @@ def rollback(root,backup):
     diagnostics.run(root,'disable')
     manifest=root/'.tmp_update/config/better-favorites-home.json'
     state=json.loads(manage.regular(manifest))
-    if state['status'] in ('installed','prepared'):manage.manage(root,'uninstall')
+    if state['status'] in ('installed','prepared','uninstalling'):manage.manage(root,'recover')
     elif state['status']!='uninstalled':raise RuntimeError('Unknown integration state preserved')
     changes={}
     for relative in ('App/BetterFavoritesTest/better-favorites','App/BetterFavoritesTest/launch.sh'):

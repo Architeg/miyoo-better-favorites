@@ -475,13 +475,17 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
     }
     fill(screen,{0,0,640,480},bg);blit(resources_.background,screen,{0,0,640,480});blit(resources_.title,screen,{0,0,640,header});
     const std::string title=page==MenuPage::Settings?"SETTINGS":page==MenuPage::Help?"HELP":
-        page==MenuPage::ReturnInfo?"AUTOMATIC RETURN":page==MenuPage::HomeInfo?"HOME FAVORITES":"REMOVE FROM FAVORITES?";
+        page==MenuPage::ReturnInfo?"AUTOMATIC RETURN":page==MenuPage::HomeInfo?"HOW TO OPEN BETTER FAVORITES":"REMOVE FROM FAVORITES?";
     const auto titleLines=wrap(resources_.titleFont,title,600);
     // Titles are short fixed labels, measured and wrapped rather than clipped.
+#ifdef BETTER_FAVORITES_MENU_RENDER_TESTING
+    assert(int(titleLines.size())*lineHeight(resources_.titleFont)<=header);
+#endif
     int headingY=(header-int(titleLines.size())*lineHeight(resources_.titleFont))/2;
     for(const auto& line:titleLines){text(screen,resources_.titleFont,line,color(theme_.title),(640-width(resources_.titleFont,line))/2,headingY);headingY+=lineHeight(resources_.titleFont);}
     if(page==MenuPage::Settings) {
-        const char* labels[]={"Automatic return","Group by console","Numeric prefixes","Sorting","Replace stock Favorites","About automatic return","About Home Favorites"};
+        const std::string labels[]={"Automatic return","Group by console","Numeric prefixes","Sorting",
+            width(resources_.listFont,"Replace stock Favorites")<=600-width(resources_.listFont,"OFF")-88?"Replace stock Favorites":"Home Favorites","About automatic return","How to open Better Favorites"};
         const std::string values[]={returnOn?"ON":"OFF",settings.groupByConsole?"ON":"OFF",settings.showNumericPrefixes?"Show":"Hide",settings.sortMode==SortMode::OriginalLabel?"Original label":"Alphabetical title",settings.replaceStockFavorites?"ON":"OFF","",""};
         const auto font=descriptionFont_?descriptionFont_:resources_.bodyFont;
         // Reserve two lines at the existing font/badge size, regardless of row count
@@ -509,8 +513,10 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
             settings.groupByConsole?"Group games under console headings.":"Flat list. Console jumps are disabled.",
             settings.showNumericPrefixes?"Show numeric prefixes in displayed titles.":"Hide leading numeric prefixes. Sorting is unchanged.",
             settings.sortMode==SortMode::OriginalLabel?"Sort by literal stored labels.":"Sort titles without leading numeric prefixes.",
-            settings.homeIntegrationAvailable?"Home integration installed.":"Integration unavailable. Stock Favorites remains.",
-            "Read how automatic return works.","Installation and Home return behavior."};
+            settings.homeIntegrationStatus==HomeIntegrationStatus::Unavailable?"Home access is unavailable on this system. Use Apps.":
+                !settings.homeIntegrationAvailable?"Open from Apps. Home access needs the optional patch.":
+                settings.replaceStockFavorites?"The Home Favorites icon opens Better Favorites.":"The Home Favorites icon opens the original list.",
+            "Read how automatic return works.","Read about opening from Home or Apps."};
         const auto description=inlineFlow(font,descriptions[selected],600,[&](const std::string& key){return controlLabel(key);});
 #ifdef BETTER_FAVORITES_MENU_RENDER_TESTING
         assert(description.lines<=2 && description.lines*description.lineHeight+16<=panelHeight);
@@ -519,7 +525,7 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
         const int descriptionY=descriptionPanel.y+(descriptionPanel.h-descriptionHeight)/2;
         const auto descriptionInk=secondaryInk(screen,{margin,descriptionY,600,descriptionHeight},section,list);
         drawFlow(screen,font,description,margin,descriptionY,descriptionInk);
-        p.footer({{"A",selected<5?"Change":"Open"},{"B","Back"}});
+        p.footer({{"A",selected==0 || selected==1 || selected==4?"Toggle":selected<5?"Change":"Open"},{"B","Back"}});
     } else if(page==MenuPage::Help) {
         pages_=2;page_=std::min(page_,pages_-1);
         const bool browser=page_==0;
@@ -548,10 +554,11 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
         const auto font=descriptionFont_?descriptionFont_:resources_.bodyFont;
         struct Block {std::string value;bool heading;};
         const std::vector<Block> blocks=page==MenuPage::HomeInfo?std::vector<Block>{
-            {settings.homeIntegrationAvailable?"Integration: installed":"Integration: unavailable",false},
-            {"Replace stock Favorites",true},{"ON opens Better Favorites from Home. OFF keeps stock Favorites.",false},
-            {"[B]: exit to Onion. Home restoration is under test.",false},{"Apps access is unchanged. Automatic return is independent.",false},
-            {"Install or remove only on a powered-off card. Binary changes require reboot.",false}}:std::vector<Block>{
+            {settings.homeIntegrationAvailable?"Home access: Available":settings.homeIntegrationStatus==HomeIntegrationStatus::NotInstalled?"Home access: Not installed":"Home access: Unavailable on this system",false},
+            {"From Home",true},{"Enable Replace stock Favorites, then choose Favorites on Home.",false},
+            {"From Apps",true},{"Open Apps > Better Favorites.",false},
+            {"Going back",true},{"[B] returns to Home when opened from Home.",false},
+            {"Automatic return controls where you go after GameSwitcher.",false}}:std::vector<Block>{
             {available?"Integration: available":"Integration: unavailable (optional patch required)",false},
             {"When enabled",true},{"[B] / [START]: return here from GameSwitcher.",false},
             {"[A]: resume the game. Switching games keeps the session.",false},
@@ -560,7 +567,7 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
         struct Positioned {TextFlow flow;TTF_Font* font;int y,page;bool heading;};
         std::vector<Positioned> laidOut;int y=header+8,pageIndex=0;
         for(std::size_t i=0;i<blocks.size();++i){
-            const auto& block=blocks[i];auto* face=block.heading?(returnHeadingFont_?returnHeadingFont_:sectionHeadingFont_):font;
+            const auto& block=blocks[i];auto* face=block.heading?(page==MenuPage::ReturnInfo && returnHeadingFont_?returnHeadingFont_:sectionHeadingFont_):font;
             if(block.heading)y+=12;
             auto flow=inlineFlow(face,block.value,600,[&](const std::string& key){return controlLabel(key);});
             const int height=flow.lines*flow.lineHeight;
@@ -571,7 +578,7 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
         }
         pages_=pageIndex+1;page_=std::min(page_,pages_-1);
         for(const auto& block:laidOut)if(block.page==page_){
-            const auto ink=block.heading?SDL_Color{255,255,255,255}:secondaryInk(screen,{margin,block.y,600,block.flow.lines*block.flow.lineHeight},section,list);
+            const auto ink=block.heading?(page==MenuPage::ReturnInfo?SDL_Color{255,255,255,255}:section):secondaryInk(screen,{margin,block.y,600,block.flow.lines*block.flow.lineHeight},section,list);
             drawFlow(screen,block.font,block.flow,margin,block.y,ink);
         }
         if(pages_>1)p.footer({{"UP DOWN","Page"},{"B","Back"}});else p.footer({{"B","Back"}});

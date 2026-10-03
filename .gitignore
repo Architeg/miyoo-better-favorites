@@ -62,3 +62,9 @@ third_party/sdl2_image/
 
 /App/BetterFavoritesTest/browser-preferences.conf
 /App/BetterFavoritesTest/browser-preferences.conf.*
+
+# Optional integration receipts and personal Home preference
+/App/BetterFavoritesTest/home-entry.conf*
+/App/BetterFavoritesTest/home-integration.conf
+/App/BetterFavoritesTest/home-diagnostics.conf
+/App/BetterFavoritesTest/release.json

@@ -73,6 +73,11 @@ static SDL_Surface* render(const char* root,MenuPage page,bool longTitle,bool er
             }
         }
         SDL_FreeSurface(panelReference);
+        for(auto status:{HomeIntegrationStatus::Available,HomeIntegrationStatus::NotInstalled,HomeIntegrationStatus::Unavailable})for(bool on:{false,true}){
+            AppSettings options;options.homeIntegrationStatus=status;options.homeIntegrationAvailable=status==HomeIntegrationStatus::Available;options.replaceStockFavorites=on;
+            underlay();renderer.draw(screen,MenuPage::Settings,4,true,false,false,game,5000,"",options);
+            underlay();renderer.draw(screen,MenuPage::HomeInfo,0,true,false,false,game,5000,"",options);
+        }
         AppSettings flatOptions;flatOptions.groupByConsole=false;
         underlay();renderer.draw(screen,MenuPage::Help,0,true,true,true,game,5000,"",flatOptions);
         for(const auto& testPage:{MenuPage::Settings,MenuPage::ReturnInfo,MenuPage::HomeInfo}){

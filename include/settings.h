@@ -3,6 +3,8 @@
 
 #include <string>
 
+enum class HomeIntegrationStatus { Available, NotInstalled, Unavailable };
+
 enum class SortMode
 {
     OriginalLabel,
@@ -12,6 +14,7 @@ enum class SortMode
 struct AppSettings
 {
     bool replaceStockFavorites = false;
+    HomeIntegrationStatus homeIntegrationStatus = HomeIntegrationStatus::NotInstalled;
     bool homeIntegrationAvailable = false; // inspected, never persisted as preference
     bool automaticReturn = false;
     std::string returnGeneration;

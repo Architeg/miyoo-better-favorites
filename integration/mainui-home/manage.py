@@ -13,7 +13,18 @@ PACKAGE = Path(__file__).resolve().parent
 RETURN = PACKAGE.parent/'onion-return'
 
 
+def require_posix():
+    if os.name != "posix" or any(not hasattr(os, name) for name in ("O_NOFOLLOW", "O_NONBLOCK", "fchmod", "fsync")):
+        raise RuntimeError("Native Windows Python is unsupported. Use a validated POSIX mount; see docs/m6-home-integration.md.")
+
+
+def unlink_if_present(path):
+    try: path.unlink()
+    except FileNotFoundError: pass
+
+
 def regular(path):
+    require_posix()
     fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
     try:
         info = os.fstat(fd)
@@ -42,6 +53,7 @@ def directory(root, path):
 
 
 def card(root):
+    require_posix()
     root = root.absolute()
     for path in (root, root/'.tmp_update/bin', root/'.tmp_update/config', root/'App/BetterFavoritesTest'):
         directory(root, path)
@@ -74,7 +86,7 @@ def stage(path, data, mode):
             raise RuntimeError('Staged bytes do not match')
         return Path(temporary)
     except Exception:
-        Path(temporary).unlink(missing_ok=True)
+        unlink_if_present(Path(temporary))
         raise
 
 
@@ -122,7 +134,7 @@ def transaction(changes, check=lambda: None, hook=lambda phase, path: None):
                             conflicts.append(str(path)); continue
                         os.replace(temporary, path)
                     finally:
-                        temporary.unlink(missing_ok=True)
+                        unlink_if_present(temporary)
                 if snapshot(path) != before:
                     conflicts.append(str(path))
             except Exception:
@@ -130,7 +142,7 @@ def transaction(changes, check=lambda: None, hook=lambda phase, path: None):
         raise RuntimeError(f'{cause}; rollback conflicts retained: {conflicts}') from cause
     finally:
         for temporary in staged.values():
-            temporary.unlink(missing_ok=True)
+            unlink_if_present(temporary)
 
 
 def catalogue():
@@ -210,7 +222,7 @@ def manage(root, action, payload=None, hook=lambda phase, path: None):
     else:
         if old_manifest is None: raise RuntimeError('No installed manifest')
         manifest = json.loads(old_manifest)
-        if (manifest.get('status') not in ('installed','prepared') or manifest.get('version')!=spec['version'] or
+        if (manifest.get('status') not in ('installed','prepared','uninstalling') or manifest.get('version')!=spec['version'] or
                 manifest.get('original')!=spec['originals'] or manifest.get('patched')!=spec['patched']):
             raise RuntimeError('Manifest/package mismatch')
         relative = Path(manifest['backup'])
@@ -222,16 +234,20 @@ def manage(root, action, payload=None, hook=lambda phase, path: None):
             current, original = regular(path),regular(backup/name)
             mode = manifest['modes'][name]
             if not isinstance(mode,int) or not 0<=mode<=0o777: raise RuntimeError('Invalid backup mode')
-            allowed = (spec['originals'][name],spec['patched'][name]) if manifest['status']=='prepared' else (spec['patched'][name],)
+            allowed = (spec['originals'][name],spec['patched'][name]) if action=='recover' or manifest['status'] in ('prepared','uninstalling') else (spec['patched'][name],)
             if prototype.digest(current) not in allowed or prototype.digest(original)!=spec['originals'][name]:
                 raise RuntimeError(f'Changed installed file or backup preserved: {name}')
             changes[path]=(current,original,mode)
         marker_bytes=snapshot(marker)
-        allowed_markers=(None,receipt(spec)) if manifest['status']=='prepared' else (receipt(spec),)
+        allowed_markers=(None,receipt(spec)) if action=='recover' or manifest['status'] in ('prepared','uninstalling') else (receipt(spec),)
         if marker_bytes not in allowed_markers: raise RuntimeError('Changed availability marker preserved')
         if marker_bytes is not None: changes[marker]=(marker_bytes,None,0o600)
+        # Journal the restore before any replacement; a crash may leave an exact
+        # original/patched mixture. Explicit recover also handles older installed journals.
+        restoring=(json.dumps(dict(manifest,status='uninstalling'),indent=2)+'\n').encode()
+        transaction({manifest_path:(old_manifest,restoring,0o600)},check=lambda: card(root))
         manifest['status']='uninstalled'
-        changes[manifest_path]=(old_manifest,(json.dumps(manifest,indent=2)+'\n').encode(),0o600)
+        changes[manifest_path]=(restoring,(json.dumps(manifest,indent=2)+'\n').encode(),0o600)
     try:
         transaction(changes,check=lambda: card(root),hook=hook)
     except Exception:
@@ -245,7 +261,7 @@ def manage(root, action, payload=None, hook=lambda phase, path: None):
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action',choices=['status','install','uninstall'])
+    parser.add_argument('action',choices=['status','install','uninstall','recover'])
     parser.add_argument('--sd-root',type=Path,required=True)
     parser.add_argument('--payload',type=Path)
     parser.add_argument('--powered-off',action='store_true')

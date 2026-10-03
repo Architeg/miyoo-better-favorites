@@ -5,10 +5,13 @@ cd "$APP_DIR" || exit 1
 LOG="$APP_DIR/better-favorites.log"
 ACTIVE=/mnt/SDCARD/.tmp_update/cmd_to_run.sh
 
-{
-    echo "=== Better Favorites runtime log ==="
-    date
-} > "$LOG"
+export BETTER_FAVORITES_LOG="$LOG"
+export LD_LIBRARY_PATH="$APP_DIR:/config/lib:/customer/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+# Bound current/previous sessions through short-lived binary modes. No logger
+# process survives the app or handoff. Logging failures never change decisions.
+"$APP_DIR/better-favorites" --rotate-log >/dev/null 2>&1 || true
+log() { "$APP_DIR/better-favorites" --log-event "$*" >/dev/null 2>&1 || true; }
+log "launcher entry pid=$$ ppid=$PPID"
 
 # Optional lifecycle evidence only; the native command and ownership checks stay exact.
 # Markers are independent of both saved Home replacement and Automatic return.
@@ -26,48 +29,47 @@ home_diagnostic() {
     if [ -f "$hook_log" ] && [ ! -L "$hook_log" ]; then
         candidate=$(awk '/event=publication reason=committed/ {for(i=1;i<=NF;i++)if($i~/^attempt=/)last=$i} END {print last}' "$hook_log" 2>/dev/null)
     fi
-    printf 'M6Home1 launcher pid=%s ppid=%s event=%s candidate_%s\n' "$$" "$PPID" "$1" "${candidate:-attempt=none}" >> "$LOG" 2>/dev/null || true
+    log "M6Home1 launcher pid=$$ ppid=$PPID event=$1 candidate_${candidate:-attempt=none}"
 }
 home_diagnostic entry
 
 umask 077
-REQUEST_DIR="$(mktemp -d /tmp/better-favorites.XXXXXX 2>> "$LOG")"
+REQUEST_DIR="$(mktemp -d /tmp/better-favorites.XXXXXX 2>/dev/null)"
 APP_PID=""
 HANDOFF_COMMITTED=0
 unset BETTER_FAVORITES_REQUEST_DIR
 if [ -n "$REQUEST_DIR" ]; then
-    printf 'Private request directory created: %s\n' "$REQUEST_DIR" >> "$LOG"
-    if cp "$ACTIVE" "$REQUEST_DIR/app-command.sh" 2>> "$LOG"; then
-        echo "Captured active app command in private request directory." >> "$LOG"
+    log "Private request directory created: $REQUEST_DIR"
+    if cp "$ACTIVE" "$REQUEST_DIR/app-command.sh" 2>/dev/null; then
+        log "Captured active app command in private request directory."
     else
-        echo "Could not capture active app command." >> "$LOG"
+        log "Could not capture active app command."
     fi
     export BETTER_FAVORITES_REQUEST_DIR="$REQUEST_DIR"
 else
-    echo "Could not create private request directory." >> "$LOG"
+    log "Could not create private request directory."
 fi
 
 cleanup() {
     trap - EXIT INT TERM
     home_diagnostic "exit committed=$HANDOFF_COMMITTED binary_status=${app_exit:-not-returned}"
-    printf 'cleanup: committed=%s app_pid=%s\n' \
-        "$HANDOFF_COMMITTED" "$APP_PID" >> "$LOG"
+    log "cleanup: committed=$HANDOFF_COMMITTED app_pid=$APP_PID"
     if [ -n "$APP_PID" ]; then
         kill -TERM "$APP_PID" 2>/dev/null || true
         wait "$APP_PID" 2>/dev/null || true
-        echo "cleanup: child binary terminated or already exited." >> "$LOG"
+        log "cleanup: child binary terminated or already exited."
     fi
     if [ -n "$REQUEST_DIR" ]; then
         if "$APP_DIR/better-favorites" \
-            --cancel-handoff "$REQUEST_DIR" >> "$LOG" 2>&1; then
-            echo "cleanup: private request removed." >> "$LOG"
+            --cancel-handoff "$REQUEST_DIR" >/dev/null 2>&1; then
+            log "cleanup: private request removed."
         else
-            echo "cleanup: private request removal failed." >> "$LOG"
+            log "cleanup: private request removal failed."
         fi
-        if rmdir "$REQUEST_DIR" 2>> "$LOG"; then
-            echo "cleanup: private directory removed." >> "$LOG"
+        if rmdir "$REQUEST_DIR" 2>/dev/null; then
+            log "cleanup: private directory removed."
         else
-            echo "cleanup: private directory retained." >> "$LOG"
+            log "cleanup: private directory retained."
         fi
     fi
 }
@@ -78,21 +80,20 @@ trap 'exit 143' TERM
 
 export BETTER_FAVORITES_SETTINGS="$APP_DIR/settings.conf"
 export BETTER_FAVORITES_BROWSER_STATE="$APP_DIR/browser-state"
-export LD_LIBRARY_PATH="$APP_DIR:/config/lib:/customer/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-echo "Starting Better Favorites binary." >> "$LOG"
+log "Starting Better Favorites binary."
 SDL_AUDIODRIVER=dsp \
 LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so \
-"$APP_DIR/better-favorites" >> "$LOG" 2>&1 &
+"$APP_DIR/better-favorites" >/dev/null 2>&1 &
 APP_PID=$!
 last_app_pid="$APP_PID"
 wait "$APP_PID"
 app_exit=$?
 APP_PID=""
-printf 'binary pid=%s exit status=%s\n' "$last_app_pid" "$app_exit" >> "$LOG"
+log "binary pid=$last_app_pid exit status=$app_exit"
 
 if [ "$app_exit" -eq 20 ] || [ "$app_exit" -eq 21 ]; then
     if [ -z "$REQUEST_DIR" ]; then
-        echo "No private request directory for handoff." >> "$LOG"
+        log "No private request directory for handoff."
         exit 1
     fi
     # Both operations publish only after SDL/audio cleanup. A registers its
@@ -102,7 +103,7 @@ if [ "$app_exit" -eq 20 ] || [ "$app_exit" -eq 21 ]; then
     operation=--publish-handoff
     [ "$app_exit" -ne 21 ] || operation=--publish-switcher-handoff
     "$APP_DIR/better-favorites" \
-        "$operation" "$REQUEST_DIR" >> "$LOG" 2>&1
+        "$operation" "$REQUEST_DIR" >/dev/null 2>&1
     publish_status=$?
     if [ "$publish_status" -eq 0 ]; then
         HANDOFF_COMMITTED=1
@@ -110,10 +111,10 @@ if [ "$app_exit" -eq 20 ] || [ "$app_exit" -eq 21 ]; then
     trap 'exit 130' INT
     trap 'exit 143' TERM
     if [ "$HANDOFF_COMMITTED" -eq 1 ]; then
-        echo "Published Onion handoff: $operation." >> "$LOG"
+        log "Published Onion handoff: $operation."
         exit 0
     fi
-    echo "Could not publish game handoff." >> "$LOG"
+    log "Could not publish game handoff."
     exit 1
 fi
 

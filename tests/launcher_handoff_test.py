@@ -22,6 +22,8 @@ with tempfile.TemporaryDirectory(prefix='better-favorites-launcher-test-') as fo
 [ "$BETTER_FAVORITES_RETURN_DIR" = "$TEST_RETURN_DIR" ] || exit 97
 printf '%s\\n' "$*" >> "$TEST_TRACE"
 case "$1" in
+    --rotate-log) : > "$BETTER_FAVORITES_LOG"; exit 0 ;;
+    --log-event) printf '%s\\n' "$2" >> "$BETTER_FAVORITES_LOG"; exit 0 ;;
     --publish-handoff|--publish-switcher-handoff)
         [ -f "$TEST_CLEANUP" ] || exit 99
         exit "$TEST_PUBLISH_EXIT" ;;

@@ -9,6 +9,7 @@ compile_run() {
     c++ -std=c++17 -Wall -Wextra -Iinclude "$@" -o "$output/$name"
     "$output/$name"
 }
+compile_run diagnostics tests/diagnostics_test.cpp src/diagnostics.cpp
 compile_run startup-profile tests/startup_profile_test.cpp
 compile_run navigation-boundaries tests/navigation_boundaries_test.cpp src/navigation.cpp src/ui_rows.cpp
 compile_run title-scroll tests/title_scroll_test.cpp src/title_scroll.cpp

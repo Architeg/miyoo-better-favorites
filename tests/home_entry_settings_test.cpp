@@ -12,6 +12,7 @@ int main(){
  assert(setHomeEntryPreference(path,true,s,error));assert(s.replaceStockFavorites);
  assert(loadHomeEntryPreference(path,s,error)&&s.replaceStockFavorites);
  assert(s.automaticReturn&&s.returnGeneration=="unchanged"&&!s.groupByConsole);
+ assert(homeEntryStatus(root,root)==HomeIntegrationStatus::Unavailable);
  assert(!homeEntryAvailable(root,root)); // ON preference is not installation
  write(path,"BetterFavoritesHome1\n1\nextra");assert(!loadHomeEntryPreference(path,s,error)&&!s.replaceStockFavorites);
  assert(setHomeEntryPreference(path,true,s,error));assert(!setHomeEntryPreference(root+"/missing/file",false,s,error)&&s.replaceStockFavorites);

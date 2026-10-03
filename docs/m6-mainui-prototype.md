@@ -1,6 +1,11 @@
-# M6: host-only Home Favorites redirect prototype
+# M6: exact-binary Home Favorites redirect evidence
 
-Accepted Home redirect on Mini Plus MY354 / firmware 202306282128 / Onion v4.3.1-1; hardware revision unknown. See [tested bytes and limits](m6-acceptance.md). This checkpoint records the accepted implementation. Later local wording and recovery changes are separate. Shortcuts are deferred beyond v1.0.
+2026-10-03, based on `main` HEAD `6f846ce32f6ee8f773b59dfae8cc4d2c0cf56907`.
+**Local/uncommitted; deployed implementation user hardware-accepted on Mini Plus
+v4.3.1-1.** See [tested hashes and log coverage](m6-acceptance.md). Diagnostic logs
+are archived, marker disabled and synced. New wording/status/recovery changes after
+acceptance remain host-only/undeployed. The adapter bytes have not changed.
+See [installation, diagnostics and offline recovery](m6-home-integration.md).
 
 ## Accepted scope and provenance
 
@@ -123,8 +128,9 @@ for SDL/audio cleanup and only then publishes exit-20/21 handoff. No MainUI PID
 capture, stop/kill or new loop is added. Runtime return ownership starts only from
 existing A/MENU tickets; entering from Home creates no separate return marker.
 B follows ordinary App return. The redirect runs only on activation, so restoring
-Home selection does not itself reopen Better Favorites. Actual Home/B/A/MENU/
-GameSwitcher/reboot behavior still requires device testing after installer review.
+Home selection does not itself reopen Better Favorites. Home/B/A/MENU/GameSwitcher
+passed user testing on the tested Mini Plus/card. Uninstall, repeated reboot and
+fault cases remain separate qualification items.
 
 ## ELF placement, byte map and sizes
 
@@ -243,6 +249,8 @@ exercised through a full real MainUI session. No emulated framebuffer, keymon,
 complete startup/shutdown or power-loss test is claimed. Verify real Home selection
 restoration, B no-loop behavior, launch/MENU/return, stock isolation, other-writer
 and interruption behavior on hardware after a reviewed reversible installer exists.
-Installer backup/hash/rollback and Settings are now host-tested; actual boot,
-Home no-loop return, library availability and additional binary/version compatibility
-remain hardware-pending. Diagnostics are opt-in and do not prove device acceptance. No performance or RAM gain is claimed.
+The user now confirms boot, OFF/ON Home dispatch, B no-loop restoration, Apps/X/Y
+and A/MENU/Automatic return on the tested Mini Plus/card; see [actual deployed
+hashes and missing log evidence](m6-acceptance.md). Other binary/device/version
+compatibility, uninstall and hardware fault cases remain unverified. New wording
+and recovery changes after collection are host-only. Diagnostics are opt-in and do not prove device acceptance. No performance or RAM gain is claimed.

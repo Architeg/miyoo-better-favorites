@@ -43,11 +43,23 @@ bool setHomeEntryPreference(const std::string& path,bool enabled,AppSettings& sa
  if(okay)okay=rename(temp.c_str(),path.c_str())==0;
  if(!okay){unlink(temp.c_str());error="Cannot save Home preference. Previous setting kept.";return false;}saved.replaceStockFavorites=enabled;return true;
 }
-bool homeEntryAvailable(const std::string& root,const std::string& app){
+HomeIntegrationStatus homeEntryStatus(const std::string& root,const std::string& app){
+ std::string version;
+ if(!small(root+"/.tmp_update/onionVersion/version.txt",version) ||
+    (version!="v4.3.1-1\n" && version!="v4.3.1-1"))return HomeIntegrationStatus::Unavailable;
+ const auto runtime=homeFileSha256(root+"/.tmp_update/runtime.sh");
+ if(runtime!=homeOriginalRuntime&&runtime!=homeReturnRuntime)return HomeIntegrationStatus::Unavailable;
  std::string marker;std::string wanted="BetterFavoritesHomeInstalled1\nM6Home1\n";
  for(const auto& item:homePackageBinaries)wanted+=std::string(item.hash)+"\n";
- if(!small(app+"/home-integration.conf",marker)||marker!=wanted)return false;
- const auto runtime=homeFileSha256(root+"/.tmp_update/runtime.sh");if(runtime!=homeOriginalRuntime&&runtime!=homeReturnRuntime)return false;
- for(const auto& item:homePackageBinaries)if(homeFileSha256(root+"/.tmp_update/bin/"+item.name)!=item.hash)return false;
- return true;
+ if(!small(app+"/home-integration.conf",marker)){
+  if(errno!=ENOENT)return HomeIntegrationStatus::Unavailable;
+  for(const auto& item:homePackageOriginals)if(homeFileSha256(root+"/.tmp_update/bin/"+item.name)!=item.hash)return HomeIntegrationStatus::Unavailable;
+  return HomeIntegrationStatus::NotInstalled;
+ }
+ if(marker!=wanted)return HomeIntegrationStatus::Unavailable;
+ for(const auto& item:homePackageBinaries)if(homeFileSha256(root+"/.tmp_update/bin/"+item.name)!=item.hash)return HomeIntegrationStatus::Unavailable;
+ return HomeIntegrationStatus::Available;
+}
+bool homeEntryAvailable(const std::string& root,const std::string& app){
+ return homeEntryStatus(root,app)==HomeIntegrationStatus::Available;
 }

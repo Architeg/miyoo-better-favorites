@@ -28,7 +28,8 @@ if [ -f "$APP_DIR/profile.enabled" ] && [ ! -L "$APP_DIR/profile.enabled" ]; the
     bf_profile_begin || echo 'Profile setup failed; ordinary launch continues.' >> "$LOG"
 fi
 '''
-    anchor='} > "$LOG"\n';assert text.count(anchor)==1
+    anchor='log "launcher entry pid=$$ ppid=$PPID"\n' if 'log "launcher entry pid=$$ ppid=$PPID"' in text else '} > "$LOG"\n'
+    assert text.count(anchor)==1
     text=text.replace(anchor,anchor+setup,1)
     anchor='cleanup() {\n';assert text.count(anchor)==1
     text=text.replace(anchor,anchor+'    cleanup_status=$?\n',1)

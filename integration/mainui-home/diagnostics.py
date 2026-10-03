@@ -9,6 +9,7 @@ ON=b'BetterFavoritesHomeDiagnostics1\n1\n'
 NAMES=('home-diagnostics.log','better-favorites.log')
 
 def run(root,action,output=None):
+    manage.require_posix()
     root=root.absolute()
     manage.directory(root,root/'App/BetterFavoritesTest')
     app=root/'App/BetterFavoritesTest';marker=app/'home-diagnostics.conf'

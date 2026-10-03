@@ -7,5 +7,11 @@ static const HomePackageBinary homePackageBinaries[]={
     {"MainUI-354-clean","4a96ca03acd4f9a4b1ffd23bcb1586d0ec509b71b3006e5322bd717922e830f4"},
     {"MainUI-354-expert","fb094eb2300562642b7f43436e441b9233694f5263f870b974086e88e3db8c75"},
 };
+static const HomePackageBinary homePackageOriginals[]={
+    {"MainUI-283-clean","6b01276a6292fd7061e0b2576322a52ada65b755562f97bf7656b174d475866f"},
+    {"MainUI-283-expert","6948b5310dda6513b9e8fa2519d90c5287fc1fd06b4f668a7f2f205406281d28"},
+    {"MainUI-354-clean","98c85f6c573bdeabd3762e8d9b596f354014e666cc873d0f758cbf3752620c94"},
+    {"MainUI-354-expert","3bd1fef7fd9bd215bb9e335b6be1101fdff510590ba0d9ca0a9707edc5d9718a"},
+};
 static const char homeOriginalRuntime[]="a8d77dcd316bc2a323b1e015aaf4b7682d2fed677af9cdadbc00e48881425d6e";
 static const char homeReturnRuntime[]="4e7fdcb04dd53eefbc54a5244e35dbd746681ac77b8fe55e574c3e7227744df1";

@@ -17,6 +17,14 @@ import diagnostics
 INPUTS=Path(sys.argv.pop(1)) if len(sys.argv)>1 else None
 PAYLOAD=Path(sys.argv.pop(1)) if len(sys.argv)>1 else None
 class Transactions(unittest.TestCase):
+ def test_native_windows_refusal_before_io(self):
+  with mock.patch.object(manage.os,'name','nt'):
+   with self.assertRaisesRegex(RuntimeError,'Native Windows Python is unsupported'):manage.regular('/unused')
+ def test_filesystem_probe(self):
+  module=importlib.util.spec_from_file_location('fsprobe',ROOT/'tools/check-m6-filesystem.py');probe=importlib.util.module_from_spec(module);module.loader.exec_module(probe)
+  with tempfile.TemporaryDirectory() as tmp:
+   self.assertEqual(probe.probe(Path(tmp))['result'],'PASS')
+   self.assertEqual(list(Path(tmp).iterdir()),[])
  def test_failure_and_foreign_rollback(self):
   for fail in ('before','after','foreign'):
    with tempfile.TemporaryDirectory() as tmp:
@@ -99,6 +107,24 @@ class Installer(unittest.TestCase):
    (root/'App/BetterFavoritesTest/home-integration.conf').unlink()
    manage.manage(root,'uninstall')
    for n,h in manage.prototype.HASHES.items():self.assertEqual(manage.prototype.digest((root/'.tmp_update/bin'/n).read_bytes()),h)
+ def test_interrupted_uninstall_and_legacy_recovery(self):
+  for legacy in (False,True):
+   with tempfile.TemporaryDirectory() as tmp:
+    root=Path(tmp);self.seed(root);manage.manage(root,'install',PAYLOAD)
+    path=root/'.tmp_update/config/better-favorites-home.json';installed=path.read_bytes()
+    first=root/'.tmp_update/bin/MainUI-283-clean'
+    def interrupt(phase,p):
+     if phase=='after' and p==first:raise KeyboardInterrupt('simulated power loss')
+    with self.assertRaises(KeyboardInterrupt):manage.manage(root,'uninstall',hook=interrupt)
+    self.assertEqual(json.loads(path.read_text())['status'],'uninstalling')
+    if legacy:path.write_bytes(installed)
+    foreign=root/'.tmp_update/bin/MainUI-354-expert';saved=foreign.read_bytes();foreign.write_bytes(b'foreign')
+    before={p:p.read_bytes() for p in root.rglob('*') if p.is_file()}
+    with self.assertRaisesRegex(RuntimeError,'preserved'):manage.manage(root,'recover')
+    for p,data in before.items():self.assertEqual(p.read_bytes(),data)
+    foreign.write_bytes(saved);manage.manage(root,'recover')
+    for name,sha in manage.prototype.HASHES.items():self.assertEqual(manage.prototype.digest((root/'.tmp_update/bin'/name).read_bytes()),sha)
+    self.assertEqual(json.loads(path.read_text())['status'],'uninstalled')
  def test_preserve_permanent_return_and_availability(self):
   with tempfile.TemporaryDirectory() as tmp:
    root=Path(tmp);self.seed(root);source=INPUTS.parent
@@ -114,12 +140,36 @@ class Installer(unittest.TestCase):
    manage.manage(root,'install',PAYLOAD)
    for p,data in protected.items():self.assertEqual(p.read_bytes(),data)
    cpp=Path(tmp)/'availability.cpp';exe=Path(tmp)/'availability'
-   cpp.write_text('#include "home_entry_settings.h"\nint main(int c,char** v){return c==3 && homeEntryAvailable(v[1],v[2])?0:1;}\n')
+   cpp.write_text('#include "home_entry_settings.h"\nint main(int c,char** v){return c==3?int(homeEntryStatus(v[1],v[2])):3;}\n')
    subprocess.run(['c++','-std=c++17','-I'+str(ROOT/'include'),str(cpp),str(ROOT/'src/home_entry_settings.cpp'),'-o',str(exe)],check=True)
    args=[str(exe),str(root),str(root/'App/BetterFavoritesTest')];self.assertEqual(subprocess.run(args).returncode,0)
-   marker=root/'App/BetterFavoritesTest/home-integration.conf';saved=marker.read_bytes();marker.write_text('foreign');self.assertEqual(subprocess.run(args).returncode,1);marker.write_bytes(saved)
-   binary=root/'.tmp_update/bin/MainUI-354-clean';saved=binary.read_bytes();binary.write_bytes(saved+b'foreign');self.assertEqual(subprocess.run(args).returncode,1);binary.write_bytes(saved)
+   marker=root/'App/BetterFavoritesTest/home-integration.conf';saved=marker.read_bytes();marker.write_text('foreign');self.assertEqual(subprocess.run(args).returncode,2);marker.write_bytes(saved)
+   binary=root/'.tmp_update/bin/MainUI-354-clean';saved=binary.read_bytes();binary.write_bytes(saved+b'foreign');self.assertEqual(subprocess.run(args).returncode,2);binary.write_bytes(saved)
    manage.manage(root,'uninstall');self.assertEqual(subprocess.run(args).returncode,1)
+   version=root/'.tmp_update/onionVersion/version.txt';version.write_text('unsupported');self.assertEqual(subprocess.run(args).returncode,2);version.write_text('v4.3.1-1\n')
+   for p,data in protected.items():self.assertEqual(p.read_bytes(),data)
+ def test_six_file_recovery_without_device_ui(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   root=Path(tmp)/'card';root.mkdir();self.seed(root);backup=Path(tmp)/'host-backup';backup.mkdir()
+   app=root/'App/BetterFavoritesTest'
+   for name in ('better-favorites','launch.sh'):(app/name).write_bytes(('old '+name).encode())
+   paths=['.tmp_update/bin/'+n for n in manage.prototype.HASHES]+['App/BetterFavoritesTest/better-favorites','App/BetterFavoritesTest/launch.sh']
+   records={}
+   for relative in paths:
+    data=(root/relative).read_bytes();saved=backup/relative;saved.parent.mkdir(parents=True,exist_ok=True);saved.write_bytes(data)
+    records[relative]=dict(sha256=manage.prototype.digest(data),mode=0o700)
+   manage.manage(root,'install',PAYLOAD)
+   for name in ('better-favorites','launch.sh'):(app/name).write_bytes(('new '+name).encode())
+   for relative in paths:records[relative]['deployed_sha256']=manage.prototype.digest((root/relative).read_bytes())
+   (backup/'deployment.json').write_text(json.dumps(dict(package=manage.catalogue(),files=records)))
+   first=root/paths[0]
+   def interrupt(phase,p):
+    if phase=='after' and p==first:raise KeyboardInterrupt('interrupted removal')
+   with self.assertRaises(KeyboardInterrupt):manage.manage(root,'uninstall',hook=interrupt)
+   protected={p:p.read_bytes() for p in app.iterdir() if p.name in ('settings.conf','browser-preferences.conf','home-entry.conf')}
+   module=importlib.util.spec_from_file_location('rollback',ROOT/'tools/rollback-m6-device.py');rollback=importlib.util.module_from_spec(module);module.loader.exec_module(rollback)
+   rollback.rollback(root,backup)
+   for relative in paths:self.assertEqual((root/relative).read_bytes(),(backup/relative).read_bytes())
    for p,data in protected.items():self.assertEqual(p.read_bytes(),data)
  def test_package_runtime_and_backup_refusal(self):
   with tempfile.TemporaryDirectory() as tmp:

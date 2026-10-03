@@ -2,9 +2,9 @@
 #define BETTER_FAVORITES_MENU_STATE_H
 #include <vector>
 #include <cstddef>
-enum class MenuPage { Browser, Actions, Settings, ReturnInfo, Help, RemoveConfirm };
+enum class MenuPage { Browser, Actions, Settings, ReturnInfo, HomeInfo, Help, RemoveConfirm };
 enum class MenuKey { Up, Down, Left, Right, A, B, Menu, Select, Y };
-enum class MenuAction { None, Launch, Remove, ToggleReturn, ToggleGrouping, TogglePrefixes, CycleSorting, PageUp, PageDown };
+enum class MenuAction { None, Launch, Remove, ToggleReturn, ToggleHome, ToggleGrouping, TogglePrefixes, CycleSorting, PageUp, PageDown };
 struct MenuFrame { MenuPage page; std::size_t selected = 0; };
 class MenuState {
 public:

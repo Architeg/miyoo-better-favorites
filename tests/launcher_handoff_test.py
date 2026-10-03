@@ -33,6 +33,8 @@ printf 'SDL/audio cleanup complete\\n' > "$TEST_CLEANUP"
 exit "$TEST_BINARY_EXIT"
 """)
     stub.chmod(0o700)
+    (app/'home-diagnostics.conf').write_text('BetterFavoritesHomeDiagnostics1\n1\n')
+    (app/'home-diagnostics.log').write_text('M6Home1 variant=MainUI-354-clean attempt=fixture event=publication reason=committed\n')
     for exitcode,publication,expected,operation in [(20,0,0,'--publish-handoff'),(21,0,0,'--publish-switcher-handoff'),(21,1,1,'--publish-switcher-handoff'),(0,0,0,None),(1,0,1,None),(139,0,139,None)]:
         if (app/'.profiling-results').exists():__import__('shutil').rmtree(app/'.profiling-results')
         trace=app/'trace'; cleanup=app/'cleanup'
@@ -40,6 +42,9 @@ exit "$TEST_BINARY_EXIT"
         env=dict(os.environ,TEST_TRACE=str(trace),TEST_CLEANUP=str(cleanup),TEST_BINARY_EXIT=str(exitcode),TEST_PUBLISH_EXIT=str(publication),BETTER_FAVORITES_PROC_ROOT=str(app/'proc'),BETTER_FAVORITES_SD_ROOT=str(app),BETTER_FAVORITES_RETURN_DIR=str(app/'runtime-context'),TEST_RETURN_DIR=str(app/'runtime-context'))
         result=subprocess.run(['sh',str(app/'launch.sh')],env=env,capture_output=True,text=True)
         assert result.returncode==expected,(exitcode,result.stdout,result.stderr)
+        diagnostic_log=(app/'better-favorites.log').read_text()
+        assert 'event=entry candidate_attempt=fixture' in diagnostic_log,diagnostic_log
+        assert 'event=exit committed=' in diagnostic_log,diagnostic_log
         assert (app/'.profiling-results/pilot-0001/startup.log').is_file()
         lines=trace.read_text().splitlines()
         publishers=[line.split()[0] for line in lines if line.startswith('--publish')]

@@ -65,7 +65,7 @@ static SDL_Surface* render(const char* root,MenuPage page,bool longTitle,bool er
         auto* panelReference=SDL_ConvertSurface(screen,screen->format,0);assert(panelReference);
         SDL_FreeSurface(off);
         // Offscreen-only checks: no extra preview files.
-        for(std::size_t row=0;row<5;++row){AppSettings options;options.groupByConsole=false;options.showNumericPrefixes=false;options.sortMode=SortMode::AlphabeticalTitle;
+        for(std::size_t row=0;row<7;++row){AppSettings options;options.groupByConsole=false;options.showNumericPrefixes=false;options.sortMode=SortMode::AlphabeticalTitle;options.replaceStockFavorites=true;options.homeIntegrationAvailable=true;
             underlay();renderer.draw(screen,MenuPage::Settings,row,true,false,false,game,5000,"",options);
             for(int y=310;y<420;++y){
                 assert(std::memcmp(static_cast<Uint8*>(panelReference->pixels)+y*panelReference->pitch,
@@ -75,7 +75,7 @@ static SDL_Surface* render(const char* root,MenuPage page,bool longTitle,bool er
         SDL_FreeSurface(panelReference);
         AppSettings flatOptions;flatOptions.groupByConsole=false;
         underlay();renderer.draw(screen,MenuPage::Help,0,true,true,true,game,5000,"",flatOptions);
-        for(const auto& testPage:{MenuPage::Settings,MenuPage::ReturnInfo}){
+        for(const auto& testPage:{MenuPage::Settings,MenuPage::ReturnInfo,MenuPage::HomeInfo}){
             underlay();renderer.draw(screen,testPage,1,true,false,false,game,5000);
         }
         Theme icons=theme;icons.hideIcons=false;
@@ -118,7 +118,7 @@ int main(int argc,char** argv){
            render(argv[2],MenuPage::RemoveConfirm,true,true,trace),render(argv[1],MenuPage::RemoveConfirm,true,true,trace)},output+"/removal-sheet.png");
     }
     for(const auto* fixture:{argv[1],argv[2],argv[3]}){
-        for(const auto pageKind:{MenuPage::Settings,MenuPage::ReturnInfo}){auto* page=render(fixture,pageKind,false,false,trace);SDL_FreeSurface(page);}
+        for(const auto pageKind:{MenuPage::Settings,MenuPage::ReturnInfo,MenuPage::HomeInfo}){auto* page=render(fixture,pageKind,false,false,trace);SDL_FreeSurface(page);}
         auto* page=render(fixture,MenuPage::RemoveConfirm,true,true,trace);SDL_FreeSurface(page);
         page=render(fixture,MenuPage::Help,true,false,trace);SDL_FreeSurface(page);
     }

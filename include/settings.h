@@ -11,6 +11,8 @@ enum class SortMode
 
 struct AppSettings
 {
+    bool replaceStockFavorites = false;
+    bool homeIntegrationAvailable = false; // inspected, never persisted as preference
     bool automaticReturn = false;
     std::string returnGeneration;
 

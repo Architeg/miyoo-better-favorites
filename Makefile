@@ -16,6 +16,7 @@ SRC := \
 	src/launch_request.cpp \
 	src/browser_state.cpp \
 	src/app_settings.cpp \
+	src/home_entry_settings.cpp \
 	src/favorites_parser.cpp \
 	src/ui_rows.cpp \
 	src/navigation.cpp \

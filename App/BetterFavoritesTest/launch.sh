@@ -10,6 +10,26 @@ ACTIVE=/mnt/SDCARD/.tmp_update/cmd_to_run.sh
     date
 } > "$LOG"
 
+# Optional lifecycle evidence only; the native command and ownership checks stay exact.
+# Markers are independent of both saved Home replacement and Automatic return.
+HOME_DIAGNOSTICS=0
+marker="$APP_DIR/home-diagnostics.conf"
+if [ -f "$marker" ] && [ ! -L "$marker" ] && [ "$(wc -c < "$marker" 2>/dev/null)" -eq 34 ] 2>/dev/null &&
+   [ "$(cat "$marker" 2>/dev/null)" = "$(printf 'BetterFavoritesHomeDiagnostics1\n1')" ]; then
+    HOME_DIAGNOSTICS=1
+fi
+home_diagnostic() {
+    [ "$HOME_DIAGNOSTICS" -eq 1 ] || return 0
+    # Correlation is a candidate only: runtime does not inherit MainUI's environment.
+    candidate=none
+    hook_log="$APP_DIR/home-diagnostics.log"
+    if [ -f "$hook_log" ] && [ ! -L "$hook_log" ]; then
+        candidate=$(awk '/event=publication reason=committed/ {for(i=1;i<=NF;i++)if($i~/^attempt=/)last=$i} END {print last}' "$hook_log" 2>/dev/null)
+    fi
+    printf 'M6Home1 launcher pid=%s ppid=%s event=%s candidate_%s\n' "$$" "$PPID" "$1" "${candidate:-attempt=none}" >> "$LOG" 2>/dev/null || true
+}
+home_diagnostic entry
+
 umask 077
 REQUEST_DIR="$(mktemp -d /tmp/better-favorites.XXXXXX 2>> "$LOG")"
 APP_PID=""
@@ -29,6 +49,7 @@ fi
 
 cleanup() {
     trap - EXIT INT TERM
+    home_diagnostic "exit committed=$HANDOFF_COMMITTED binary_status=${app_exit:-not-returned}"
     printf 'cleanup: committed=%s app_pid=%s\n' \
         "$HANDOFF_COMMITTED" "$APP_PID" >> "$LOG"
     if [ -n "$APP_PID" ]; then

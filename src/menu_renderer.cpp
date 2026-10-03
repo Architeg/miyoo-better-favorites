@@ -475,14 +475,14 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
     }
     fill(screen,{0,0,640,480},bg);blit(resources_.background,screen,{0,0,640,480});blit(resources_.title,screen,{0,0,640,header});
     const std::string title=page==MenuPage::Settings?"SETTINGS":page==MenuPage::Help?"HELP":
-        page==MenuPage::ReturnInfo?"AUTOMATIC RETURN":"REMOVE FROM FAVORITES?";
+        page==MenuPage::ReturnInfo?"AUTOMATIC RETURN":page==MenuPage::HomeInfo?"HOME FAVORITES":"REMOVE FROM FAVORITES?";
     const auto titleLines=wrap(resources_.titleFont,title,600);
     // Titles are short fixed labels, measured and wrapped rather than clipped.
     int headingY=(header-int(titleLines.size())*lineHeight(resources_.titleFont))/2;
     for(const auto& line:titleLines){text(screen,resources_.titleFont,line,color(theme_.title),(640-width(resources_.titleFont,line))/2,headingY);headingY+=lineHeight(resources_.titleFont);}
     if(page==MenuPage::Settings) {
-        const char* labels[]={"Automatic return","Group by console","Numeric prefixes","Sorting","About automatic return"};
-        const std::string values[]={returnOn?"ON":"OFF",settings.groupByConsole?"ON":"OFF",settings.showNumericPrefixes?"Show":"Hide",settings.sortMode==SortMode::OriginalLabel?"Original label":"Alphabetical title",""};
+        const char* labels[]={"Automatic return","Group by console","Numeric prefixes","Sorting","Replace stock Favorites","About automatic return","About Home Favorites"};
+        const std::string values[]={returnOn?"ON":"OFF",settings.groupByConsole?"ON":"OFF",settings.showNumericPrefixes?"Show":"Hide",settings.sortMode==SortMode::OriginalLabel?"Original label":"Alphabetical title",settings.replaceStockFavorites?"ON":"OFF","",""};
         const auto font=descriptionFont_?descriptionFont_:resources_.bodyFont;
         // Reserve two lines at the existing font/badge size, regardless of row count
         // or selected description. The surface touches the footer at y=420.
@@ -494,14 +494,14 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
         // No selection asset: this is a quiet, opaque theme-derived popup surface.
         // Only fully measured rows fit above the independently anchored panel.
         auto settingHeight=[&](int i){
-            const int arrows=i<4?64:0;
+            const int arrows=i<5?64:0;
             const int valueWidth=values[i].empty()?0:width(resources_.listFont,values[i])+24+arrows;
             return std::max(60,int(wrap(resources_.listFont,labels[i],600-valueWidth).size())*lineHeight(resources_.listFont)+16);
         };
         int first=int(selected), used=settingHeight(first);
         while(first>0 && used+settingHeight(first-1)<=rowsBottom-header){--first;used+=settingHeight(first);}
         int y=header;
-        for(int i=first;i<5 && y+settingHeight(i)<=rowsBottom;++i)y+=p.row(labels[i],values[i],y,640,selected==std::size_t(i),false,i<4);
+        for(int i=first;i<7 && y+settingHeight(i)<=rowsBottom;++i)y+=p.row(labels[i],values[i],y,640,selected==std::size_t(i),false,i<5);
 #ifdef BETTER_FAVORITES_MENU_RENDER_TESTING
         assert(y<=rowsBottom && descriptionPanel.y+descriptionPanel.h==bottom);
 #endif
@@ -509,7 +509,8 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
             settings.groupByConsole?"Group games under console headings.":"Flat list. Console jumps are disabled.",
             settings.showNumericPrefixes?"Show numeric prefixes in displayed titles.":"Hide leading numeric prefixes. Sorting is unchanged.",
             settings.sortMode==SortMode::OriginalLabel?"Sort by literal stored labels.":"Sort titles without leading numeric prefixes.",
-            "Read how automatic return works."};
+            settings.homeIntegrationAvailable?"Home integration installed.":"Integration unavailable. Stock Favorites remains.",
+            "Read how automatic return works.","Installation and Home return behavior."};
         const auto description=inlineFlow(font,descriptions[selected],600,[&](const std::string& key){return controlLabel(key);});
 #ifdef BETTER_FAVORITES_MENU_RENDER_TESTING
         assert(description.lines<=2 && description.lines*description.lineHeight+16<=panelHeight);
@@ -518,7 +519,7 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
         const int descriptionY=descriptionPanel.y+(descriptionPanel.h-descriptionHeight)/2;
         const auto descriptionInk=secondaryInk(screen,{margin,descriptionY,600,descriptionHeight},section,list);
         drawFlow(screen,font,description,margin,descriptionY,descriptionInk);
-        p.footer({{"A",selected<4?"Change":"Open"},{"B","Back"}});
+        p.footer({{"A",selected<5?"Change":"Open"},{"B","Back"}});
     } else if(page==MenuPage::Help) {
         pages_=2;page_=std::min(page_,pages_-1);
         const bool browser=page_==0;
@@ -543,10 +544,14 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
             text(screen,resources_.bodyFont,item.second,list,210,y+(h-TTF_FontHeight(resources_.bodyFont))/2);y+=h;
         }
         p.footer({{browser?"DOWN":"UP",browser?"Inside menus":"Favorites list"},{"B","Back"}});
-    } else if(page==MenuPage::ReturnInfo) {
+    } else if(page==MenuPage::ReturnInfo || page==MenuPage::HomeInfo) {
         const auto font=descriptionFont_?descriptionFont_:resources_.bodyFont;
         struct Block {std::string value;bool heading;};
-        const std::vector<Block> blocks={
+        const std::vector<Block> blocks=page==MenuPage::HomeInfo?std::vector<Block>{
+            {settings.homeIntegrationAvailable?"Integration: installed":"Integration: unavailable",false},
+            {"Replace stock Favorites",true},{"ON opens Better Favorites from Home. OFF keeps stock Favorites.",false},
+            {"[B]: exit to Onion. Home restoration is under test.",false},{"Apps access is unchanged. Automatic return is independent.",false},
+            {"Install or remove only on a powered-off card. Binary changes require reboot.",false}}:std::vector<Block>{
             {available?"Integration: available":"Integration: unavailable (optional patch required)",false},
             {"When enabled",true},{"[B] / [START]: return here from GameSwitcher.",false},
             {"[A]: resume the game. Switching games keeps the session.",false},

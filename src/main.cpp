@@ -1,3 +1,4 @@
+#include "home_entry_settings.h"
 #include "profiled_sdl.h"
 #include "favorites_parser.h"
 #include "favorite_removal.h"
@@ -239,6 +240,10 @@ int main(int argc, char* argv[])
     const std::string browserPreferencesPath=(preferenceSlash==std::string::npos?".":appSettingsPath.substr(0,preferenceSlash))+"/browser-preferences.conf";
     { startup_profile::Scope phase("settings.browser"); loadBrowserPreferences(browserPreferencesPath,appSettings,settingsError); }
     if(!settingsError.empty())std::cerr<<settingsError<<std::endl;
+    const std::string homePreferencePath=(preferenceSlash==std::string::npos?".":appSettingsPath.substr(0,preferenceSlash))+"/home-entry.conf";
+    loadHomeEntryPreference(homePreferencePath,appSettings,settingsError);
+    if(!settingsError.empty())std::cerr<<settingsError<<std::endl;
+
     FavoritesParser parser("/mnt/SDCARD", appSettings);
 
     const std::string favoritesPath = "/mnt/SDCARD/Roms/favourite.json";
@@ -736,6 +741,8 @@ int main(int argc, char* argv[])
                 if (action == MenuAction::PageUp) menuRenderer.movePage(-1);
                 if (action == MenuAction::PageDown) menuRenderer.movePage(1);
                 if (menu.page() != previousPage) menuRenderer.resetPage();
+                if (menu.page()==MenuPage::Settings && previousPage!=MenuPage::Settings)
+                    appSettings.homeIntegrationAvailable=homeEntryAvailable("/mnt/SDCARD",homePreferencePath.substr(0,homePreferencePath.find_last_of('/')));
                 // Observe even open/close events batched into a single SDL frame.
                 if (!wasMenuOpen && menu.open()) browserTitles.pause(SDL_GetTicks());
                 if (wasMenuOpen && !menu.open()) browserTitles.restartDelay(SDL_GetTicks());
@@ -748,6 +755,10 @@ int main(int argc, char* argv[])
                                             appSettings, settingsError)) reportError(settingsError);
                     else std::cerr << "Automatic return: "
                         << (appSettings.automaticReturn ? "on" : "off") << std::endl;
+                }
+                if(action==MenuAction::ToggleHome){
+                    if(!setHomeEntryPreference(homePreferencePath,!appSettings.replaceStockFavorites,appSettings,settingsError))reportError(settingsError);
+                    else std::cerr<<"Replace stock Favorites: "<<(appSettings.replaceStockFavorites?"on":"off")<<std::endl;
                 }
                 if(action==MenuAction::ToggleGrouping||action==MenuAction::TogglePrefixes||action==MenuAction::CycleSorting){
                     AppSettings candidate=appSettings;

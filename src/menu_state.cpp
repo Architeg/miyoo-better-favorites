@@ -14,7 +14,7 @@ MenuAction MenuState::handle(MenuKey key, bool repeat, bool hasFavorite) {
         stack_.pop_back(); return MenuAction::None;
     }
     // Reading/paging never moves a destructive action selection.
-    if (page() == MenuPage::RemoveConfirm || page() == MenuPage::Help || page() == MenuPage::ReturnInfo) {
+    if (page() == MenuPage::RemoveConfirm || page() == MenuPage::Help || (page() == MenuPage::ReturnInfo || page() == MenuPage::HomeInfo)) {
         if (key == MenuKey::Up) return MenuAction::PageUp;
         if (key == MenuKey::Down) return MenuAction::PageDown;
     }
@@ -23,13 +23,13 @@ MenuAction MenuState::handle(MenuKey key, bool repeat, bool hasFavorite) {
         if (key == MenuKey::Right) stack_.back().selected = 1;
     }
     const std::size_t count = page() == MenuPage::Actions ? 4 :
-        (page() == MenuPage::Settings ? 5 : 0);
+        (page() == MenuPage::Settings ? 7 : 0);
     if (key == MenuKey::Up && count) {
         if (stack_.back().selected) --stack_.back().selected;
     } else if (key == MenuKey::Down && count) {
         if (stack_.back().selected + 1 < count) ++stack_.back().selected;
-    } else if(page()==MenuPage::Settings && selected()<4 && (key==MenuKey::A||key==MenuKey::Left||key==MenuKey::Right)) {
-        const MenuAction values[]={MenuAction::ToggleReturn,MenuAction::ToggleGrouping,MenuAction::TogglePrefixes,MenuAction::CycleSorting};
+    } else if(page()==MenuPage::Settings && selected()<5 && (key==MenuKey::A||key==MenuKey::Left||key==MenuKey::Right)) {
+        const MenuAction values[]={MenuAction::ToggleReturn,MenuAction::ToggleGrouping,MenuAction::TogglePrefixes,MenuAction::CycleSorting,MenuAction::ToggleHome};
         return values[selected()];
     } else if (key == MenuKey::A) {
         if (page() == MenuPage::Actions) {
@@ -40,7 +40,8 @@ MenuAction MenuState::handle(MenuKey key, bool repeat, bool hasFavorite) {
             case 3: push(MenuPage::Help); break;
             }
         } else if (page() == MenuPage::Settings) {
-            if(selected()==4)push(MenuPage::ReturnInfo);
+            if(selected()==5)push(MenuPage::ReturnInfo);
+            if(selected()==6)push(MenuPage::HomeInfo);
         } else if (page() == MenuPage::RemoveConfirm) {
             if (selected()) return hasFavorite ? MenuAction::Remove : MenuAction::None;
             stack_.pop_back();

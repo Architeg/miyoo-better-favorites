@@ -32,8 +32,8 @@ int main() {
     assert(key(MenuKey::Menu)==MenuAction::None && !menu.open());
     key(MenuKey::Select);key(MenuKey::Down);key(MenuKey::Down);key(MenuKey::A);assert(menu.page()==MenuPage::Settings);
     assert(key(MenuKey::A) == MenuAction::ToggleReturn);
-    for(int i=0;i<4;++i)key(MenuKey::Down); key(MenuKey::A); assert(menu.page() == MenuPage::ReturnInfo);
-    key(MenuKey::B); assert(menu.page() == MenuPage::Settings && menu.selected() == 4);
+    for(int i=0;i<5;++i)key(MenuKey::Down); key(MenuKey::A); assert(menu.page() == MenuPage::ReturnInfo);
+    key(MenuKey::B); assert(menu.page() == MenuPage::Settings && menu.selected() == 5);
     key(MenuKey::B); assert(menu.page() == MenuPage::Actions && menu.selected() == 2);
     key(MenuKey::Down); key(MenuKey::A); assert(menu.page() == MenuPage::Help);
     key(MenuKey::Menu, true, true); assert(menu.open());
@@ -53,7 +53,10 @@ int main() {
     assert(key(MenuKey::Left)==MenuAction::ToggleGrouping);
     key(MenuKey::Down);assert(key(MenuKey::Right)==MenuAction::TogglePrefixes);
     key(MenuKey::Down);assert(key(MenuKey::A)==MenuAction::CycleSorting);
+    key(MenuKey::Down);assert(key(MenuKey::Right)==MenuAction::ToggleHome);
+    assert(key(MenuKey::A,true,true)==MenuAction::None);
     key(MenuKey::Down);assert(key(MenuKey::Right)==MenuAction::None);
+    key(MenuKey::Down);key(MenuKey::A);assert(menu.page()==MenuPage::HomeInfo);
     key(MenuKey::Menu);
     SystemGroup group; group.label = "GB"; group.favorites.resize(3);
     auto rows = buildUiRows({}); assert(selectableRowAtOrdinal(rows, 5) == 0);

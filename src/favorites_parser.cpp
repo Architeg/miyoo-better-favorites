@@ -1,3 +1,4 @@
+#include "startup_profile.h"
 #include "favorites_parser.h"
 #include "browser_model.h"
 
@@ -65,6 +66,7 @@ std::string FavoritesParser::resolveSystemLabel(
     const std::string configPath =
         sdRoot_ + "/Emu/" + systemId + "/config.json";
 
+    startup_profile::Scope phase("emu.config_read_parse",configPath.c_str());
     std::ifstream input(configPath);
 
     if (!input.is_open()) {
@@ -123,6 +125,7 @@ std::vector<Favorite> FavoritesParser::loadFavorites(
 
 std::vector<Favorite> FavoritesParser::loadFavoritesFromText(const std::string& text) const
 {
+    startup_profile::Scope phase("favorites.parse_inclusive");
     std::vector<Favorite> favorites;
     std::istringstream input(text);
     std::size_t offset = 0;

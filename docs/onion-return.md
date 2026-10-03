@@ -164,7 +164,13 @@ reboot; they are never adopted. Installation also retains a verified 24,440-byte
 original runtime and manifest on card. These disk sizes do not measure shell
 allocator overhead, function definitions, page mappings, or RAM savings.
 
-**No on-device RAM measurements have been made.** Measurement procedure:
+**Limited pre-cache idle measurements exist:** three valid ON samples give
+browser smaps RSS 19,308 kB / median PSS 17,449 kB and runtime RSS 1,808 kB /
+PSS 357 kB. They do not measure return-integration overhead or gameplay memory.
+M5 is closed with gameplay/OFF-ON/process-absence work explicitly deferred; see
+[results and limitations](m5-profiling.md). No RAM savings or cache build's device
+acceptance is claimed. The procedure below is retained reference, **inactive and
+not requested** in this pass; these deferrals do not block M6 investigation.
 
 1. Compare three clean boots: original runtime, patched runtime with app setting
    off, and patched runtime with setting on and a Better Favorites-owned game.

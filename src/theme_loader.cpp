@@ -1,3 +1,4 @@
+#include "startup_profile.h"
 #include "theme_loader.h"
 
 #include <json.h>
@@ -252,6 +253,7 @@ Theme ThemeLoader::load() const
                     const ThemeTextStyle* hintFallback,
                     const ThemeTextStyle* listFallback,
                     bool allowFallbacks) {
+                    startup_profile::Scope phase("theme.config_read_parse",path.c_str());
                     std::ifstream input(path);
 
                     if (!input.is_open()) {

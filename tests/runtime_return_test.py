@@ -283,6 +283,31 @@ for menu_failure in OFF GENERATION FLAG APPFAIL SHUTDOWN; do
     printf 'BetterFavoritesSettings1\n1\n%s\n' "$epoch" > "$setting"
 done
 
+# Sourced profiling does not change the exact Apps command or exported context.
+rm -f "$sysdir/cmd_to_run.sh"
+APP_DIR="$CARD/App/BetterFavoritesTest"
+LOG="$APP_DIR/profile-fixture.log"
+printf fixture > "$LOG"
+printf 'BetterFavoritesProfilePilot1\n' > "$APP_DIR/profile.enabled"
+printf '{}\n' > "$CARD/Roms/favourite.json"
+bf_return before-launch "$app"
+profile_context="$BETTER_FAVORITES_RETURN_DIR"
+. "$PROFILE_HOOK"
+BETTER_FAVORITES_SD_ROOT="$CARD"
+bf_profile_begin
+[ "$BETTER_FAVORITES_RETURN_DIR" = "$profile_context" ]
+[ "$BETTER_FAVORITES_PROFILE" = 1 ] && bf_return_is_app "$app"
+printf '%s' "$game" > "$profile_context/request.sh"
+printf '%s\n' "$epoch" > "$profile_context/generation"
+printf '%s' "$game" > "$sysdir/cmd_to_run.sh"
+touch "$TMP/quick_switch"
+bf_profile_finish 0
+bf_return after-app "$app" 0
+[ "$bf_origin" = "$CARD/Roms/GB/one.gb" ] && [ "$bf_origin_epoch" = "$epoch" ]
+rm "$TMP/quick_switch" "$sysdir/cmd_to_run.sh"
+bf_return after-switcher 0
+[ -z "$bf_origin" ] && [ "$(cat "$sysdir/cmd_to_run.sh")" = "$app" ]
+
 # A log write failure cannot prevent ownership adoption or reopening.
 if command -v bf_return_diag >/dev/null; then
     diagnostic="$sysdir/logs/better-favorites-return.log"
@@ -296,7 +321,7 @@ if command -v bf_return_diag >/dev/null; then
     mv "$diagnostic.saved" "$diagnostic"
 fi
 '''
-    env = dict(__import__('os').environ, CARD=str(card), TMP=str(temp), HELPER=str(root / 'helper.sh'), TEST_LOG=str(root / 'log'))
+    env = dict(__import__('os').environ, CARD=str(card), TMP=str(temp), HELPER=str(root / 'helper.sh'), TEST_LOG=str(root / 'log'), PROFILE_HOOK=str(repo/'tools/profile-device-launch.sh'))
     result = subprocess.run(['sh', '-xc', script], env=env, capture_output=True, text=True)
     if result.returncode:
         print(result.stderr[-7000:])

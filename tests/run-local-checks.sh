@@ -9,6 +9,7 @@ compile_run() {
     c++ -std=c++17 -Wall -Wextra -Iinclude "$@" -o "$output/$name"
     "$output/$name"
 }
+compile_run startup-profile tests/startup_profile_test.cpp
 compile_run navigation-boundaries tests/navigation_boundaries_test.cpp src/navigation.cpp src/ui_rows.cpp
 compile_run title-scroll tests/title_scroll_test.cpp src/title_scroll.cpp
 compile_run text tests/menu_text_test.cpp src/menu_text.cpp
@@ -20,6 +21,9 @@ compile_run settings tests/app_settings_test.cpp src/app_settings.cpp
 compile_run state tests/browser_state_test.cpp src/browser_state.cpp src/ui_rows.cpp src/navigation.cpp
 compile_run launch -DBETTER_FAVORITES_HANDOFF_TESTING tests/launch_request_test.cpp src/launch_request.cpp src/app_settings.cpp
 compile_run switcher -DBETTER_FAVORITES_HANDOFF_TESTING tests/switcher_request_test.cpp src/launch_request.cpp src/app_settings.cpp
+python3 tests/profiling_tools_test.py
+python3 tests/profiling_activation_test.py
+python3 tests/profiling_retirement_test.py
 python3 tests/launcher_handoff_test.py
 python3 tests/runtime_return_test.py
-sh -n App/BetterFavoritesTest/launch.sh integration/onion-return/better_favorites_return.sh
+sh -n App/BetterFavoritesTest/launch.sh integration/onion-return/better_favorites_return.sh tools/profile-device-launch.sh tools/profile-memory-session.sh tools/sample-device-memory.sh

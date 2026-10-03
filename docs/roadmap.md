@@ -145,7 +145,7 @@ Theme/device identities and test logs are not complete enough for universal clai
 
 | Feature/change | Current evidence and missing evidence |
 | --- | --- |
-| Bold-white Automatic return headings | Existing font/size preserved; host checks and ARM build; device verification pending |
+| Bold-white Automatic return headings | Included in accepted combined M4 binary; exhaustive theme matrix remains pending |
 | M4 shoulder paging/resource fallback | Combined deployed binary hardware-accepted 2026-10-03; exhaustive fault combinations remain host-only, see [audit](m4-audit.md) |
 | Empty favorites browsing/menu availability | Implemented and fixture-covered; complete device empty-list matrix pending |
 | Removed remembered entry → nearby selection | Identity/ordinal fallback and tests; dedicated device edge-case check pending |
@@ -162,14 +162,14 @@ Theme/device identities and test logs are not complete enough for universal clai
 | Hint/artwork preferences | Theme hide flags and artwork rendering work; proposed app controls absent |
 | Artwork failure behavior | IMG loading failures handled; full missing/corrupt presentation not verified |
 | Theme fallback coverage | Menu fallbacks exist; full-browser startup/fallback coverage incomplete |
-| Lightweight operation | Resources/audio/control surfaces cached in places; no complete device profile |
+| Lightweight operation | Limited startup/idle measurements; host-verified per-parse label cache. Gameplay/OFF-ON evidence deferred; no device gain claimed |
 | Maintainability | Separate menu/model/state/removal/handoff modules; substantial browser logic in `main.cpp` |
 | Dependency preparation | `fetch-deps.sh` pins an SDL commit; full custom SDL/audio build provenance/reproduction incomplete |
 | Installation | Return integration manager works; production app installer/upgrade/uninstaller incomplete |
 
 ### Planned
 
-- M4 page navigation and resource gap closure is complete; M5 measurement is next.
+- M4 is hardware-complete; M5 measurement pass is closed with documented deferrals. M6 read-only entry-point investigation is next.
 - Browser page-at-a-time navigation after button semantics are resolved.
 - Device follow-up for the final centering/text-size/padding adjustments; optional controls remain unresolved.
 - Measured startup/memory profiling and evidence-based optimization.
@@ -322,23 +322,31 @@ and remaining navigation/artwork precede profiling and Home entry integration.
 
 ### M5 — Profile startup and memory; optimize measured bottlenecks
 
-- **Intended behavior:** fast first usable frame and lightweight browsing, with no
-  retained app/helper during gameplay and no change to working sound.
-- **Current/missing:** some fonts/images/controls/audio are cached. No device timing
-  or RAM measurement establishes startup or return-integration cost.
-- **Dependencies:** complete core feature block M2–M4, stable comparable builds and
-  identified device/card/theme/favorite corpus; instrumentation must be scoped.
-- **Reuse/inspect:** existing Docker/SDL2/audio build, loader/parser boundaries,
-  console config reads, font/PNG decoding, runtime process lifecycle and `/proc`.
-  Reuse the memory procedure in [onion-return.md](onion-return.md).
-- **Acceptance:** report startup/dynamic linking, theme/config loading, parsing and
-  repeated Emu config reads, font loading/PNG decoding, first usable frame and browsing/
-  gameplay process memory. Optimizations address measured costs and preserve results.
-- **Host/device verification:** host output/model/cache correctness and leak/resource
-  checks; repeated cold/warm device measurements with conditions and distributions,
-  ON/OFF return comparison and process inventory during play. File bytes are not RAM.
-- **Exclusions/decisions:** no permanent daemon, audio replacement or speculative
-  rewrite. Numeric time/RAM targets were not agreed; establish baselines first.
+**Closed pass with explicit deferrals (2026-10-03); M6 may proceed.** This is not
+full performance certification or new hardware acceptance of the cache build.
+
+- **Intended behavior:** fast first usable frame and lightweight browsing, preserving
+  working UI/audio/Onion handoff and no app/helper retained by design during gameplay.
+- **Collected:** seven successful pre-cache startup archives. Original post-boot
+  505.361 ms; warm median 267.590 ms (n=3). Corrected post-boot 505.596 ms;
+  warm median 271.043 ms (n=2; planned fourth archive absent). Original prelaunch
+  hashing and remaining metadata/IO/instrumentation/cache biases are explicit.
+  Three valid idle ON samples per role: browser smaps RSS 19,308 kB / median
+  PSS 17,449 kB; runtime RSS 1,808 kB / PSS 357 kB. No unbiased cold-start claim.
+- **Separate optimization review:** per-parse emulator-label cache is reviewed
+  separately. No measured target startup gain or cache-build hardware acceptance.
+- **Deferred evidence:** gameplay memory, ON/OFF comparison, post-scroll/menu memory
+  and process-absence measurement. No more profiling sessions, Terminal commands
+  or device checks requested for this pass. Preserve these gaps; do not infer RAM
+  from disk size or gameplay absence from idle samples. Deferrals do not block M6.
+- **Retained mechanisms:** default-off startup scopes, identity-validated RSS/PSS
+  collectors, guarded activation/retirement tools, fixtures and raw evidence on
+  host. No persistent observer, audio/font-ownership changes or speculative cleanup.
+  [Detailed results and archive](m5-profiling.md); [return memory limits](onion-return.md).
+- **Closure:** all temporary profiling-owned card files archived/byte-verified before
+  removal; exact production launcher restored, cache binary kept, permanent return
+  integration/data preserved. Existing user hardware acceptance remains distinct.
+  Any future optimization requires separately authorized matched measurements.
 
 ### M6 — Implement a verified reversible Home entry point
 
@@ -346,7 +354,7 @@ and remaining navigation/artwork precede profiling and Home entry integration.
   Favorites → Onion game launch. Investigate a direct Home shortcut as an alternative.
 - **Current/missing:** Apps test entry and return integration work; neither replaces
   the Home tile. No supported tile dispatch/shortcut hook has been established.
-- **Dependencies:** M2–M5 stable browser; exact target device/runtime/source and safe
+- **Dependencies:** stable M2–M4 browser and closed M5 pass (deferrals do not block investigation); exact target device/runtime/source and safe
   integration design; inventory stock dispatch before choosing a mechanism.
 - **Reuse/inspect:** mounted v4.3.1-1 `runtime.sh` MainUI launch/mount/command handoff,
   actual MainUI tile dispatch, state/keymon/GLO mechanisms, existing Apps launcher,
@@ -468,7 +476,7 @@ Evidence gaps and limitations to retain until resolved:
   observed conflicts are refused and backups retained. No full concurrent-edit claim.
 - Recent registration/handoff rollback and runtime ownership have strong host fixtures,
   but interruption/storage/shutdown/restart/stock-isolation device cases are incomplete.
-- No measured device startup/RAM data; resource/file sizes do not measure overhead.
+- Limited pre-cache startup and idle ON RSS/PSS are measured; full gameplay/OFF-ON/process-absence evidence is deferred. Resource/file sizes do not measure RAM.
 - Existing SDL_ttf `libbz2.so.1.0` linker warning and private library provenance are
   packaging gaps. Do not change working audio/dependencies merely to silence it.
 - Home dispatch/hook remains unknown; MainUI internals are not verified. Return helper

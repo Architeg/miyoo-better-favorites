@@ -6,7 +6,8 @@ Update roadmap/status whenever a milestone changes or hardware verification arri
 
 ## Current implementation checkpoint
 
-M4 publication checkpoint: shoulder paging and resilient theme resources.
+Published/pushed M4 on `main`: `be00372ce53b4b2e8f4d48d1974335ffa932034c` —
+`Add shoulder paging and resilient theme resources`. Remote main matched.
 User hardware acceptance received 2026-10-03; tested binary is identified below.
 
 Previous committed/pushed M3 on `main`:
@@ -58,16 +59,40 @@ fault combinations remain host fixtures, not implied device measurements. No pre
   measured bounds, owned-font preservation, static reading and explicit paging.
 - Docker ARM build passed. Existing SDL_ttf `libbz2.so.1.0` linker warning remains.
   Compilation/previews/fixtures are distinct from device verification.
-- No measured device startup or RAM baseline. Full Mini/Plus, Onion-version, theme,
+- Limited pre-cache startup and idle RSS/PSS evidence is recorded below. Full Mini/Plus, Onion-version, theme,
   shutdown/restart/interruption/stock-isolation and fault coverage is incomplete.
 
 ## Next unfinished milestone
 
-**M5: establish startup and memory baselines before optimizing.** Inspect existing
-loader/parser/SDL boundaries and the [runtime memory procedure](onion-return.md).
-Use opt-in instrumentation, repeatable cold/warm runs and RSS/PSS/process evidence.
-Compare Automatic return OFF/ON; never infer RAM from file size. No speculative
-refactoring, Home integration or persistent profiling process.
+**M6: read-only investigation of reversible Home Favorites entry integration**
+and a direct Home shortcut alternative. Compare mounted Onion v4.3.1-1 with
+matching source before choosing a mechanism. No Home integration implementation
+or deployment is authorized in this investigation.
+
+### M5 pass closed with explicit deferrals — 2026-10-03
+
+Seven available pre-cache startup archives validate success and cleanup. Original
+pilot post-boot 505.361 ms, warm median 267.590 ms (n=3); corrected post-boot
+505.596 ms, warm median 271.043 ms (n=2, fourth archive absent). Original hashing
+and remaining preparation/instrumentation/cache biases prevent unbiased cold or
+causal gain claims. Idle ON sampling validates three samples per role: browser
+smaps RSS 19,308 kB / median PSS 17,449 kB; runtime RSS 1,808 / PSS 357 kB.
+
+Gameplay memory, ON/OFF comparisons, post-scroll/menu memory and gameplay process
+absence measurements are **deferred**, not verified and not prerequisites for
+M6. No more profiling sessions, Terminal commands or device checks are requested.
+See [measurements, limits and verified retirement archive](m5-profiling.md).
+
+The cache optimization and its host equivalence/failure/reload checks are
+published separately from this measurement checkpoint. No device gain or new
+cache-build hardware acceptance is established.
+
+Exact production launcher restored; profiling hooks/collectors/evidence/card
+rollback copies were archived and verified before removal. Cache binary retained,
+profiling disabled, saved data and permanent Onion return integration preserved.
+Host archive: `/Users/valeriybagrintsev/IT Projects/miyoo-better-favorites-backups/20261003-034734-m5-retired-card-archive/`.
+M4 remains the last complete user hardware-accepted checkpoint; M5 closure does
+not retrospectively mark the cache build hardware-accepted.
 
 M4 is complete, including approved L1/R1 pixel paging, non-repeated presses,
 selectable/no-wrap clamps, theme decode fallbacks and bounded artwork. See

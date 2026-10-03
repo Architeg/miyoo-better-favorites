@@ -1,3 +1,4 @@
+#include "profiled_sdl.h"
 #include "menu_renderer.h"
 #include "menu_text.h"
 #include "browser_resources.h"
@@ -122,7 +123,7 @@ TTF_Font* readableFont(const Theme& theme,const ThemeTextStyle& style,int maxHei
         if(suppliedFont(theme,candidate)&&std::ifstream(candidate).good()){path=candidate;break;}
     }
     for(int size=style.size+1;size>=8;--size) {
-        auto* font=TTF_OpenFont(path.c_str(),size);if(!font)return nullptr;
+        auto* font=profiledFontOpen(path.c_str(),size);if(!font)return nullptr;
         std::string face=TTF_FontFaceStyleName(font)?TTF_FontFaceStyleName(font):"";
         std::transform(face.begin(),face.end(),face.begin(),[](unsigned char c){return std::tolower(c);});
         if(face.find("bold")==std::string::npos)TTF_SetFontStyle(font,TTF_STYLE_BOLD);
@@ -140,7 +141,7 @@ bool regularFace(TTF_Font* font) {
     return style.empty() || style=="regular" || style=="normal" || style=="book" || style=="roman";
 }
 TTF_Font* regularFont(const Theme& theme,const ThemeTextStyle& style,int size) {
-    auto* original=TTF_OpenFont(style.fontPath.c_str(),size);
+    auto* original=profiledFontOpen(style.fontPath.c_str(),size);
     if(!original)return nullptr;
     const std::string family=TTF_FontFaceFamilyName(original)?TTF_FontFaceFamilyName(original):"";
     std::string chosen=style.fontPath;
@@ -181,7 +182,7 @@ TTF_Font* regularFont(const Theme& theme,const ThemeTextStyle& style,int size) {
         }
         for(const auto& path:paths) {
             if(!suppliedFont(theme,path))continue;
-            auto* candidate=TTF_OpenFont(path.c_str(),size);if(!candidate)continue;
+            auto* candidate=profiledFontOpen(path.c_str(),size);if(!candidate)continue;
             if(regularFace(candidate) && TTF_FontFaceFamilyName(candidate) && family==TTF_FontFaceFamilyName(candidate)) {
                 TTF_CloseFont(original);original=candidate;chosen=path;break;
             }
@@ -296,7 +297,7 @@ MenuRenderer::MenuRenderer(const Theme& theme,MenuResources resources):sectionHe
     if(!theme.menuLeftArrowPath.empty()) leftArrow_=loadThemeImage(theme,theme.menuLeftArrowPath);
     if(!theme.menuRightArrowPath.empty()) rightArrow_=loadThemeImage(theme,theme.menuRightArrowPath);
     // App-owned instances only. Browser resources are borrowed and never restyled.
-    returnHeadingFont_=TTF_OpenFont(theme.section.fontPath.c_str(),theme.section.size);
+    returnHeadingFont_=profiledFontOpen(theme.section.fontPath.c_str(),theme.section.size);
     if(returnHeadingFont_)TTF_SetFontStyle(returnHeadingFont_,TTF_GetFontStyle(returnHeadingFont_)|TTF_STYLE_BOLD);
     ownedBodyFont_=readableFont(theme,theme.section);
     ownedHintFont_=readableFont(theme,theme.hint,26);
@@ -309,7 +310,7 @@ MenuRenderer::MenuRenderer(const Theme& theme,MenuResources resources):sectionHe
     // never shrinks it; face selection happens once at construction.
     int descriptionSize=std::max(16,theme.section.size-1);
     for(;descriptionSize>8;--descriptionSize){
-        auto* probe=TTF_OpenFont(theme.section.fontPath.c_str(),descriptionSize);
+        auto* probe=profiledFontOpen(theme.section.fontPath.c_str(),descriptionSize);
         if(!probe)break;
         const int h=TTF_FontHeight(probe);TTF_CloseFont(probe);if(h<=24)break;
     }
@@ -604,11 +605,11 @@ bool MenuRenderer::explanationsAreRegular() const {return regularFace(regularBod
 void MenuRenderer::verifyFonts(bool expectRegular) const {
     assert(regularBodyFont_ && descriptionFont_ && returnHeadingFont_);
     assert(TTF_GetFontStyle(returnHeadingFont_)&TTF_STYLE_BOLD);
-    auto* heading=TTF_OpenFont(theme_.section.fontPath.c_str(),theme_.section.size);assert(heading);
+    auto* heading=profiledFontOpen(theme_.section.fontPath.c_str(),theme_.section.size);assert(heading);
     assert(TTF_FontHeight(returnHeadingFont_)==TTF_FontHeight(heading));
     TTF_CloseFont(heading);
     if(expectRegular)assert(regularFace(regularBodyFont_) && regularFace(descriptionFont_));
-    auto* original=TTF_OpenFont(theme_.section.fontPath.c_str(),theme_.section.size+1);assert(original);
+    auto* original=profiledFontOpen(theme_.section.fontPath.c_str(),theme_.section.size+1);assert(original);
     assert(TTF_FontHeight(regularBodyFont_)>=TTF_FontHeight(original)-2);
     assert(std::string(TTF_FontFaceFamilyName(original))==TTF_FontFaceFamilyName(regularBodyFont_));
     if(regularFace(original))assert(regularFace(regularBodyFont_));

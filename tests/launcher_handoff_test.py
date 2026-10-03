@@ -7,12 +7,19 @@ with tempfile.TemporaryDirectory(prefix='better-favorites-launcher-test-') as fo
     app=Path(folder)
     active=app/'active-command'
     active.write_text('fixture app command')
-    launcher=(repo/'App/BetterFavoritesTest/launch.sh').read_text()
+    prepared=app/'prepared'
+    subprocess.run(['python3',str(repo/'tools/manage-profiling.py'),'prepare','--output',str(prepared)],check=True,capture_output=True)
+    (app/'profile-device-launch.sh').write_bytes((prepared/'profile-device-launch.sh').read_bytes())
+    (app/'profile.enabled').write_text('BetterFavoritesProfilePilot1\n')
+    (app/'Roms').mkdir();(app/'Roms/favourite.json').write_text('{}\n')
+    (app/'proc').mkdir();(app/'proc/uptime').write_text('12.34 34.56\n')
+    launcher=(prepared/'launch.sh').read_text()
     launcher=launcher.replace('ACTIVE=/mnt/SDCARD/.tmp_update/cmd_to_run.sh', 'ACTIVE="'+str(active)+'"')
     launcher=launcher.replace('LD_PRELOAD=/mnt/SDCARD/miyoo/lib/libpadsp.so '+chr(92)+'\n','')
     (app/'launch.sh').write_text(launcher)
     stub=app/'better-favorites'
     stub.write_text("""#!/bin/sh
+[ "$BETTER_FAVORITES_RETURN_DIR" = "$TEST_RETURN_DIR" ] || exit 97
 printf '%s\\n' "$*" >> "$TEST_TRACE"
 case "$1" in
     --publish-handoff|--publish-switcher-handoff)
@@ -27,11 +34,13 @@ exit "$TEST_BINARY_EXIT"
 """)
     stub.chmod(0o700)
     for exitcode,publication,expected,operation in [(20,0,0,'--publish-handoff'),(21,0,0,'--publish-switcher-handoff'),(21,1,1,'--publish-switcher-handoff'),(0,0,0,None),(1,0,1,None),(139,0,139,None)]:
+        if (app/'.profiling-results').exists():__import__('shutil').rmtree(app/'.profiling-results')
         trace=app/'trace'; cleanup=app/'cleanup'
         trace.unlink(missing_ok=True);cleanup.unlink(missing_ok=True)
-        env=dict(os.environ,TEST_TRACE=str(trace),TEST_CLEANUP=str(cleanup),TEST_BINARY_EXIT=str(exitcode),TEST_PUBLISH_EXIT=str(publication))
+        env=dict(os.environ,TEST_TRACE=str(trace),TEST_CLEANUP=str(cleanup),TEST_BINARY_EXIT=str(exitcode),TEST_PUBLISH_EXIT=str(publication),BETTER_FAVORITES_PROC_ROOT=str(app/'proc'),BETTER_FAVORITES_SD_ROOT=str(app),BETTER_FAVORITES_RETURN_DIR=str(app/'runtime-context'),TEST_RETURN_DIR=str(app/'runtime-context'))
         result=subprocess.run(['sh',str(app/'launch.sh')],env=env,capture_output=True,text=True)
         assert result.returncode==expected,(exitcode,result.stdout,result.stderr)
+        assert (app/'.profiling-results/pilot-0001/startup.log').is_file()
         lines=trace.read_text().splitlines()
         publishers=[line.split()[0] for line in lines if line.startswith('--publish')]
         assert publishers==([operation] if operation else []),lines

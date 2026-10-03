@@ -1,3 +1,4 @@
+#include "profiled_sdl.h"
 #include "favorites_parser.h"
 #include "favorite_removal.h"
 #include "menu_state.h"
@@ -217,34 +218,39 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    startup_profile::Session profileSession;
+
     constexpr int width = 640;
     constexpr int height = 480;
     constexpr int bpp = 16;
 
     ThemeLoader themeLoader("/mnt/SDCARD");
-    Theme theme = themeLoader.load();
+    Theme theme;
+    { startup_profile::Scope phase("theme.total"); theme = themeLoader.load(); }
 
     const char* settingsEnvironment = std::getenv("BETTER_FAVORITES_SETTINGS");
     const std::string appSettingsPath = settingsEnvironment && *settingsEnvironment
         ? settingsEnvironment : "/mnt/SDCARD/App/BetterFavoritesTest/settings.conf";
     AppSettings appSettings;
     std::string settingsError;
-    loadAppSettings(appSettingsPath, appSettings, settingsError);
+    { startup_profile::Scope phase("settings.return"); loadAppSettings(appSettingsPath, appSettings, settingsError); }
     if (!settingsError.empty()) std::cerr << settingsError << std::endl;
     const auto preferenceSlash=appSettingsPath.find_last_of('/');
     const std::string browserPreferencesPath=(preferenceSlash==std::string::npos?".":appSettingsPath.substr(0,preferenceSlash))+"/browser-preferences.conf";
-    loadBrowserPreferences(browserPreferencesPath,appSettings,settingsError);
+    { startup_profile::Scope phase("settings.browser"); loadBrowserPreferences(browserPreferencesPath,appSettings,settingsError); }
     if(!settingsError.empty())std::cerr<<settingsError<<std::endl;
     FavoritesParser parser("/mnt/SDCARD", appSettings);
 
     const std::string favoritesPath = "/mnt/SDCARD/Roms/favourite.json";
     FavoritesSnapshot favoritesSnapshot;
     std::string favoritesError;
-    readFavoritesSnapshot(favoritesPath, favoritesSnapshot, favoritesError);
+    { startup_profile::Scope phase("favorites.read"); readFavoritesSnapshot(favoritesPath, favoritesSnapshot, favoritesError); }
     if (!favoritesError.empty()) std::cerr << favoritesError << std::endl;
     auto favorites = parser.loadFavoritesFromText(favoritesSnapshot.bytes);
+    startup_profile::Scope groupingPhase("favorites.group_rows");
     auto groups = parser.groupFavorites(favorites);
     auto rows = buildUiRows(groups, appSettings.groupByConsole);
+    groupingPhase.end();
 
     std::size_t selectedRow =
         firstSelectableRow(rows);
@@ -253,7 +259,7 @@ int main(int argc, char* argv[])
     const std::string browserStatePath = stateEnvironment && *stateEnvironment
         ? stateEnvironment : "/mnt/SDCARD/App/BetterFavoritesTest/browser-state";
     std::string stateError;
-    restoreBrowserState(browserStatePath, rows, selectedRow, firstRow, stateError);
+    { startup_profile::Scope phase("browser.restore"); restoreBrowserState(browserStatePath, rows, selectedRow, firstRow, stateError); }
     if (!stateError.empty()) std::cerr << stateError << std::endl;
 
     if (
@@ -266,6 +272,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    startup_profile::Scope sdlPhase("sdl.init_video_audio_events");
     if (
         SDL_Init(
             SDL_INIT_VIDEO |
@@ -281,6 +288,9 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    sdlPhase.end();
+
+    startup_profile::Scope extensionsPhase("sdl.image_ttf_init");
     if ((IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) == 0) {
         std::cerr
             << "IMG_Init failed: "
@@ -302,8 +312,10 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    resolveThemeFonts(theme);
+    extensionsPhase.end();
+    { startup_profile::Scope phase("font.validation"); resolveThemeFonts(theme); }
 
+    startup_profile::Scope displayPhase("display.setup");
     SDL_Window* window =
         SDL_CreateWindow(
             "Better Favorites",
@@ -356,6 +368,8 @@ int main(int argc, char* argv[])
 
         return 1;
     }
+
+    displayPhase.end();
 
     SDL_Surface* background =
         loadThemeImage(theme,theme.backgroundPath);
@@ -446,6 +460,8 @@ int main(int argc, char* argv[])
      * Mix_PlayChannel(), so there is no filesystem work while scrolling.
      */
     Mix_Chunk* navigationSound = nullptr;
+    startup_profile::Scope audioPhase("audio.total");
+    startup_profile::Scope audioOpenPhase("audio.mixer_open");
 
     if (
         Mix_OpenAudio(
@@ -455,6 +471,7 @@ int main(int argc, char* argv[])
             1024
         ) == 0
     ) {
+        audioOpenPhase.end();
         std::cerr
             << "Audio opened successfully."
             << std::endl;
@@ -462,6 +479,7 @@ int main(int argc, char* argv[])
         const std::string navigationSoundPath =
             resolveNavigationSound(theme);
 
+        startup_profile::Scope wavPhase("audio.wav_decode");
         navigationSound =
             Mix_LoadWAV_RW(
                 SDL_RWFromFile(
@@ -470,6 +488,8 @@ int main(int argc, char* argv[])
                 ),
                 1
             );
+
+        wavPhase.end();
 
             std::cerr
                 << "Navigation sound path: "
@@ -483,6 +503,7 @@ int main(int argc, char* argv[])
             }
 
         if (navigationSound) {
+            startup_profile::Scope volumePhase("audio.volume_config");
             const int navigationVolume =
                 loadNavigationVolume();
 
@@ -510,6 +531,9 @@ int main(int argc, char* argv[])
             << std::endl;
     }
 
+    audioOpenPhase.end();
+    audioPhase.end();
+
     SDL_Surface* divider = nullptr;
 
     if (!theme.horizontalDividerPath.empty()) {
@@ -518,7 +542,7 @@ int main(int argc, char* argv[])
     }
 
     TTF_Font* titleFont =
-        TTF_OpenFont(
+        profiledFontOpen(
             theme.title.fontPath.c_str(),
             std::max(
                 1,
@@ -527,7 +551,7 @@ int main(int argc, char* argv[])
         );
 
     TTF_Font* listFont =
-        TTF_OpenFont(
+        profiledFontOpen(
             theme.list.fontPath.c_str(),
             std::max(
                 1,
@@ -543,7 +567,7 @@ int main(int argc, char* argv[])
     }
 
     TTF_Font* sectionFont =
-        TTF_OpenFont(
+        profiledFontOpen(
             theme.section.fontPath.c_str(),
             std::max(
                 1,
@@ -552,7 +576,7 @@ int main(int argc, char* argv[])
         );
 
     TTF_Font* footerFont =
-        TTF_OpenFont(
+        profiledFontOpen(
             theme.hint.fontPath.c_str(),
             std::max(
                 1,
@@ -625,8 +649,10 @@ int main(int argc, char* argv[])
         255
     };
 
+    startup_profile::Scope menuPhase("menu.resources");
     MenuRenderer menuRenderer(theme, {background, titleBackground, footerBackground, listSmall,
         titleFont, listFont, sectionFont, footerFont ? footerFont : sectionFont});
+    menuPhase.end();
     BrowserTitles browserTitles(listFont);
     MenuState menu;
     std::string uiError;
@@ -678,6 +704,7 @@ int main(int argc, char* argv[])
     bool saveUpdatedPosition = false;
 
     while (running) {
+        startup_profile::Scope framePhase("frame.first_render_and_events");
         SDL_Event event;
 
         while (SDL_PollEvent(&event)) {
@@ -1972,16 +1999,16 @@ int main(int argc, char* argv[])
         }
         if (!uiError.empty() && menu.page() != MenuPage::RemoveConfirm) menuRenderer.drawError(screen, uiError, SDL_GetTicks());
 
-        SDL_UpdateTexture(
+        const int updateStatus = SDL_UpdateTexture(
             texture,
             nullptr,
             screen->pixels,
             screen->pitch
         );
 
-        SDL_RenderClear(renderer);
+        const int clearStatus = SDL_RenderClear(renderer);
 
-        SDL_RenderCopy(
+        const int copyStatus = SDL_RenderCopy(
             renderer,
             texture,
             nullptr,
@@ -1989,6 +2016,9 @@ int main(int argc, char* argv[])
         );
 
         SDL_RenderPresent(renderer);
+        framePhase.end();
+        startup_profile::finish(updateStatus == 0 && clearStatus == 0 && copyStatus == 0
+            ? "first_presented_frame" : "presentation_error");
     }
 
     browserTitles.clear();

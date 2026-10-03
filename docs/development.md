@@ -46,3 +46,9 @@ in [browser-title-scrolling.md](browser-title-scrolling.md).
 
 Use [m4-audit.md](m4-audit.md) to distinguish verified existing behavior, local
 resource corrections, approved shoulder paging and user hardware acceptance.
+
+M5's closed measurement pass, startup/idle results, biases, explicit gameplay and
+ON/OFF deferrals, reusable tools and verified retirement archive are documented
+in [m5-profiling.md](m5-profiling.md). The per-parse cache has host checks;
+device speedup/build acceptance is unverified. M6 proceeds with read-only entry
+investigation; no further profiling sessions or device commands are requested.

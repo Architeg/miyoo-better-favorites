@@ -1,3 +1,4 @@
+#include "profiled_sdl.h"
 #include "browser_resources.h"
 #include <SDL_image.h>
 #include <algorithm>
@@ -9,7 +10,7 @@ SDL_Surface* loadThemeImage(const Theme& theme, const std::string& resolvedPath)
     const std::vector<std::string> candidates=found==theme.imageCandidates.end()
         ?std::vector<std::string>{resolvedPath}:found->second;
     for(const auto& path:candidates){
-        auto* surface=IMG_Load(path.c_str());
+        auto* surface=profiledImageLoad(path.c_str());
         if(surface && surface->w>0 && surface->h>0){
             if(path!=resolvedPath)std::cerr<<"Theme image fallback: "<<resolvedPath<<" -> "<<path<<std::endl;
             return surface;
@@ -46,7 +47,7 @@ void updateFavoriteArtwork(SDL_Surface*& surface,std::string& currentPath,const 
     if(surface)SDL_FreeSurface(surface);
     surface=nullptr;currentPath=newPath;
     if(!newPath.empty()){
-        surface=IMG_Load(newPath.c_str());
+        surface=profiledImageLoad(newPath.c_str());
         if(!surface)std::cerr<<"Preview image failed: "<<newPath<<": "<<IMG_GetError()<<std::endl;
     }
 }

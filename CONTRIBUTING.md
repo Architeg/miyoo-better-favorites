@@ -79,6 +79,7 @@ These do not require a card or proprietary firmware fixtures:
 sh tests/run-local-checks.sh
 (cd tools/release-installer && go test ./...)
 (cd tools/host-dispatch && go test ./...)
+(cd tools/bootstrap && go test ./...)
 python3 tests/host_dispatch_test.py
 ```
 

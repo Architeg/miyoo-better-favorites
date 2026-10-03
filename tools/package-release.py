@@ -75,11 +75,17 @@ def main():
  from host_packaging import build_hosts
  build_hosts(stage,a.legacy_toolchain,out)
  for target in (stage,base):
-  document_paths=['README.md','CONTRIBUTING.md','CHANGELOG.md','LICENSE','THIRD_PARTY_NOTICES.md']
+  document_paths=['README.md','CONTRIBUTING.md','CHANGELOG.md','LICENSE','THIRD_PARTY_NOTICES.md','tools/bootstrap/README.md']
   document_paths += [str(p.relative_to(ROOT)) for p in sorted((ROOT/'docs').rglob('*.md'))]
   document_paths += ['docs/release/dependency-hashes.json','docs/release/upstream-sources.json']
   for rel in document_paths:
-   write(target,rel,(ROOT/rel).read_bytes())
+   data=(ROOT/rel).read_bytes()
+   if rel=='README.md' and target==stage:
+    data=data.replace(b'src="App/BetterFavoritesTest/icon.png"',b'src="payload/App/BetterFavoritesTest/icon.png"')
+   if rel=='docs/roadmap.md':
+    for source in ('integration/onion-return/hashes.json','integration/onion-return/manage.py'):
+     data=data.replace(('](../'+source+')').encode(),('](https://github.com/Architeg/miyoo-better-favorites/blob/'+commit+'/'+source+')').encode())
+   write(target,rel,data)
   write(target,'README.txt',b'Better Favorites 1.0.0-rc.2 - private review candidate, not stable.\nStart with docs/install.md. Uninstall restores integrations and removes owned app/data automatically; computer recovery is retained.\nDesigned for Mini and Mini Plus; hardware tested on Mini Plus.\nUser-confirmed Windows7 SP1 x64/Windows10 x64 and Mac tests are recorded; exact host/tool and remaining gates are in docs/release/rc.2.md.\n')
  # Supply pinned dependency source material, rather than promising a future URL.
  # No vendor MainUI, ROMs, private backups or development logs are in these trees.

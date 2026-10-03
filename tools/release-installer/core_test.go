@@ -97,7 +97,7 @@ func TestActualAuditedOutputs(t *testing.T) {
 	}
 	var h HomeSpec
 	json.Unmarshal(d("integration/mainui-home/package.json"), &h)
-	payload := d("build/m6-home-review-final/adapter.elf")
+	payload := d("build/rc-adapter/adapter.elf")
 	for _, n := range names {
 		original := d("build/m6-accepted-fixture/.tmp_update/bin/" + n)
 		patched, e := patchHome(original, payload, n)

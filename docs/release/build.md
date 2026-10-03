@@ -45,3 +45,14 @@ The package includes SDL/image/mixer/ttf/json-c/png/z and SwiftShader EGL/GLES
 private libraries. Firmware/Onion supplies libc/libstdc++/libgcc, MI driver libraries,
 freetype, bzip2 and libpadsp. Inherited runtime search paths are retained. The
 candidate app-only fresh installation still needs device closure verification.
+
+### Canonical adapter ELF metadata
+
+The accepted raw adapter ELF included its link input pathname in an unmapped
+STT_FILE string. `hooks.S` now supplies an explicit filename directive so raw
+ELF output is independent of the output directory. Canonical payload SHA-256:
+`c8110095a3da0637ffd21788968e9c2f7b3a6637d57d7f333c1acacefd908146`.
+The accepted raw ELF (`1623d143…`) remains preserved. All loadable code/data/unwind
+sections and all four generated MainUI SHA-256 values are **byte-identical** to
+the accepted deployment. This is metadata reproducibility, not a new redirect
+behavior or a replacement of accepted card files.

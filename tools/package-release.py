@@ -18,6 +18,14 @@ def zipdir(root,dest,epoch):
    name=p.relative_to(root).as_posix();entry=zipfile.ZipInfo(name,time.gmtime(max(epoch,315532800))[:6]);entry.compress_type=zipfile.ZIP_DEFLATED
    entry.external_attr=(0o100000|(0o755 if p.suffix in ('.sh','.command') or p.name.startswith('better-favorites-installer-') or p.name=='better-favorites' else 0o644))<<16
    z.writestr(entry,p.read_bytes())
+def source_archive(repo, args, destination, epoch):
+ import gzip
+ proc=subprocess.Popen(['git','-C',str(repo),'archive','--format=tar']+args,stdout=subprocess.PIPE)
+ try:
+  with destination.open('xb') as raw:
+   with gzip.GzipFile(filename='',mode='wb',fileobj=raw,compresslevel=9,mtime=epoch) as gz:shutil.copyfileobj(proc.stdout,gz,1024*1024)
+  if proc.wait()!=0:raise RuntimeError('Source archive failed')
+ finally:proc.stdout.close()
 def main():
  p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',type=Path,required=True);a=p.parse_args()
  if command(['git','status','--porcelain','--untracked-files=normal']).strip():raise SystemExit('Commit reviewed source first; package requires a clean pinned checkout.')
@@ -67,11 +75,8 @@ def main():
   write(target,'README.txt',b'Better Favorites 1.0.0-rc.1 - release candidate, not stable.\nStart with docs/install.md. Restore optional integrations BEFORE deleting the app.\nDesigned for Mini and Mini Plus; hardware tested on Mini Plus.\nCandidate ZIP roundtrip and native Windows execution gates remain; see docs/release/rc.1.md.\n')
  # Supply pinned dependency source material, rather than promising a future URL.
  # No vendor MainUI, ROMs, private backups or development logs are in these trees.
- source=command(['git','-C',str(sdl),'archive','--format=tar','--prefix=sdl2-miyoo/','HEAD','LICENSE','Makefile','Makefile.mk','sdl2','swiftshader','mini'])
- import gzip
- write(out,'sdl2-miyoo-'+SDL_COMMIT+'.tar.gz',gzip.compress(source,compresslevel=9,mtime=epoch))
- own=command(['git','archive','--format=tar','--prefix=better-favorites-'+VERSION+'/','HEAD'])
- write(out,'better-favorites-'+VERSION+'-source.tar.gz',gzip.compress(own,compresslevel=9,mtime=epoch))
+ source_archive(sdl,['--prefix=sdl2-miyoo/','HEAD','LICENSE','Makefile','Makefile.mk','sdl2','swiftshader','mini'],out/('sdl2-miyoo-'+SDL_COMMIT+'.tar.gz'),epoch)
+ source_archive(ROOT,['--prefix=better-favorites-'+VERSION+'/','HEAD'],out/('better-favorites-'+VERSION+'-source.tar.gz'),epoch)
  notices=out/'licenses';notices.mkdir()
  for rel in ('LICENSE','sdl2/LICENSE.txt','swiftshader/LICENSE.txt','swiftshader/AUTHORS.txt'):
   write(notices,rel.replace('/','-'),(sdl/rel).read_bytes())
@@ -86,6 +91,9 @@ def main():
  for target in (stage,base):
   shutil.copytree(notices,target/'licenses')
   write(target,'SOURCE.txt',('Matching project source: better-favorites-'+VERSION+'-source.tar.gz\nDependency source: sdl2-miyoo-'+SDL_COMMIT+'.tar.gz\nDistribute source/license companions with this private candidate. Prebuilt correspondence audit remains a gate.\n').encode())
+ for target in (stage,base):
+  entries=[p for p in sorted(target.rglob('*')) if p.is_file()]
+  write(target,'SHA256SUMS', ''.join(sha(p.read_bytes())+'  '+p.relative_to(target).as_posix()+'\n' for p in entries).encode())
  zipdir(base,out/('better-favorites-'+VERSION+'-app-only.zip'),epoch)
  zipdir(stage,out/('better-favorites-'+VERSION+'-installer.zip'),epoch)
  # Separate source/license archives alongside both binaries, checksums external.

@@ -1,3 +1,4 @@
+.file "hooks.S"
 .syntax unified
 .arm
 .text

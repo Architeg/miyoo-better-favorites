@@ -7,7 +7,7 @@ No recovery step requires MainUI, Miyoo Terminal, network access or firmware wri
 ## Normal uninstall
 
 Power off and mount the card on Windows/macOS/Linux. Open the packaged host tool,
-choose **Uninstall**, give the card root and this card's printed recovery folder.
+choose **Uninstall**, give the card root and this card's **latest successful Install/Update recovery folder**. Older bundles retain stock originals for manual copy-back, but automatic restore refuses a stale expected installed manifest.
 It verifies every applicable backup and destination before changing anything,
 restores stock runtime/MainUI first, then removes its own receipts/helper and makes
 journals inert. Reboot and confirm stock Home Favorites and GameSwitcher behavior.

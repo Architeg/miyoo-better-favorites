@@ -14,6 +14,11 @@ candidate deployment or change to the accepted mounted card is part of this pass
 - Whole-package host fixture checks exercise the actual extracted candidate:
   install/update with personal files, uninstall/stock/reinstall, refusal,
   publication/rollback and interrupted/foreign restore, bounded diagnostics.
+- Actual ZIPs and their packaged self-contained installer executables passed the
+  roundtrip/refusal/recovery fixture on **macOS arm64** and **Linux amd64 in the
+  existing isolated Docker image**. Native Mac/Linux Go tests passed whole-package
+  write/rollback, accepted-helper upgrade, staged-space simulation and preservation.
+  Native SDL checks-only passed; no images were generated.
 - Native Windows self-contained executable and Windows tests cross-compile.
   **No Windows execution/SD-reader acceptance follows.**
 
@@ -41,3 +46,20 @@ candidate deployment or change to the accepted mounted card is part of this pass
    and publish stable v1.0.0. Screenshots/banner await user-supplied materials.
 
 No additional profiling, preview batch or shortcut work is required for these gates.
+
+### Host package procedure
+
+`python3 tests/release_package_test.py --release <candidate-directory> --fixtures
+<private-audited-fixture>` verifies archive/entry hashes and executes the actual
+packaged native host tool. Tests preserve personal files, require latest update
+recovery identity, exercise stock/patched mixtures and refuse foreign changes.
+Go fault fixtures additionally simulate stage/no-space, publication and rollback
+failures. Those simulations are not physical card/reader power-loss tests.
+
+The ARM build passes with the existing SDL_ttf `libbz2.so.1.0` link warning and
+GCC ABI notes; no new app warnings remain. The card contains bzip2, but this does
+not replace the final device package dependency check. All nine packaged private
+libraries match the accepted card bytes; audio has not been swapped. Runtime
+script and generated MainUI outputs remain identical to the accepted hashes;
+only candidate return trace gating/helper manifest and app/launcher wording/logging
+change. No candidate was deployed.

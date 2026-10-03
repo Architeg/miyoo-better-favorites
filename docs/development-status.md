@@ -35,8 +35,8 @@ M7/M8 now prepare **v1.0.0-rc.1**, not stable. Post-acceptance Home wording/stat
 recovery and new release logging/package code have host/ARM checks only.
 The native Go offline installer replaces Python/WSL as the proposed user route;
 Windows cross-compilation is implemented but native Windows execution/SD-reader
-qualification remains pending. The actual extracted package is tested in isolated
-host fixtures; final ZIP hardware install/uninstall/reinstall is pending.
+qualification remains pending. The actual extracted ZIP installer roundtrip passes on native macOS arm64 and
+Linux amd64 in the isolated existing Docker image; final ZIP hardware install/uninstall/reinstall is pending.
 
 Basic current/previous logs are bounded to128KiB total; Export diagnostics is a
 host action, detailed tracing remains OFF. Short-lived logging modes leave no

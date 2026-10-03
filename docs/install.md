@@ -40,7 +40,7 @@ folder beside the tool, mirrors it on-card, stages replacements and checks outpu
 Unknown versions/hashes or third-party patch conflicts are refused before replacement.
 Both app preferences remain unchanged; absent preferences default OFF.
 
-Retain the printed **recovery folder**, including hidden `.tmp_update` content,
+Retain every printed recovery folder; use the **latest successful Install/Update recovery folder** for automated uninstall/restore. Keep the complete bundle, including hidden `.tmp_update` content,
 `recovery.json`, `SHA256SUMS` and `RESTORE.txt`. Copy it somewhere safe. It contains
 this card's originals, not generic files. Reboot after binary installation/removal.
 Enable **Replace stock Favorites** or **Automatic return** in app Settings only

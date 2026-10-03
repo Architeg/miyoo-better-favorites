@@ -127,6 +127,9 @@ std::vector<Favorite> FavoritesParser::loadFavoritesFromText(const std::string& 
 {
     startup_profile::Scope phase("favorites.parse_inclusive");
     std::vector<Favorite> favorites;
+    // Cache resolved labels (including fallbacks) only for this parse. Reloads
+    // must observe config edits, repairs and removals without stale labels.
+    std::map<std::string, std::string> systemLabels;
     std::istringstream input(text);
     std::size_t offset = 0;
     std::string line;
@@ -217,8 +220,14 @@ std::vector<Favorite> FavoritesParser::loadFavoritesFromText(const std::string& 
         favorite.systemId =
             extractSystemId(favorite.launchPath);
 
-        favorite.systemLabel =
-            resolveSystemLabel(favorite.systemId);
+        auto systemLabel = systemLabels.find(favorite.systemId);
+        if (systemLabel == systemLabels.end()) {
+            systemLabel = systemLabels.emplace(
+                favorite.systemId,
+                resolveSystemLabel(favorite.systemId)
+            ).first;
+        }
+        favorite.systemLabel = systemLabel->second;
 
         json_object_put(root);
 

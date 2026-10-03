@@ -83,9 +83,11 @@ absence measurements are **deferred**, not verified and not prerequisites for
 M6. No more profiling sessions, Terminal commands or device checks are requested.
 See [measurements, limits and verified retirement archive](m5-profiling.md).
 
-The cache optimization and its host equivalence/failure/reload checks are
-published separately from this measurement checkpoint. No device gain or new
-cache-build hardware acceptance is established.
+The isolated per-parse emulator-label cache is host-verified: output/failure/reload
+checks pass and config reads fall 70 → 3 on the current corpus. ARM build and
+regressions pass. The reviewed cache binary is deployed, but **device speedup
+and this build's behavioral acceptance remain unverified**. Audio, font ownership,
+rendering and broader cleanup are unchanged. See [cache review](m5-emulator-label-cache.md).
 
 Exact production launcher restored; profiling hooks/collectors/evidence/card
 rollback copies were archived and verified before removal. Cache binary retained,

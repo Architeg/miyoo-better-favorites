@@ -333,8 +333,11 @@ full performance certification or new hardware acceptance of the cache build.
   hashing and remaining metadata/IO/instrumentation/cache biases are explicit.
   Three valid idle ON samples per role: browser smaps RSS 19,308 kB / median
   PSS 17,449 kB; runtime RSS 1,808 kB / PSS 357 kB. No unbiased cold-start claim.
-- **Separate optimization review:** per-parse emulator-label cache is reviewed
-  separately. No measured target startup gain or cache-build hardware acceptance.
+- **Isolated change:** per-parse emulator-label cache; host exact-output, failure
+  fallback and reload checks verify 70 → 3 config reads on this corpus. Regression
+  suite/ARM build pass; cache binary deployed with production launcher and profiling
+  disabled. **Device speedup and this build's behavior are unverified.** See
+  [cache scope and checks](m5-emulator-label-cache.md).
 - **Deferred evidence:** gameplay memory, ON/OFF comparison, post-scroll/menu memory
   and process-absence measurement. No more profiling sessions, Terminal commands
   or device checks requested for this pass. Preserve these gaps; do not infer RAM

@@ -182,7 +182,7 @@ benefit and regression risk. Compare it against accepted baseline on identical
 device/theme/corpus/state/game conditions with the same instrumentation. Reject
 noise-sized or regressive changes. Run regressions/ARM build and require device
 acceptance before publishing. Cosmetic cleanup and performance changes must have
-separate diffs/commits; M5 profiling remains uncommitted for review. If no worthwhile
+separate diffs/commits; the final pass is published with its evidence gaps explicitly retained. If no worthwhile
 bottleneck appears, keep the working implementation.
 
 ## Available baseline / unavailable measurements
@@ -688,6 +688,17 @@ RSS/PSS or unsupported metrics. Opening Terminal before completion can invalidat
 this trial. Sampling overhead and whole-device/shared-RSS limitations remain.
 This idle pilot alone will not prove gameplay process absence or OFF/ON memory cost.
 
+### Separate cache optimization (device acceptance unverified)
+
+At the user's direction, only a per-parse emulator-label cache is now implemented.
+It preserves output and failure fallbacks, refreshes on each reload, and reduces
+host corpus config reads from 70 to 3. This is separate from the measurement
+instrumentation and is published in its own commit. The deployed binary remains
+unverified on hardware; no new measurement session or test is requested. See
+[scope, checks and final disposition](m5-emulator-label-cache.md).
+No measured device gain or hardware acceptance is implied. Audio, font ownership,
+rendering and broader cleanup remain unchanged.
+
 ### Collected idle-memory evidence and reviewed cache deployment — 2026-10-03
 
 The finite idle observer completed with `failed=0`. All six snapshot directories
@@ -719,10 +730,11 @@ there is no after-optimization timing sample.
 
 The reviewed per-parse cache binary was deployed with verified backup:
 `/Users/valeriybagrintsev/IT Projects/miyoo-better-favorites-backups/20261003-033812-m5-cache-deployment/`.
-The cache implementation is published separately from profiling.
+See [cache scope, checks and deployment](m5-emulator-label-cache.md).
 Profiling stays disabled; no new session, Terminal commands or observers are
 requested. Only binary plus its profiling ownership-manifest hash were published.
-Hardware cache acceptance awaits one ordinary browsing/game launch-return check.
+This deployment recorded no cache-build hardware acceptance; final closure
+explicitly requests no further browsing/game check.
 No optimization beyond this isolated cache, cosmetic cleanup, commit or push.
 
 ## Final retirement and retained evidence

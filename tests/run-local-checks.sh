@@ -21,6 +21,11 @@ compile_run settings tests/app_settings_test.cpp src/app_settings.cpp
 compile_run state tests/browser_state_test.cpp src/browser_state.cpp src/ui_rows.cpp src/navigation.cpp
 compile_run launch -DBETTER_FAVORITES_HANDOFF_TESTING tests/launch_request_test.cpp src/launch_request.cpp src/app_settings.cpp
 compile_run switcher -DBETTER_FAVORITES_HANDOFF_TESTING tests/switcher_request_test.cpp src/launch_request.cpp src/app_settings.cpp
+if command -v pkg-config >/dev/null 2>&1 && pkg-config --exists libcjson; then
+    sh tests/run-emulator-label-cache-checks.sh "$output/emulator-label-cache"
+else
+    echo 'Emulator-label cache host test: SKIP (existing libcjson host bridge unavailable)'
+fi
 python3 tests/profiling_tools_test.py
 python3 tests/profiling_activation_test.py
 python3 tests/profiling_retirement_test.py

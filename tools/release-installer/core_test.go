@@ -194,6 +194,54 @@ func TestActualPackage(t *testing.T) {
 			t.Fatal("reinstall:", e)
 		}
 	})
+	t.Run("accepted-helper-upgrade-and-rollback", func(t *testing.T) {
+		root := seed(t)
+		original, _ := read(root, system+"runtime.sh")
+		patch, _ := read(dir, "payload/integration/onion-return/runtime.patch")
+		patched, err := patchRuntime(original, patch)
+		if err != nil {
+			t.Fatal(err)
+		}
+		oldHelper, err := os.ReadFile(filepath.Join(repo, "build/m6-accepted-fixture/.tmp_update/script/better_favorites_return.sh"))
+		if err != nil || digest(oldHelper) != r.Previous {
+			t.Fatal("accepted helper fixture mismatch", err)
+		}
+		mustWrite(t, root, returnBackup+"runtime.sh", original)
+		oldManifest := encode(map[string]any{"status": "installed", "version": r.Version, "original_git_blob": r.Blob, "original_sha256": r.Original, "patched_sha256": r.Patched, "helper_sha256": r.Previous, "mode": 448})
+		mustWrite(t, root, returnBackup+"manifest.json", oldManifest)
+		mustWrite(t, root, system+"script/better_favorites_return.sh", oldHelper)
+		os.WriteFile(filepath.Join(root, system+"runtime.sh"), patched, 0700)
+		recovery := filepath.Join(t.TempDir(), "failed-upgrade")
+		err = install(root, dir, recovery, true, true, func(phase, p string) error {
+			if phase == "after" && p == system+"script/better_favorites_return.sh" {
+				return errors.New("injected upgrade failure")
+			}
+			return nil
+		})
+		if err == nil {
+			t.Fatal("expected failure")
+		}
+		current, _ := read(root, system+"script/better_favorites_return.sh")
+		if !bytes.Equal(current, oldHelper) {
+			t.Fatal("accepted helper not rolled back")
+		}
+		m, _ := read(root, returnBackup+"manifest.json")
+		if !bytes.Equal(m, oldManifest) {
+			t.Fatal("accepted manifest changed on failure")
+		}
+		recovery = filepath.Join(t.TempDir(), "upgrade")
+		if err = install(root, dir, recovery, true, true, nil); err != nil {
+			t.Fatal(err)
+		}
+		current, _ = read(root, system+"script/better_favorites_return.sh")
+		if digest(current) != r.Helper {
+			t.Fatal("upgrade mismatch")
+		}
+		backup, _ := read(root, returnBackup+"runtime.sh")
+		if !bytes.Equal(backup, original) {
+			t.Fatal("permanent original changed")
+		}
+	})
 	t.Run("unsupported-before-mutation", func(t *testing.T) {
 		root := seed(t)
 		os.WriteFile(filepath.Join(root, system+"bin/"+names[0]), []byte("foreign"), 0700)

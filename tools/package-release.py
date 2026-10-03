@@ -80,7 +80,7 @@ def main():
  notices=out/'licenses';notices.mkdir()
  for rel in ('LICENSE','sdl2/LICENSE.txt','swiftshader/LICENSE.txt','swiftshader/AUTHORS.txt'):
   write(notices,rel.replace('/','-'),(sdl/rel).read_bytes())
- go=Path(command(['go','env','GOROOT']).decode().strip());write(notices,'Go-LICENSE',(go/'LICENSE').read_bytes())
+ write(notices,'Go-LICENSE',(ROOT/'third_party/notices/Go-BSD.txt').read_bytes())
  for archive in sorted((sdl/'sdl2/dependency').glob('*.tar.gz')):
   if not any(archive.name.startswith(n) for n in ('SDL2_image-','SDL2_mixer-','SDL2_ttf-','json-c-')):continue
   with tarfile.open(archive) as tar:

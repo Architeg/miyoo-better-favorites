@@ -36,6 +36,7 @@ type ReturnSpec struct {
 	Original string `json:"original_sha256"`
 	Patched  string `json:"patched_sha256"`
 	Helper   string `json:"helper_sha256"`
+	Previous string `json:"previous_helper_sha256"`
 }
 type PayloadFile struct {
 	Path string `json:"path"`
@@ -479,7 +480,7 @@ func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package,
 	}
 	if rh == r.Patched {
 		helper, e := read(root, system+"script/better_favorites_return.sh")
-		if e != nil || digest(helper) != r.Helper {
+		if e != nil || (digest(helper) != r.Helper && digest(helper) != r.Previous) {
 			return nil, pkg, fmt.Errorf("changed return helper preserved")
 		}
 		orig, e := read(root, returnBackup+"runtime.sh")
@@ -488,7 +489,7 @@ func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package,
 		}
 		m, e := read(root, returnBackup+"manifest.json")
 		var manifest map[string]any
-		if e != nil || json.Unmarshal(m, &manifest) != nil || manifest["status"] != "installed" || manifest["helper_sha256"] != r.Helper {
+		if e != nil || json.Unmarshal(m, &manifest) != nil || manifest["status"] != "installed" || manifest["helper_sha256"] != digest(helper) || manifest["original_sha256"] != r.Original || manifest["patched_sha256"] != r.Patched {
 			return nil, pkg, fmt.Errorf("return manifest mismatch")
 		}
 	}
@@ -545,7 +546,7 @@ func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package,
 				return nil, pkg, e
 			}
 		}
-		m := map[string]any{"version": r.Version, "original_git_blob": r.Blob, "original_sha256": r.Original, "patched_sha256": r.Patched, "helper_sha256": r.Helper, "mode": 448, "status": "installed"}
+		m := map[string]any{"version": r.Version, "original_git_blob": r.Blob, "original_sha256": r.Original, "patched_sha256": r.Patched, "helper_sha256": r.Helper, "previous_helper_sha256": r.Previous, "mode": 448, "status": "installed"}
 		if e = add(root, &changes, system+"script/better_favorites_return.sh", helper, nil, 0700, true); e != nil {
 			return nil, pkg, e
 		}
@@ -569,6 +570,17 @@ func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package,
 		if e != nil {
 			return nil, pkg, e
 		}
+		helper, e = read(dir, "payload/integration/onion-return/better_favorites_return.sh")
+		if e != nil || digest(helper) != r.Helper {
+			return nil, pkg, fmt.Errorf("package helper mismatch")
+		}
+		var updated map[string]any
+		if json.Unmarshal(manifest, &updated) != nil {
+			return nil, pkg, fmt.Errorf("bad retained return manifest")
+		}
+		updated["helper_sha256"] = r.Helper
+		updated["previous_helper_sha256"] = r.Previous
+		manifest = encode(updated)
 		for _, item := range []struct {
 			p            string
 			after, stock []byte
@@ -680,6 +692,22 @@ func installRank(p string) int {
 	return 5
 }
 func saveRecovery(root, host string, changes []change, pkg Package) (string, error) {
+	absHost, err := filepath.Abs(host)
+	if err != nil {
+		return "", err
+	}
+	absRoot, err := filepath.Abs(root)
+	if err != nil {
+		return "", err
+	}
+	rel, err := filepath.Rel(absRoot, absHost)
+	if err != nil {
+		return "", err
+	}
+	if rel == "." || (rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator))) {
+		return "", fmt.Errorf("host recovery must be outside the SD card")
+	}
+	host = absHost
 	if _, e := os.Lstat(host); !errors.Is(e, os.ErrNotExist) {
 		return "", fmt.Errorf("recovery directory must be NEW: %s", host)
 	}
@@ -791,7 +819,7 @@ func restore(root, recovery, dir string, interrupted bool, hook func(string, str
 		if s.Path == system+"runtime.sh" && (s.Stock != ret.Original || s.After != ret.Patched) {
 			return fmt.Errorf("unknown recovery runtime")
 		}
-		if s.Path == system+"script/better_favorites_return.sh" && (s.Stock != "absent" || s.After != ret.Helper) {
+		if s.Path == system+"script/better_favorites_return.sh" && (s.Stock != "absent" || (s.After != ret.Helper && s.After != ret.Previous)) {
 			return fmt.Errorf("unknown recovery helper")
 		}
 		if s.Path == app+"home-integration.conf" && (s.Stock != "absent" || s.After != digest(receipt(home))) {

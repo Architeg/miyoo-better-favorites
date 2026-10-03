@@ -1,9 +1,29 @@
 # Sourced by the separately patched Onion v4.3.1-1 runtime.
 # No game execution, history handling, or input interception lives here.
 bf_return_diag() {
-    # Boundary-only, independent of Onion's global logging switch. Best effort:
-    # never make logging failure an execution/ownership decision.
-    printf '%s\n' "BF_RETURN pid=$$ event=${bf_event:-init} origin=[${bf_origin:-}] owned_generation=[${bf_origin_epoch:-}] settings_generation=[${bf_setting_epoch:-}] $*" 2>/dev/null >> "$sysdir/logs/better-favorites-return.log" || :
+    bf_return_diag_write "$@" || :
+    unset bf_diag_marker bf_diag_file bf_diag_size bf_diag_line bf_diag_length
+    return 0
+}
+bf_return_diag_write() {
+    # Detailed tracing is independent of either feature preference, OFF normally.
+    # Logging is bounded/best effort and never changes ownership or handoff.
+    bf_diag_marker=/mnt/SDCARD/App/BetterFavoritesTest/home-diagnostics.conf
+    [ -f "$bf_diag_marker" ] && [ ! -L "$bf_diag_marker" ] || return 0
+    [ "$(wc -c < "$bf_diag_marker" 2>/dev/null)" -eq 34 ] 2>/dev/null || return 0
+    [ "$(cat "$bf_diag_marker" 2>/dev/null)" = "$(printf 'BetterFavoritesHomeDiagnostics1\n1')" ] || return 0
+    bf_diag_file="$sysdir/logs/better-favorites-return.log"
+    [ ! -L "$bf_diag_file" ] || return 0
+    if [ -e "$bf_diag_file" ]; then
+        [ -f "$bf_diag_file" ] || return 0
+        bf_diag_size=$(wc -c < "$bf_diag_file" 2>/dev/null) || return 0
+    else bf_diag_size=0; fi
+    bf_diag_line="BF_RETURN pid=$$ event=${bf_event:-init} origin=[${bf_origin:-}] owned_generation=[${bf_origin_epoch:-}] settings_generation=[${bf_setting_epoch:-}] $*"
+    bf_diag_length=$(printf '%s\n' "$bf_diag_line" | wc -c) || return 0
+    [ "$bf_diag_size" -le "$((131072-bf_diag_length))" ] || return 0
+    printf '%s\n' "$bf_diag_line" 2>/dev/null >> "$bf_diag_file" || :
+    unset bf_diag_marker bf_diag_file bf_diag_size bf_diag_line bf_diag_length
+    return 0
 }
 
 bf_return_path_state() {

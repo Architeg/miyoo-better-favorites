@@ -24,7 +24,7 @@ Unknown model/firmware/revision stay unknown. No favorites/history contents,
 credentials, serials or host personal paths are collected. Logs can contain game
 filenames in errors; inspect before sharing. Offline exports do not measure RAM.
 
-Support-only detailed Home trace remains bounded at 128 KiB and OFF normally.
+Support-only detailed Home and return traces each cap new writes at 128 KiB and share the opt-in marker; both are OFF normally in the candidate. Existing oversized legacy logs are retained without growth; export takes bounded tails. The accepted deployed helper still has its old logging until a separately qualified candidate installation.
 With the self-contained executable for your host, powered-off card mounted:
 
 ```text

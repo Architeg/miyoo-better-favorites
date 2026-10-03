@@ -1,3 +1,9 @@
+> Release candidate update: runtime hook/ownership behavior is unchanged. The
+> candidate helper gates detailed trace behind the independent diagnostics marker
+> and caps new writes at128KiB. The accepted installed helper is preserved; the
+> native release installer can upgrade only its exact known hash and matching
+> manifest, backing up both before publication. See [release gates](release/rc.1.md).
+
 # Optional Onion return integration
 
 Installed session-return checkpoint, 2026-10-02. The user reports hardware-confirmed

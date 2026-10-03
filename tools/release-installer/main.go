@@ -96,9 +96,9 @@ func export(root, dir, out string) error {
 		return e
 	}
 	missing := map[string]string{}
-	for _, p := range []string{app + "better-favorites.log", app + "better-favorites.previous.log", app + "home-diagnostics.log"} {
+	for _, p := range []string{app + "better-favorites.log", app + "better-favorites.previous.log", app + "home-diagnostics.log", system + "logs/better-favorites-return.log"} {
 		limit := int64(65536)
-		if strings.HasSuffix(p, "home-diagnostics.log") {
+		if strings.HasSuffix(p, "home-diagnostics.log") || strings.HasSuffix(p, "better-favorites-return.log") {
 			limit = 131072
 		}
 		d, e := bounded(root, p, limit)

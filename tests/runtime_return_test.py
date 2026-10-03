@@ -32,6 +32,10 @@ set -eu
 sysdir="$CARD/.tmp_update"
 log() { printf '%s\n' "$*" >> "$TEST_LOG"; }
 . "$HELPER"
+# Default tracing writes nothing. Opt-in lifecycle evidence is separate.
+bf_return_diag test-default-off
+[ ! -e "$sysdir/logs/better-favorites-return.log" ]
+printf 'BetterFavoritesHomeDiagnostics1\n1\n' > "$CARD/App/BetterFavoritesTest/home-diagnostics.conf"
 # Disabled by default, even when callers provide forged origin state.
 bf_origin=forged
 bf_context=''
@@ -43,7 +47,15 @@ printf 'BetterFavoritesSettings1\n1\n%s\n' "$epoch" > "$setting"
 app=$(bf_return_app_command)
 game="LD_PRELOAD=fixture \"$CARD/Emu/GB/launch.sh\" \"$CARD/Roms/GB/one.gb\""
 other="$CARD/Roms/GB/two.gb"
+rotate_trace_fixture() {
+    trace="$sysdir/logs/better-favorites-return.log"
+    if [ -f "$trace" ] && [ "$(wc -c < "$trace")" -ge 60000 ]; then
+        cat "$trace" >> "$trace.fixture-archive"
+        : > "$trace"
+    fi
+}
 adopt() {
+    rotate_trace_fixture
     bf_return before-launch "$app"
     [ -n "$BETTER_FAVORITES_RETURN_DIR" ]
     printf '%s' "$game" > "$BETTER_FAVORITES_RETURN_DIR/request.sh"
@@ -218,6 +230,7 @@ bf_return after-app "$app" 0
 [ -z "$bf_origin" ]
 # MENU-origin sessions do not require any recent record or selected ROM.
 menu_adopt() {
+    rotate_trace_fixture
     bf_return before-launch "$app"
     [ "$BETTER_FAVORITES_SWITCHER_HANDOFF" = 1 ]
     context="$BETTER_FAVORITES_RETURN_DIR"
@@ -319,6 +332,14 @@ if command -v bf_return_diag >/dev/null; then
     [ -z "$bf_origin" ] && [ "$(cat "$sysdir/cmd_to_run.sh")" = "$app" ]
     rmdir "$diagnostic"
     mv "$diagnostic.saved" "$diagnostic"
+    cp "$diagnostic" "$diagnostic.evidence"
+    dd if=/dev/zero of="$diagnostic" bs=1024 count=128 2>/dev/null
+    bf_return_diag cap-test
+    [ "$(wc -c < "$diagnostic")" -eq 131072 ]
+    mv "$diagnostic.evidence" "$diagnostic"
+    rm "$CARD/App/BetterFavoritesTest/home-diagnostics.conf"
+    bf_return_diag disabled-test
+    ! grep -q disabled-test "$diagnostic"
 fi
 '''
     env = dict(__import__('os').environ, CARD=str(card), TMP=str(temp), HELPER=str(root / 'helper.sh'), TEST_LOG=str(root / 'log'), PROFILE_HOOK=str(repo/'tools/profile-device-launch.sh'))
@@ -328,6 +349,8 @@ fi
         raise SystemExit(result.returncode)
     if 'bf_return_diag()' in helper:
         records = (card / '.tmp_update/logs/better-favorites-return.log').read_text()
+        archive=card/'.tmp_update/logs/better-favorites-return.log.fixture-archive'
+        if archive.exists(): records+=archive.read_text()
         for token in ('action=adopt reason=verified-ticket', 'action=adopt reason=verified-menu-ticket', 'reason=generation-mismatch',
                       'reason=settings-disabled', 'reason=game-within-session',
                       'reason=game-exit-status exit_status=139', 'reason=ordinary-menu-return',

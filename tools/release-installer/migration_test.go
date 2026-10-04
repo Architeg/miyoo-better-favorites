@@ -21,7 +21,7 @@ func TestLegacyPackageMigration(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	for _, scenario := range []string{"off", "on", "write-failure", "foreign-old", "conflicting-preference", "unknown-new", "unknown-new-directory", "interrupted", "copied-only"} {
+	for _, scenario := range []string{"off", "on", "write-failure", "foreign-old", "conflicting-preference", "unknown-new", "unknown-new-directory", "interrupted", "copied-only", "metadata"} {
 		t.Run(scenario, func(t *testing.T) {
 			card := root(t)
 			mustWrite(t, card, system+"onionVersion/version.txt", []byte("v4.3.1-1\n"))
@@ -74,6 +74,11 @@ func TestLegacyPackageMigration(t *testing.T) {
 					t.Fatal(e)
 				}
 			}
+			if scenario == "metadata" {
+				mustWrite(t, card, legacyApp+"._launch.sh", macMetadata(t))
+				mustWrite(t, card, legacyApp+".DS_Store", finderMetadata(t))
+			}
+
 			value := "0"
 			if scenario == "on" {
 				value = "1"

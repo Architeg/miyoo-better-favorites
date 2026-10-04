@@ -66,7 +66,7 @@ func loadRecovery(path string) (Recovery, error) {
 	}
 	seen := map[string]bool{}
 	for _, s := range r.Files {
-		if !safeRel(s.Path) || seen[s.Path] || s.Mode > 0777 || (!s.Integration && !allowedRecoveryApp(s.Path)) || (s.Integration && !allowedRestorePath(s.Path)) {
+		if !safeRel(s.Path) || seen[s.Path] || s.Mode > 0777 || (!s.Integration && !allowedRecoveryApp(s.Path) && !(appPrefix(s.Path) != "" && metadataName(s.Path))) || (s.Integration && !allowedRestorePath(s.Path)) {
 			return r, fmt.Errorf("unsafe recovery entry: %s", s.Path)
 		}
 		seen[s.Path] = true
@@ -80,6 +80,42 @@ func loadRecovery(path string) (Recovery, error) {
 			}
 		}
 	}
+	// Metadata archived by a migration remains tied to authenticated sibling
+	// records; accepting a metadata pathname alone would weaken recovery checks.
+	dirs := map[string]bool{}
+	for _, v := range r.Files {
+		if metadataName(v.Path) {
+			continue
+		}
+		for d := filepath.ToSlash(filepath.Dir(v.Path)); d != "."; d = filepath.ToSlash(filepath.Dir(d)) {
+			dirs[d] = true
+		}
+	}
+	for _, v := range r.Files {
+		if !metadataName(v.Path) {
+			continue
+		}
+		for _, part := range []struct{ name, hash string }{{"before/", v.Before}, {"after/", v.After}, {"files/", v.Stock}} {
+			if part.hash == "absent" {
+				continue
+			}
+			b, err := read(path, part.name+v.Path)
+			if err != nil {
+				return r, err
+			}
+			if err = validateMetadata(v.Path, b, dirs, func(target string) error {
+				for _, peer := range r.Files {
+					if peer.Path == target && !metadataName(peer.Path) {
+						return nil
+					}
+				}
+				return fmt.Errorf("metadata has no recorded companion")
+			}); err != nil {
+				return r, err
+			}
+		}
+	}
+
 	return r, nil
 }
 func ownJournal(current, installed []byte) bool {
@@ -112,7 +148,9 @@ func personalFile(name string, b []byte) bool {
 	}
 	return false
 }
-func ownedTree(root, rel string, check func(string, []byte) error) ([]change, error) {
+
+// Metadata is validated in a second pass: names alone never confer ownership.
+func ownedTree(root, rel string, check func(string, []byte) error, missingRecorded ...map[string]bool) ([]change, error) {
 	p, e := join(root, rel)
 	if e != nil {
 		return nil, e
@@ -120,7 +158,17 @@ func ownedTree(root, rel string, check func(string, []byte) error) ([]change, er
 	if _, e = os.Lstat(p); errors.Is(e, os.ErrNotExist) {
 		return nil, nil
 	}
-	var out []change
+	var out, metadata []change
+	knownDirs := map[string]bool{}
+	missing := map[string]bool{}
+	if len(missingRecorded) > 0 {
+		missing = missingRecorded[0]
+		for target := range missing {
+			for d := filepath.ToSlash(filepath.Dir(target)); d == rel || strings.HasPrefix(d, rel+"/"); d = filepath.ToSlash(filepath.Dir(d)) {
+				knownDirs[d] = true
+			}
+		}
+	}
 	e = filepath.Walk(p, func(path string, s os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -134,22 +182,51 @@ func ownedTree(root, rel string, check func(string, []byte) error) ([]change, er
 			return err
 		}
 		if s.IsDir() {
-			if relative != rel && (strings.Contains(rel, "-backup")) {
+			if relative != rel && strings.Contains(rel, "-backup") {
 				return fmt.Errorf("unknown directory preserved: %s", relative)
 			}
 			return nil
+		}
+		if metadataName(relative) && (s.Size() < 0 || s.Size() > metadataLimit) {
+			return fmt.Errorf("oversized metadata preserved: %s", relative)
 		}
 		b, err := read(root, relative)
 		if err != nil {
 			return err
 		}
+		c := change{relative, b, nil, s.Mode().Perm(), nil, false}
+		if metadataName(relative) {
+			metadata = append(metadata, c)
+			return nil
+		}
 		if err = check(relative, b); err != nil {
 			return err
 		}
-		out = append(out, change{relative, b, nil, s.Mode().Perm(), nil, false})
+		for d := filepath.ToSlash(filepath.Dir(relative)); d == rel || strings.HasPrefix(d, rel+"/"); d = filepath.ToSlash(filepath.Dir(d)) {
+			knownDirs[d] = true
+		}
+		out = append(out, c)
 		return nil
 	})
-	return out, e
+	if e != nil {
+		return nil, e
+	}
+	for _, c := range metadata {
+		if e = validateMetadata(c.Path, c.Before, knownDirs, func(target string) error {
+			b, err := read(root, target)
+			if errors.Is(err, os.ErrNotExist) && missing[target] {
+				return nil
+			}
+			if err != nil {
+				return err
+			}
+			return check(target, b)
+		}); e != nil {
+			return nil, e
+		}
+		out = append(out, c)
+	}
+	return out, nil
 }
 func cleanupPlan(root, recovery, dir string) ([]change, error) {
 	r, e := loadRecovery(recovery)
@@ -218,6 +295,14 @@ func cleanupPlan(root, recovery, dir string) ([]change, error) {
 	}); e != nil {
 		return nil, e
 	}
+	// Only a verified journal may authenticate metadata whose payload was already
+	// removed by partial cleanup. Present payloads still undergo normal hash checks.
+	recorded := map[string]bool{}
+	for p, v := range saved {
+		if strings.HasPrefix(p, app) && !metadataName(p) && v.After != "absent" {
+			recorded[p] = true
+		}
+	}
 	appFiles, e := ownedTree(root, strings.TrimSuffix(app, "/"), func(p string, b []byte) error {
 		if s, ok := saved[p]; ok && digest(b) == s.After {
 			return nil
@@ -230,7 +315,7 @@ func cleanupPlan(root, recovery, dir string) ([]change, error) {
 			return nil
 		}
 		return fmt.Errorf("unknown/modified app file preserved: %s", p)
-	})
+	}, recorded)
 	if e != nil {
 		return nil, e
 	}
@@ -455,7 +540,31 @@ func cleanupPlan(root, recovery, dir string) ([]change, error) {
 		}
 		add([]change{{p, b, nil, 0600, nil, false}})
 	}
-	for _, parent := range []string{system + "script", system + "logs"} {
+	// Shared directories remain intact. Consider only exact sidecars of files
+	// already authenticated by this cleanup plan, never unrelated directory data.
+	ownedFiles := append([]change(nil), out...)
+	for _, c := range ownedFiles {
+		if metadataName(c.Path) {
+			continue
+		}
+		sidecar := filepath.ToSlash(filepath.Join(filepath.Dir(c.Path), "._"+filepath.Base(c.Path)))
+		if seen[sidecar] {
+			continue
+		}
+		b, err := optional(root, sidecar)
+		if err != nil {
+			return nil, err
+		}
+		if b == nil {
+			continue
+		}
+		if !appleDouble(b) {
+			return nil, fmt.Errorf("ambiguous metadata preserved: %s", sidecar)
+		}
+		add([]change{{sidecar, b, nil, 0600, nil, false}})
+	}
+
+	for _, parent := range []string{system + "config", system + "script", system + "logs"} {
 		path, e := join(root, parent)
 		if e != nil {
 			return nil, e
@@ -470,7 +579,7 @@ func cleanupPlan(root, recovery, dir string) ([]change, error) {
 		for _, item := range items {
 			n := strings.ToLower(item.Name())
 			p := parent + "/" + item.Name()
-			if (strings.Contains(n, "better-favorites") || strings.Contains(n, "better_favorites")) && !seen[p] {
+			if (strings.Contains(n, "better-favorites") || strings.Contains(n, "better_favorites")) && !seen[p] && !dirs[p] && !ownMirrors[p] {
 				return nil, fmt.Errorf("unrecorded project file preserved: %s", p)
 			}
 		}

@@ -37,7 +37,7 @@ def main():
     time.sleep(.1)
    assert result.read_text()==str(script), 'desktop path/quoting failed'
   source=package/'App/BetterFavorites';computer=source/'computer';p=json.loads((computer/'package.json').read_text());h=json.loads((computer/'payload/integration/mainui-home/package.json').read_text());r=json.loads((computer/'payload/integration/onion-return/hashes.json').read_text())
-  assert p['version']=='1.0.0-rc.4';assert (source/'Install-Windows.cmd').is_file();assert (source/'Install-Linux.desktop').is_file()
+  assert p['version']=='1.0.0-rc.5';assert (source/'Install-Windows.cmd').is_file();assert (source/'Install-Linux.desktop').is_file()
   card=t/'SD card 日本語';app=card/'App/BetterFavorites'
   for name in ('App','.tmp_update/bin','.tmp_update/config','.tmp_update/script','.tmp_update/onionVersion','Roms','Saves','Themes'):(card/name).mkdir(parents=True,exist_ok=True)
   (card/'.tmp_update/onionVersion/version.txt').write_text('v4.3.1-1\n')
@@ -52,6 +52,11 @@ def main():
     dest=app/n.relative_to(source)
     if n.is_dir():dest.mkdir(parents=True,exist_ok=True)
     else:dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(n,dest)
+   # Real Mac-generated sidecar encoding travels to every tested host.
+   fixtures=Path(__file__).resolve().parents[1]/'tools/release-installer/testdata'
+   (app/'._Install-Linux.desktop').write_bytes((fixtures/'macos-appledouble.bin').read_bytes())
+   for d in (app,app/'computer',app/'computer/payload/App/BetterFavorites'):
+    (d/'.DS_Store').write_bytes((fixtures/'finder-empty.bin').read_bytes())
    # Host executable bits on SD input are not needed by the click staging route.
    for n in (app/'computer').glob('better-favorites-*'):n.chmod(0o644)
   def unchanged():
@@ -78,6 +83,7 @@ def main():
   (app/'welcome-pending').unlink();copy();run('1\ny\n')
   for n,b in prefs.items():assert (app/n).read_bytes()==b,n
   assert not (app/'welcome-pending').exists()
+  metadata=app/'._Install-Linux.desktop';valid=metadata.read_bytes();metadata.write_bytes(b'unknown metadata');run('1\ny\n',ok=False);assert metadata.read_bytes()==b'unknown metadata';metadata.write_bytes(valid)
   bad=app/'foreign.txt';bad.write_text('foreign');run('1\ny\n',ok=False);assert bad.read_text()=='foreign';bad.unlink()
   payload=app/'computer/payload/App/BetterFavorites/icon.png';original=payload.read_bytes();payload.write_bytes(b'tampered');before=(card/'.tmp_update/runtime.sh').read_bytes();run('1\ny\n',ok=False);assert (card/'.tmp_update/runtime.sh').read_bytes()==before;payload.write_bytes(original)
   # Relocation + another computer HOME: no original computer recovery exists.

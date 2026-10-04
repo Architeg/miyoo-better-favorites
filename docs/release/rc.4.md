@@ -29,3 +29,17 @@ No mounted-card changes, new profiling, previews or publication are part of this
 App regression suite passed (nine private Python fixture cases explicitly skipped; actual stock/output Go and four-variant ARM emulation checks were run separately). ARM build succeeded with the existing libbz2 link warning and GCC ABI notes. Actual previous/new package tests cover OFF/ON migration, copied-only RC3, preference/state and dismissed notice, foreign files/directories, rollback/retry, partial publication/portable complete uninstall, and unchanged stock hashes. One-ZIP CRC/hash, permissions, manifests, icon, source identity and nine working-library checks passed. GitHub rendered README HTML and 205 relative links were checked.
 
 Read-only Mac fixture copying preserved quarantine bytes; simulated retry keeps the same identifiable file/inode and detects tampering. These do not establish actual GUI approval persistence. The original downloaded ZIP was not located; attribution to Keka extraction comes from the supplied screenshots, not a recovered download trail. The mounted card currently contains the exact RC3 app copy with stock system hashes and no active portable installation receipt. No writes were made to it.
+
+## Confirmed RC4 installation outcome
+
+The user successfully approved the retained helper, reached its menu and card
+identification, then installation failed with status 1:
+`unknown/modified app input preserved: App/BetterFavorites/._Install-Linux.desktop`.
+The wrapper incorrectly offered security troubleshooting again. This is **not
+accepted RC4 device installation**. RC4's ZIP contains no AppleDouble files; Mac
+copying can introduce them. During correction the mounted card had no
+`App/BetterFavorites`, so the reported sidecar itself could not be inspected.
+Its format is not independently verified. The two newly referenced screenshots
+were also unavailable; the error evidence is the user's report.
+
+[RC5 correction](rc.5.md) preserves RC4 artifacts and existing tags.

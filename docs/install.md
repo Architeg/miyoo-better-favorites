@@ -4,7 +4,7 @@
 
 ## One ready-to-install download
 
-`better-favorites-<version>.zip` contains the app and offline computer tools. GitHub Source code and dependency/source companions are for developers. There is no separate app-only download. RC4 is a new identity; earlier RC2/RC3 bytes and acceptance are retained separately.
+`better-favorites-<version>.zip` contains the app and offline computer tools. GitHub Source code and dependency/source companions are for developers. There is no separate app-only download. RC5 corrects RC4 metadata/error handling; earlier RC2/RC3 bytes and acceptance are retained separately.
 
 ## Recommended: copy, then click
 
@@ -62,3 +62,13 @@ Run these in the copied app folder if a support person asks you to. Normal insta
 Use `export-diagnostics` instead of `install` to export logs on the computer. Fully specified `--sd-root`, `--powered-off`, `--package`, `--recovery` and `--archive` backend interfaces remain for automation. `remove-integrations` is an advanced operation, not the default uninstall.
 
 The experimental download bootstrap is separate and is not needed by this offline package.
+
+## Metadata created by Mac copying
+
+The installer recognizes structurally valid AppleDouble sidecars associated with
+verified project files, and Finder metadata in verified project directories.
+These do not require manual cleanup, including when later uninstalling on Windows
+or Linux. Actual payload checks remain unchanged. Unknown/modified files, links
+and ambiguous metadata are preserved and reported as ordinary installation
+errors. Keep that message and recovery archive; approval troubleshooting cannot
+resolve an ownership or checksum failure.

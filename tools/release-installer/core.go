@@ -92,14 +92,18 @@ func regular(p string) ([]byte, error) {
 	if e != nil {
 		return nil, e
 	}
-	if !s.Mode().IsRegular() || s.Size() > 64*1024*1024 {
+	limit := int64(64 * 1024 * 1024)
+	if metadataName(p) {
+		limit = metadataLimit
+	}
+	if !s.Mode().IsRegular() || s.Size() < 0 || s.Size() > limit {
 		return nil, fmt.Errorf("unsafe or oversized file: %s", p)
 	}
-	data, e := io.ReadAll(io.LimitReader(f, 64*1024*1024+1))
+	data, e := io.ReadAll(io.LimitReader(f, limit+1))
 	if e != nil {
 		return nil, e
 	}
-	if len(data) > 64*1024*1024 {
+	if int64(len(data)) > limit {
 		return nil, fmt.Errorf("file grew past bound: %s", p)
 	}
 	return data, nil
@@ -373,7 +377,7 @@ func loadPackage(dir string) (Package, HomeSpec, ReturnSpec, error) {
 	if e = json.Unmarshal(d, &pkg); e != nil {
 		return pkg, home, ret, e
 	}
-	if pkg.Format != 1 || (pkg.Version != "1.0.0-rc.1" && pkg.Version != "1.0.0-rc.2" && pkg.Version != "1.0.0-rc.3" && pkg.Version != "1.0.0-rc.4") || len(pkg.Commit) != 40 {
+	if pkg.Format != 1 || (pkg.Version != "1.0.0-rc.1" && pkg.Version != "1.0.0-rc.2" && pkg.Version != "1.0.0-rc.3" && pkg.Version != "1.0.0-rc.4" && pkg.Version != "1.0.0-rc.5") || len(pkg.Commit) != 40 {
 		return pkg, home, ret, fmt.Errorf("unsupported package")
 	}
 	seen := map[string]bool{}

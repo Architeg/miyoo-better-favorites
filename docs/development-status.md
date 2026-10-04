@@ -95,3 +95,13 @@ separate from previous accepted candidate bytes. No stable release or SD deploym
 ## Copy-and-click follow-up
 
 Full package launchers now live inside App/BetterFavoritesTest; the native installer derives and validates the card, stages off-card, installs both supported integrations and leaves fresh switches OFF. Portable recovery identity survives computer/path changes; complete uninstall removes owned app/tool files only after verified restoration. New once-only guidance uses the existing menu renderer. [Candidate and acceptance](release/rc.3.md).
+
+## RC5 focused installation correction
+
+RC4 file-specific helper approval reached the menu and identified the card, but
+installation failed on reported `._Install-Linux.desktop`; RC4 device installation
+is not accepted. RC5 adds bounded, companion-authenticated Mac metadata handling
+and separates normal installer failures from possible security termination.
+[Correction, evidence and remaining acceptance](release/rc.5.md). No app behavior
+change or mounted-card deployment. The reported sidecar was absent during
+read-only inspection; a real benign Mac-created fixture supplements regressions.

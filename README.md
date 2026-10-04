@@ -5,7 +5,7 @@
 </div>
 
 <p align="center">
-  <a href="docs/release/rc.4.md"><img alt="Release candidate" src="https://img.shields.io/badge/status-RC4%20candidate-f59e0b"></a>
+  <a href="docs/release/rc.5.md"><img alt="Release candidate" src="https://img.shields.io/badge/status-RC5%20candidate-f59e0b"></a>
   <a href="docs/compatibility.md"><img alt="Tested on Onion v4.3.1-1" src="https://img.shields.io/badge/tested%20Onion-v4.3.1--1-7c5cbf"></a>
   <a href="LICENSE"><img alt="GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-2563eb"></a>
 </p>
@@ -25,7 +25,7 @@ A growing favorites list is easier to browse with console groups, readable title
 
 The native C++/SDL2 app reads Onion's `Roms/favourite.json`. Onion still handles game launching, cores, saves, recent history and GameSwitcher.
 
-> **Release status:** RC4 is a local final-review candidate. No public binary asset is available yet. Earlier hardware acceptance remains recorded; the renamed package needs its own install/migration test. [Current status →](docs/release/rc.4.md)
+> **Release status:** RC5 is a local installation-fix candidate. No public binary asset is available yet. Earlier hardware acceptance remains recorded; RC4 approval succeeded but installation failed on metadata; the corrected package needs device acceptance. [Current status →](docs/release/rc.5.md)
 
 <a id="features"></a>
 ## ✨ Features

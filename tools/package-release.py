@@ -5,7 +5,7 @@ Fresh output only. Public payload excludes vendor MainUI/runtime and private dat
 import argparse, hashlib, io, json, os, shutil, subprocess, tarfile, time, zipfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
-VERSION='1.0.0-rc.4'
+VERSION='1.0.0-rc.5'
 SDL_COMMIT='3c68ed01fee7feffd4ea338b1cc5018a455e2be9'
 def sha(data):return hashlib.sha256(data).hexdigest()
 def command(args,**kwargs):return subprocess.check_output(args,cwd=ROOT,**kwargs)
@@ -35,7 +35,7 @@ def main():
  paths=command(['git','ls-files','-z']).decode().split('\0')
  if a.review_snapshot:
   new=command(['git','ls-files','--others','--exclude-standard','-z']).decode().split('\0')
-  allowed_new={'tools/release-installer/card_launch.go','tools/release-installer/card_launch_test.go','tests/click_package_test.py','docs/recovery.md','docs/release/rc.4.md','docs/release/notes-rc.3.md','docs/release/dependency-components.json','packaging/Install-Linux.desktop','third_party/notices/SDL_image-2.0.5-COPYING.txt','third_party/notices/SDL_mixer-2.0.4-COPYING.txt','third_party/notices/SDL_ttf-2.0.15-COPYING.txt','tools/release-installer/uninstall.go','tools/release-installer/uninstall_test.go','tools/build-windows7-test.py','App/BetterFavorites/icon.png','docs/release/rc.2.md','docs/release/rc1-mac-acceptance.md','tests/rc2_presentation_test.py','tests/host_dispatch_test.py','tools/host_packaging.py','tools/package-windows7-test.py','tools/host-dispatch/go.mod','tools/host-dispatch/dispatch.go','tools/host-dispatch/probe_windows.go','tools/host-dispatch/probe_other.go','tools/host-dispatch/dispatch_test.go','packaging/Install-Windows.cmd','packaging/Install-macOS.command','packaging/Install-Linux.sh','docs/release/host-dispatch.md','docs/release/windows-acceptance.md','docs/release/dependency-audit.md'}
+  allowed_new={'tools/release-installer/card_launch.go','tools/release-installer/card_launch_test.go','tests/click_package_test.py','docs/recovery.md','docs/release/rc.5.md','docs/release/notes-rc.3.md','docs/release/dependency-components.json','packaging/Install-Linux.desktop','third_party/notices/SDL_image-2.0.5-COPYING.txt','third_party/notices/SDL_mixer-2.0.4-COPYING.txt','third_party/notices/SDL_ttf-2.0.15-COPYING.txt','tools/release-installer/uninstall.go','tools/release-installer/uninstall_test.go','tools/build-windows7-test.py','App/BetterFavorites/icon.png','docs/release/rc.2.md','docs/release/rc1-mac-acceptance.md','tests/rc2_presentation_test.py','tests/host_dispatch_test.py','tools/host_packaging.py','tools/package-windows7-test.py','tools/host-dispatch/go.mod','tools/host-dispatch/dispatch.go','tools/host-dispatch/probe_windows.go','tools/host-dispatch/probe_other.go','tools/host-dispatch/dispatch_test.go','packaging/Install-Windows.cmd','packaging/Install-macOS.command','packaging/Install-Linux.sh','docs/release/host-dispatch.md','docs/release/windows-acceptance.md','docs/release/dependency-audit.md'}
   if any(n and n not in allowed_new for n in new):raise SystemExit('Unexpected untracked source; review explicitly before packaging: '+repr(new))
   paths+=new
  source_files={p:sha((ROOT/p).read_bytes()) for p in sorted(set(paths)) if p and (ROOT/p).is_file()}
@@ -69,7 +69,7 @@ def main():
  if sha(adapter.read_bytes())!=spec['payload_sha256']:raise SystemExit('Adapter differs from accepted exact catalogue')
  for rel in ('integration/legacy/rc3-copied-package.json','integration/mainui-home/package.json','integration/mainui-home/legacy-package.json','integration/onion-return/legacy-hashes.json','integration/onion-return/hashes.json','integration/onion-return/runtime.patch','integration/onion-return/better_favorites_return.sh'):payload(rel,ROOT/rel)
  payload('integration/mainui-home/adapter.elf',adapter)
- release=dict(version=VERSION,source_commit=commit,source_snapshot_sha256=snapshot,review_snapshot=a.review_snapshot,dependencies=dependencies,toolchain='aemiii91/miyoomini-toolchain@sha256:a864876472a489f63d6223d2c8ad61e12ced679c0b177ae9429e51f3673ef4e7',gates='See docs/release/rc.4.md; not stable/hardware-qualified candidate')
+ release=dict(version=VERSION,source_commit=commit,source_snapshot_sha256=snapshot,review_snapshot=a.review_snapshot,dependencies=dependencies,toolchain='aemiii91/miyoomini-toolchain@sha256:a864876472a489f63d6223d2c8ad61e12ced679c0b177ae9429e51f3673ef4e7',gates='See docs/release/rc.5.md; not stable/hardware-qualified candidate')
  data=(json.dumps(release,indent=2)+'\n').encode();write(base,'App/BetterFavorites/release.json',data);write(stage,'payload/App/BetterFavorites/release.json',data);inventory.append(dict(path='App/BetterFavorites/release.json',sha256=sha(data),mode=0o644))
  write(stage,'package.json',(json.dumps(dict(format=1,version=VERSION,commit=commit,source_snapshot_sha256=snapshot,review_snapshot=a.review_snapshot,files=inventory),indent=2)+'\n').encode())
  from host_packaging import build_hosts
@@ -86,7 +86,7 @@ def main():
     for source in ('integration/onion-return/hashes.json','integration/onion-return/manage.py'):
      data=data.replace(('](../'+source+')').encode(),('](https://github.com/Architeg/miyoo-better-favorites/blob/'+commit+'/'+source+')').encode())
    write(target,rel,data)
-  write(target,'README.txt',b'Better Favorites 1.0.0-rc.4 - private review candidate, not stable.\nStart with docs/install.md. Uninstall restores integrations and removes owned app/data automatically; portable card recovery is primary; computer archive is retained after uninstall.\nDesigned for Mini and Mini Plus; hardware tested on Mini Plus.\nUser-confirmed Windows7 SP1 x64/Windows10 x64 and Mac tests are recorded; exact host/tool and remaining gates are in docs/release/rc.4.md.\n')
+  write(target,'README.txt',b'Better Favorites 1.0.0-rc.5 - private review candidate, not stable.\nStart with docs/install.md. Uninstall restores integrations and removes owned app/data automatically; portable card recovery is primary; computer archive is retained after uninstall.\nDesigned for Mini and Mini Plus; hardware tested on Mini Plus.\nUser-confirmed Windows7 SP1 x64/Windows10 x64 and Mac tests are recorded; exact host/tool and remaining gates are in docs/release/rc.5.md.\n')
  # Supply pinned dependency source material, rather than promising a future URL.
  # No vendor MainUI, ROMs, private backups or development logs are in these trees.
  source_archive(sdl,['--prefix=sdl2-miyoo/','HEAD','LICENSE','Makefile','Makefile.mk','sdl2','swiftshader'],out/('sdl2-miyoo-'+SDL_COMMIT+'.tar.gz'),epoch)

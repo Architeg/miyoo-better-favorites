@@ -13,6 +13,7 @@ def main():
  with tempfile.TemporaryDirectory(prefix='bf-win7-source-') as tmp:
   source=Path(tmp)
   for f in (ROOT/'tools/release-installer').glob('*.go'):shutil.copy2(f,source/f.name)
+  shutil.copytree(ROOT/'tools/release-installer/testdata',source/'testdata')
   (source/'go.mod').write_text('module better-favorites/release-installer\n\ngo 1.20\n')
   with (out/'host-tests.log').open('wb') as log:subprocess.run([str(go),'test','./...'],cwd=source,env=e,stdout=log,stderr=subprocess.STDOUT,check=True)
   for arch in ('amd64','386'):

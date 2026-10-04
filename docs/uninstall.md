@@ -22,3 +22,9 @@ The tool reports the unresolved path and returns failure. Unknown/modified files
 ## Advanced operations
 
 The entry scripts accept `uninstall` for complete removal and `remove-integrations` for restoring only integrations, retaining app/data. Explicit support flags remain available; this latter operation requires the validated recovery and powered-off card. Never select an ambiguous recovery by guessing.
+
+Validated Mac metadata in owned app/recovery folders is included in the verified
+computer archive and removed with those folders, regardless of the uninstalling
+computer's OS. Unrelated hidden files, malformed/orphan sidecars and links remain
+protected: uninstall reports failure rather than complete removal. Shared folders
+and their Finder metadata are not cleaned. No whole-card metadata cleanup is used.

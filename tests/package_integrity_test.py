@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sha=lambda b:hashlib.sha256(b).hexdigest()
 def main():
  p=argparse.ArgumentParser();p.add_argument('--release',type=Path,required=True);a=p.parse_args()
- users=list(a.release.glob('*.zip'));assert len(users)==1 and users[0].name=='better-favorites-1.0.0-rc.4.zip',users
+ users=list(a.release.glob('*.zip'));assert len(users)==1 and users[0].name=='better-favorites-1.0.0-rc.5.zip',users
  for line in (a.release/'SHA256SUMS').read_text().splitlines():h,n=line.split('  ',1);assert sha((a.release/n).read_bytes())==h,n
  with zipfile.ZipFile(users[0]) as z:
   assert z.testzip() is None;names=set(z.namelist());prefix='App/BetterFavorites/';computer=prefix+'computer/'

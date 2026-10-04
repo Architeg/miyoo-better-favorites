@@ -54,7 +54,7 @@ case "$1" in
    (package/name).write_text(script);(package/name).chmod(0o755)
    for arch in ('amd64','arm64'):
     p=package/('better-favorites-installer-'+host+'-'+arch)
-    p.write_text('#!/bin/sh\nprintf "%s\\n" "$0" "$@" > "$BF_RESULT"\nexit "$BF_CHILD_STATUS"\n');p.chmod(0o755)
+    p.write_text('#!/bin/sh\nprintf "%s\\n" "$0" "$@" > "$BF_RESULT"\n[ "$BF_CHILD_STATUS" != 1 ] || echo "helper reason: unknown/modified app input preserved: App/BetterFavorites/._Install-Linux.desktop" >&2\nexit "$BF_CHILD_STATUS"\n');p.chmod(0o755)
   defaults=dict(BF_SYSTEM='Darwin',BF_MACHINE='arm64',BF_VERSION='12.7.6',BF_ARM='1',BF_TRANSLATED='0',BF_CPUTYPE='16777228',BF_KERNEL='6.1.0',BF_CHILD_STATUS='0',BF_RESULT=str(t/'result'))
   cases=[
    ('Install-macOS.command',{},'darwin-arm64'),
@@ -110,7 +110,13 @@ case "$1" in
     assert len(approved)==1 and approved[0].read_bytes()==(copied/'computer/better-favorites-installer-darwin-arm64').read_bytes()
     identity=approved[0].stat().st_ino
     retry=subprocess.run([str(copied/name),'install'],env=e,input='r\nx\n',text=True,capture_output=True,timeout=10)
-    assert retry.returncode==17 and 'file is retained' in retry.stdout and approved[0].stat().st_ino==identity
+    assert retry.returncode==17 and 'Installation failed' in retry.stdout and 'retry' not in retry.stdout and 'Open Anyway' not in retry.stdout
+    for status in ('1','2','143'):
+     ordinary=subprocess.run([str(copied/name),'install'],env={**e,'BF_CHILD_STATUS':status},input='r\nx\n',text=True,capture_output=True,timeout=10)
+     assert ordinary.returncode==int(status) and 'Installation failed' in ordinary.stdout and 'retry' not in ordinary.stdout
+     if status=='1':assert 'helper reason: unknown/modified app input preserved' in ordinary.stderr
+    security=subprocess.run([str(copied/name),'install'],env={**e,'BF_CHILD_STATUS':'137'},input='r\nx\n',text=True,capture_output=True,timeout=10)
+    assert security.returncode==137 and 'possible SIGKILL' in security.stdout and 'does not establish' in security.stdout and 'file is retained' in security.stdout and approved[0].stat().st_ino==identity
     assert (t/'result').read_text().splitlines()[1:]==['--card-launcher',str(copied),'install']
     approved[0].write_bytes(b'foreign cache bytes');(t/'result').unlink()
     refused=subprocess.run([str(copied/name),'uninstall'],env=e,capture_output=True,timeout=10)

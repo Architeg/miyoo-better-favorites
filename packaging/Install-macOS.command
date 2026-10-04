@@ -55,12 +55,24 @@ if [ -d computer ]; then
   result=$?
   set -e
   [ "$result" -ne 0 ] || break
-  printf '\nInstaller did not complete (status %s).\n' "$result"
-  printf 'If macOS blocked this file, use its file-specific Open Anyway approval:\n%s\n' "$approved"
-  printf 'Monterey: System Preferences > Security & Privacy > General.\n'
-  printf 'Newer macOS: System Settings > Privacy & Security.\n'
-  printf 'Do not override malware/damaged-file or managed-policy warnings.\n'
-  printf 'The verified file is retained. After approval, type r to retry; anything else closes: '
+  case "$result" in
+   137)
+    printf '\nInstaller terminated with status 137 (possible SIGKILL).\n'
+    printf 'This alone does not establish that macOS security blocked it.\n'
+    printf 'If macOS displayed an approval warning, approve only this verified file:\n%s\n' "$approved"
+    printf 'Monterey: System Preferences > Security & Privacy > General.\n'
+    printf 'Newer macOS: System Settings > Privacy & Security.\n'
+    printf 'Do not override malware/damaged-file or managed-policy warnings.\n'
+    printf 'The verified file is retained. After approval, type r to retry; anything else closes: '
+    ;;
+   *)
+    case "${1:-menu}" in install) operation=Installation;; uninstall) operation=Uninstall;; *) operation=Operation;; esac
+    printf '\n%s failed (status %s).\n' "$operation" "$result"
+    printf 'The installer reason is shown above. Resolve that reported problem before trying again.\n'
+    printf 'Files reported as unknown or modified are preserved; use verified recovery if restoration is required.\n'
+    break
+    ;;
+  esac
   read -r answer || answer=
   [ "$answer" = r ] || break
  done

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0-rc.5 — preparation, not published
+
+- Validate Mac AppleDouble/Finder metadata in authenticated project locations across install, migration, update and full uninstall. Keep payload and unknown-file safeguards.
+- Keep ordinary installer failures out of the macOS security retry loop; preserve the reason and status. Report status 137 as possible termination, not proof of Gatekeeper.
+- Record RC4 helper approval success and metadata installation failure; corrected device installation acceptance is pending.
+
 ## 1.0.0-rc.4 — preparation, not published
 
 - One user ZIP and canonical BetterFavorites path.

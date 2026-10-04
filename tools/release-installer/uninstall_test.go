@@ -42,10 +42,13 @@ func completeFixture(t *testing.T) (string, string, string) {
 	for n, b := range map[string]string{"settings.conf": "BetterFavoritesSettings1\n0\ngeneration\n", "browser-preferences.conf": "BetterFavoritesBrowserPreferences1\n1\n1\n0\n", "browser-state": "BetterFavoritesBrowserState1\n0\n", "home-entry.conf": "BetterFavoritesHome1\n0\n", "better-favorites.log": "startup\n"} {
 		mustWrite(t, root, app+n, []byte(b))
 	}
+	mustWrite(t, root, app+"._launch.sh", macMetadata(t))
+	mustWrite(t, root, app+".DS_Store", finderMetadata(t))
+
 	return root, dir, recovery
 }
 func TestCompleteUninstall(t *testing.T) {
-	for _, kind := range []string{"roundtrip", "missing-recovery", "corrupt-original", "foreign-app", "unknown-app", "foreign-system", "interrupted-cleanup", "partial-cleanup", "foreign-backup", "ambiguous-recovery", "updated-records", "integrations-only-reinstall"} {
+	for _, kind := range []string{"roundtrip", "missing-recovery", "corrupt-original", "foreign-app", "unknown-app", "foreign-system", "interrupted-cleanup", "partial-cleanup", "foreign-backup", "ambiguous-recovery", "updated-records", "integrations-only-reinstall", "invalid-metadata", "orphan-metadata", "unrelated-hidden", "unknown-shared-metadata"} {
 		t.Run(kind, func(t *testing.T) {
 			root, dir, recovery := completeFixture(t)
 			archive := filepath.Join(t.TempDir(), "archive")
@@ -70,6 +73,15 @@ func TestCompleteUninstall(t *testing.T) {
 				os.WriteFile(filepath.Join(root, app+"better-favorites"), []byte("foreign"), 0600)
 			case "unknown-app":
 				mustWrite(t, root, app+"keep.txt", []byte("foreign"))
+			case "invalid-metadata":
+				os.WriteFile(filepath.Join(root, app+"._launch.sh"), []byte("keep"), 0600)
+			case "orphan-metadata":
+				mustWrite(t, root, app+"._unknown", macMetadata(t))
+			case "unrelated-hidden":
+				mustWrite(t, root, app+".hidden", []byte("keep"))
+			case "unknown-shared-metadata":
+				mustWrite(t, root, system+"config/._better-favorites-unknown", macMetadata(t))
+
 			case "foreign-system":
 				os.WriteFile(filepath.Join(root, system+"bin/"+names[0]), []byte("foreign"), 0600)
 			case "foreign-backup":

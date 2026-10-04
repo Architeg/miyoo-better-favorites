@@ -47,6 +47,17 @@ func TestChildStatusAndArguments(t *testing.T) {
 	if n := runTool(own, []string{"-test.run=TestChildStatusAndArguments", "--", "SD path with spaces"}); n != 7 {
 		t.Fatal(n)
 	}
+	tmp := t.TempDir()
+	t.Setenv("TMPDIR", tmp)
+	t.Setenv("TEMP", tmp)
+	t.Setenv("TMP", tmp)
+	if n := stageTool(own, []string{"-test.run=TestChildStatusAndArguments", "--", "SD path with spaces"}); n != 7 {
+		t.Fatal("staged child status", n)
+	}
+	entries, e := os.ReadDir(tmp)
+	if e != nil || len(entries) != 0 {
+		t.Fatal("private stage not removed", e)
+	}
 	if n := runTool(filepath.Join(t.TempDir(), "missing"), nil); n == 0 {
 		t.Fatal(n)
 	}

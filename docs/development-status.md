@@ -31,7 +31,7 @@ device speedup. Later M6 acceptance covers the actual cache-containing deployed 
 
 ## Release preparation
 
-M7/M8 prepare **v1.0.0-rc.2**, not stable. Complete default uninstall now restores
+M7/M8 continue with **v1.0.0-rc.3**, not stable. Tagged RC2 remains unchanged. Complete default uninstall now restores
 and verifies originals, archives recovery on the computer, and removes owned app/data.
 Optional remove-integrations retains app/data. The native offline installer is
 implemented; end users need no Python/WSL/developer tools.
@@ -59,11 +59,7 @@ redistribution gate. Candidate is private review material until cleared.
 
 ## Exact next step
 
-Review documentation and coordinate the next exact package/checksums, then qualify
-its identified dispatcher/ZIP and remaining native targets using [release gates](release/rc.2.md). Complete dependency audit
-before public distribution. No shortcut, profiling session, broad cleanup or new
-feature is authorized by this release pass. All global shortcuts are deferred
-beyond v1.0; existing Apps/Home and MainUI X/Y remain.
+Qualify the new full-package copy → click workflow in one fresh-user device cycle: install → Apps/Home OFF/ON → one game/GameSwitcher/return → complete uninstall → stock boot → reinstall. RC3 workflow/one-time guidance is host-tested, not new hardware acceptance. Preserve accepted device evidence and existing backups. Resolve only the concrete redistribution items in [dependency audit](release/dependency-audit.md); byte-identical rebuilding is a separate goal. Do not reopen shortcuts, profiling or UI redesign.
 
 [Quick start](install.md) · [Recovery](uninstall.md) · [Compatibility](compatibility.md)
 · [Technical guide](development.md) · [Historical evidence](developer-index.md)
@@ -84,11 +80,14 @@ inspection supplements the unavailable app browser tool.
 Offline wrappers/full-uninstall remain the implemented route. A separate
 [bootstrap preparation](../tools/bootstrap/README.md) has isolated host fixtures
 and modern/legacy cross-builds, not Windows online acceptance or working public
-URLs. Uninstall requires an explicit matching release/recovery.
+URLs. The experimental online route requires an explicit matching release/recovery; the offline copy-to-card route locates its verified portable recovery automatically.
 
 libpng/zlib embedded versions and original upstream notices/sources are recovered.
-Custom SDL fresh linking fails on MI system/graphics symbols; original link inputs
-and extension/SwiftShader prebuilt correspondence remain binary publication gates.
-Prepare the annotated RC2 tag and **draft prerelease without assets**. Local final
+Follow-up resolved custom SDL linking and reproduced its entire accepted ELF. Actual extension versions and notices are corrected; the concrete remaining publication question is SwiftShader prebuilt component attribution, documented in release/dependency-audit.md.
+Annotated RC2 tag and **asset-free draft prerelease** exist at `a31f9a2fff42d12b2a9f2cc16118f3b8a43eb94a`. Local final
 packages must identify the exact committed tree and keep new-byte qualification
 separate from previous accepted candidate bytes. No stable release or SD deployment.
+
+## Copy-and-click follow-up
+
+Full package launchers now live inside App/BetterFavoritesTest; the native installer derives and validates the card, stages off-card, installs both supported integrations and leaves fresh switches OFF. Portable recovery identity survives computer/path changes; complete uninstall removes owned app/tool files only after verified restoration. New once-only guidance uses the existing menu renderer. [Candidate and acceptance](release/rc.3.md).

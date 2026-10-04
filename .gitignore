@@ -68,3 +68,6 @@ third_party/sdl2_image/
 /App/BetterFavoritesTest/home-integration.conf
 /App/BetterFavoritesTest/home-diagnostics.conf
 /App/BetterFavoritesTest/release.json
+
+# Once-only installer guidance is device state
+/App/BetterFavoritesTest/welcome-pending

@@ -1,51 +1,24 @@
-# Complete uninstall and failed-menu recovery
+# Complete uninstall
 
-Power the Miyoo OFF and mount its card. From the extracted installer folder:
+[Install](install.md) · [Recovery](recovery.md)
 
-- macOS: `./Install-macOS.command uninstall`
-- Linux: `./Install-Linux.sh uninstall`
-- Windows 7 onward: `.\Install-Windows.cmd uninstall`
-- Windows 7 test bundle: `.\Install-Windows7.cmd uninstall`
+1. Power off the Miyoo and connect its card to any supported computer.
+2. Open the appropriate computer launcher inside `App/BetterFavoritesTest`.
+3. Choose **Uninstall completely**, confirm the card and that the Miyoo is off.
+4. Wait for verified success, safely eject and boot stock Onion.
 
-The tool prompts for the card and OFF confirmation. It locates and validates recovery
-only when one matching identity exists; otherwise it asks for this card's retained
-recovery folder. Multiple identities are never resolved by choosing the first/newest.
-The no-argument menu and fully specified commands still work.
+One operation validates portable recovery, restores and verifies original patched system files, archives a verified copy on this computer, and removes owned app/preferences/state/logs/computer tools/integration artifacts. Portable card recovery is removed last, after restoration and app cleanup. Shared directories and game data are retained.
 
-**Default uninstall is complete removal in one operation:** preflight every file;
-keep a verified recovery/removal archive on the computer; restore stock MainUI/runtime;
-automatically verify hashes; remove the owned app (including preferences/state/logs),
-helpers, receipts, journals, on-card backups/mirrors and app-generated removal backups.
-Favorites/history, ROMs, saves, artwork, themes, shared system libraries, shortcuts
-and unrelated files/directories are preserved. App-private libraries are removed
-with the app. Unknown/modified files cause failure and identify unresolved paths;
-partial cleanup is never reported as complete. Keep the printed computer archive.
+The computer archive is in `BetterFavorites-Recovery` under your home folder. It can contain app preferences/logs and recovery originals: keep it private. Recovery does not depend on your original computer, username or drive letter.
 
-## Retain app/preferences: optional operation
+Do not delete the app as a substitute for uninstall. It cannot restore patched MainUI/runtime files.
 
-Use the same wrapper with `remove-integrations` instead of `uninstall`. This restores
-stock integrations and retains the app/data/backups. Installation and removal of
-system binaries take effect after reboot. Deleting the app alone cannot undo patches.
+## If removal stops
 
-## Missing MainUI or interrupted operation
+The tool reports the unresolved path and returns failure. Unknown/modified files are preserved. Missing or corrupt originals are never guessed. Recovery remains available through restoration/app-cleanup failures; retry after resolving the reported problem. After an interruption that removed the launcher, copy the matching full package contents back into the app folder and reopen it. Do not replace personal files.
 
-No Miyoo menu, Terminal, compiler, Python, Docker, WSL or network is needed. Power off,
-mount the card and use the same tool with `restore` to restore known original/patched
-mixtures while retaining app/data. Use `uninstall` to finish complete removal.
-A failed cleanup can be retried with its retained computer recovery bundle. Do not
-use an older bundle if a later update changed the expected outputs; conflict checks
-will refuse it. If recovery is missing/corrupt, nothing is guessed or blindly deleted.
+[Recovery without MainUI or device Terminal](recovery.md).
 
-## Manual recovery if the host tool cannot run
+## Advanced operations
 
-Use this card's retained recovery bundle. Show hidden files. Read RESTORE.txt;
-`files/` is the stock integration copy-back tree. `before/` and `after/` must not be
-copied blindly. Copy only verified `files/.tmp_update/runtime.sh` and existing
-`files/.tmp_update/bin/MainUI-*` to identical SD paths. Never overwrite a foreign
-patch without preserving it and seeking support. Never delete shared .tmp_update.
-Mac `shasum -a 256` / Linux `sha256sum` / Windows `certutil -hashfile FILE SHA256`
-can verify individual files. Windows 7's bundled PowerShell lacks Get-FileHash and
-Expand-Archive; use Explorer's Extract All for the portable test ZIP.
-Keep the entire recovery bundle. Reboot and confirm stock behavior afterward.
-The updated automatic uninstall does all routine verification/removal; manual copying
-is an emergency fallback, not the normal installation procedure.
+The entry scripts accept `uninstall` for complete removal and `remove-integrations` for restoring only integrations, retaining app/data. Explicit support flags remain available; this latter operation requires the validated recovery and powered-off card. Never select an ambiguous recovery by guessing.

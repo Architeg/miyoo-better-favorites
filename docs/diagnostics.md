@@ -2,7 +2,7 @@
 
 ## Export a report
 
-Power off the Miyoo, connect its card and open the extracted installer folder.
+Power off the Miyoo, connect its card and open the copied App/BetterFavoritesTest folder.
 Use the same entry script as installation:
 
 | Platform | Export |
@@ -12,7 +12,7 @@ Use the same entry script as installation:
 | Linux | `./Install-Linux.sh export-diagnostics` |
 
 The Windows7 test folder also supports `.\Install-Windows7.cmd export-diagnostics`.
-Enter the card root when prompted. A fresh ZIP is written beside the installer;
+The copied launcher derives the card automatically. A fresh ZIP is written in your computer home folder;
 existing exports are not replaced. Export does not alter preferences or enable tracing.
 No Miyoo Terminal, Wi-Fi, SSH or developer tools are needed.
 

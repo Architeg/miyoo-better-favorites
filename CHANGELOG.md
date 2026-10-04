@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.0-rc.3 — preparation, not published
+
+- Copy-to-card computer launchers with Install / Update and Uninstall completely.
+- Both supported optional integrations installed, fresh switches OFF; update preferences preserved.
+- Verified off-card execution staging and portable card recovery across computers.
+- Complete uninstall archives evidence, restores stock, removes owned files, then recovery.
+- Once-only theme-aware Getting started guidance; no core/audio behavior changes.
+- Corrected actual SDL extension versions/notices; recovered MI link inputs reproduce working SDL exactly.
+- Source companions exclude restricted vendor SDK material; component-specific attribution limits documented.
+
+RC2 tag/bytes remain unchanged. RC3 host fixtures are not new hardware acceptance.
+
+
 ## 1.0.0-rc.2 — prepared 2026-10-04, private review
 
 - Limited How to Open headings and explicit GameSwitcher destinations; restore the

@@ -136,5 +136,11 @@ tar -xzf "$SDL_IMAGE_ARCHIVE" \
 
 echo "==> SDL2_image headers ready"
 
+# SDL2_mixer headers use the same pinned archive as the working library.
+SDL_MIXER_INCLUDE="$ROOT_DIR/third_party/sdl2_mixer/include"
+mkdir -p "$SDL_MIXER_INCLUDE"
+tar -xzf "$SDL_DIR/sdl2/dependency/SDL2_mixer-2.6.3.tar.gz" \
+ --strip-components=2 -C "$SDL_MIXER_INCLUDE" SDL2_mixer-2.6.3/include/SDL_mixer.h
+
 echo
 echo "Dependencies successfully prepared."

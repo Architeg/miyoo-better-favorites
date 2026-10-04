@@ -1,91 +1,44 @@
-# Dependency provenance and reproduction audit
+# Distributed dependency audit
 
-This page records release work, not extra user installation requirements.
-[Third-party notices](../../THIRD_PARTY_NOTICES.md) are the readable attribution
-summary. [Build instructions](build.md) record the actual compiler/configuration.
+[Readable notices](../../THIRD_PARTY_NOTICES.md) · [Build procedure](build.md) · [Exact binary evidence](dependency-components.json)
 
-## What packaging currently distributes
+This audit concerns the actual nine unchanged private app libraries in [dependency-hashes.json](dependency-hashes.json). MainUI, firmware drivers, user themes, ROMs and saves are not in the app payload. Build success, runtime availability, attribution/source supply and byte-identical reproduction are different questions.
 
-`tools/package-release.py` copies nine app-private libraries, recorded in
-[dependency-hashes.json](dependency-hashes.json), plus the ARM app and host tools.
-It verifies those expected hashes; it does not manufacture evidence of their source
-correspondence. No original MainUI/runtime, ROM, save or user theme is copied.
+## Component decisions
 
-The SDL fork pin is `3c68ed01fee7feffd4ea338b1cc5018a455e2be9`.
-Its SDL header declares 2.0.20; that alone does not identify a compiled ELF.
-The preserved OSS SDL library is separate from the upstream mini-audio prebuilt.
-A fresh checkout can compile the app against pinned headers/prebuilts, but release
-packaging requires the exact qualified custom OSS file. No fresh recreation claim
-is made until source/configuration/toolchain output is reproduced and checked.
-
-## Notice locations in generated packages
-
-| Recorded source | Generated notice |
-| --- | --- |
-| Fork root LICENSE | `licenses/LICENSE` (LGPL-2.1 text; distinct from project root LICENSE) |
-| SDL core | `licenses/sdl2-LICENSE.txt` |
-| SDL2_image 2.8.1 | `licenses/SDL2_image-2.8.1.tar-SDL2_image-2.8.1-LICENSE.txt` |
-| SDL2_mixer 2.6.3 | `licenses/SDL2_mixer-2.6.3.tar-SDL2_mixer-2.6.3-LICENSE.txt` and extracted codec notices |
-| SDL2_ttf 2.20.2 | `licenses/SDL2_ttf-2.20.2.tar-SDL2_ttf-2.20.2-LICENSE.txt` and extracted shaping notices |
-| json-c 0.15 | `licenses/json-c-0.15.tar-json-c-0.15-COPYING` |
-| SwiftShader | `licenses/swiftshader-LICENSE.txt`, `licenses/swiftshader-AUTHORS.txt` |
-| Modern and legacy Go | `licenses/Go-LICENSE`, copied from preserved repository BSD text |
-
-The packager extracts files named LICENSE, LICENSE.txt or COPYING from the four
-extension/json archives. That filename filter is not a complete transitive audit;
-other notice names/components must be reviewed. Required originals remain intact.
-
-## Open correspondence and licensing items
-
-| Item | Evidence available | Missing work / release condition |
+| Actual distributed file | License/source evidence and supplied material | Concrete missing item / smallest remedy |
 | --- | --- | --- |
-| Custom OSS SDL | Accepted library hash, pinned fork, recorded configure switches/toolchain | Reproduce from clean source and establish exact binary correspondence |
-| SDL extensions/json-c | Versioned source archives and expected prebuilt hashes | Trace build configuration, linked/static codec components and matching source/notices |
-| SwiftShader EGL/GLES | Full fork tree and root Apache/AUTHORS texts, expected ELF hashes | Establish prebuilt revision/configuration and component-specific license/source closure |
-| libpng16/zlib | Library hashes, embedded 1.6.37/1.2.11 strings, pinned source and original notices | Establish exact build/source correspondence and remaining artifact obligations |
-| Go host runtime | Go1.26.2 modern / official Go1.20.14 legacy, no external modules, BSD text | Keep exact toolchain/build identities and corresponding notice; legacy runtime security review |
-| Firmware-provided libraries | Existing Onion/Miyoo runtime dependency paths | Document runtime closure; do not bundle unidentified firmware libraries |
+| libSDL2-2.0.so.0 | SDL 2.0.20 fork; core zlib, Miyoo backend LGPL-2.1. Pinned SDL source, root LGPL and SDL license supplied. Rebuilt entire ELF equals accepted SHA f103f543… | Custom SDL source/build correspondence is resolved. External firmware SDK is a build prerequisite, not redistributed. |
+| libSDL2_image-2.0.so.0 | IMG_Linked_Version disassembly sets 2.0.5. Official pinned 2.0.5 source/COPYING and embedded miniz/NanoSVG source notices supplied. Dynamic-loader strings identify external jpeg/png/tiff/webp libraries. | Corrects previous 2.8.1 archive-versus-binary confusion. Exact byte rebuilding/configuration is unproven, not itself a zlib-license publication condition. No required root notice remains missing. |
+| libSDL2_mixer-2.0.so.0 | Mix_Linked_Version sets 2.0.4. Official source/COPYING and its codec/TiMidity notice families supplied. libvorbisidec.so.1 is loaded externally; no exported codec-library definitions were identified. | Corrects 2.6.3 header/source-versus-binary confusion. Original configure/static-codec selection is unavailable; version-matched source and all available embedded-code notices are provided. This is not an exhaustive proof of every static component. |
+| libSDL2_ttf-2.0.so.0 | TTF_Linked_Version sets 2.0.15. Official source/COPYING supplied. DT_NEEDED names freetype, bzip2, png, zlib and SDL. | Corrects 2.20.2 header-versus-binary confusion. Required binary root notice supplied; installed freetype/bzip2 are not redistributed by this app. |
+| libjson-c.so.5 | MIT-style upstream author notices; pinned 0.15 archive/COPYING supplied | Binary build identity is not proven by archive name. No additional source-rebuild condition is imposed by this permissive notice. |
+| libpng16.so.16 | Embedded 1.6.37 string; pinned 1.6.37 source/original LICENSE supplied | Build configuration remains unknown; exact byte reproduction is separate from preserved libpng notice requirements. |
+| libz.so.1 | Embedded 1.2.11 string; pinned 1.2.11 source/original README license supplied | No missing dedicated license remains. Reproduction is a separate goal. |
+| libEGL.so / libGLESv2.so | SwiftShader 4.1.0.7 strings match src/Common/Version.h; custom eglUpdateBufferSettings appears in the supplied fork. Apache-2.0/AUTHORS and all available third-party notice families supplied with source. | **Remaining binary-publication question:** upstream did not provide the component/NOTICE inventory for these particular prebuilts. Smallest remedy is its prebuilt attribution/build inventory, sufficient to map notices to actual embedded components; an entire byte-identical rebuild is not inherently required by Apache-2.0. A compatible rebuild with known inputs is an alternative, but this pass does not replace working graphics/audio libraries. |
+| Modern/legacy Go host code | Go1.26.2 and isolated official Go1.20.14, standard library only; preserved BSD notice | Source/toolchain identities recorded. No user toolchain requirement; legacy security/OS execution limitations remain disclosed. |
 
-The companion `sdl2-miyoo-<pin>.tar.gz` contains the fork LICENSE/Makefiles, SDL,
-mini and SwiftShader trees, including extension source archives. Supplying it does
-not automatically close any row above. Project source companions correspond to
-package source inventories; verified device behavior is a different question.
+The extension version evidence is the compiled ARM version function, not the newer development headers. Official upstream archives/notices are pinned in [upstream-sources.json](upstream-sources.json). Source companions preserve all notice families, including COPYING.txt, COPYRIGHT and NOTICE. Possible third-party notices are supplied conservatively; this is not an assertion that every optional codec was linked.
 
-## Tools and verification boundaries
+## Custom OSS SDL: resolved exact reproduction
 
-Docker's pinned Miyoo compiler image is a developer build dependency, not a user
-installation dependency or a bundled image. Keep its identity, source/runtime terms
-and compiler/linker notes in [build provenance](build.md). Existing GCC ABI notes
-and the bzip2 link warning do not establish runtime availability; inspect ELF needs
-and verify card-supplied dependencies separately.
+The previously missing link inputs are **libmi_common, libmi_sys and libmi_gfx**, plus the correct EGL/GLES library search directory. The accepted ELF's DT_NEEDED independently names these inputs. Adding them in the isolated pinned-toolchain build produced **the entire original ELF byte for byte**, SHA256 `f103f5439d62a570b8977dcd7352779404cfb5112fc79008899c91c718a85d8a`.
 
-Go1.26.2 builds modern Windows/macOS/Linux installers. Go1.20.14 builds only legacy
-Windows installers and the read-only Windows dispatcher, in an isolated module;
-normal go.mod remains go1.24. [Host dispatch](host-dispatch.md) records minimum OSes,
-static Linux headers and Mach-O load minima. The full toolchain is not shipped;
-compiled executables include licensed runtime/standard-library code.
+The exact configure switches are in [build provenance](build.md). SDL source/revision, SDL_image header and recorded compiler flags were retained. Final link addition:
 
-Do not publish binaries as license-cleared until the exact source/prebuilt and
-transitive notice issues are closed. Preserve all license/source companions and
-original copyright texts during package/documentation updates.
+```text
+EXTRA_LDFLAGS=-L<SDK>/mini/lib -lmi_common -lmi_sys -lmi_gfx
+ -L<fork>/prebuilt/mini -lm -ldl -lEGL -lGLESv2 -lpthread -lrt
+```
 
-## RC2 follow-up evidence (2026-10-04)
+No rebuilt audit library replaces the accepted working file. OSS remains enabled; mini audio stays disabled. MI SDK headers explicitly restrict disclosure/redistribution. New source companions exclude `mini/inc` and `mini/lib`; firmware driver binaries are not in app ZIPs. SDK access for this advanced reproduction must be separately authorized. Ordinary contributor app/tests do not require publishing private SDK/firmware fixtures.
 
-Binary strings from the hash-qualified libpng report 1.6.37; zlib reports 1.2.11.
-SwiftShader EGL/GLES reports 4.1.0.7. These identify embedded version strings, not
-a reconstructed build. [Pinned upstream source metadata](upstream-sources.json)
-records full commit/archive/notice hashes for libpng and zlib. The packager checks
-and supplies both archives and their original LICENSE/README notices. Working
-shared libraries are unchanged. Earlier unidentified-version and missing dedicated
-notice findings are narrowed by this evidence; exact build correspondence remains open.
+## Runtime bzip2 and compiler notes
 
-The clean SDL source archive needs autogen before configure; the pinned compiler
-image lacks autoconf. Host autogen succeeds. The isolated pinned-toolchain build, with verified revision
-and SDL_image headers and recorded CFLAGS, fails at the link step on MI_GFX/MI_SYS
-symbols. The recorded configure flags therefore do not reproduce the qualified
-ELF on their own; the original link inputs/overrides must be recovered. No fresh
-audit build replaces the working library, and no byte-reproduction claim is made.
+SDL_ttf DT_NEEDED includes libbz2.so.1.0. Read-only inspection finds `miyoo/lib/libbz2.so.1.0` on the tested card, SHA256 `027db0ed00700063f4af51afafd7598672e3536d21f4af0fef4c419a8ed1440c`; Onion's inherited library search environment includes this path. This supports the recorded working runtime, not a fresh device test or guarantee for every card. The build's existing link warning reports the build-time search environment. GCC ABI notes alone are not release blockers. No shared library/audio setting is changed or bundled merely to silence a warning.
 
-Binary assets remain unpublished until custom SDL, extension/codec and SwiftShader
-source/build correspondence and transitive license obligations are established.
-The source checkpoint/tag and draft release can be prepared independently.
+## Publication boundary
+
+Custom SDL correspondence, actual extension versions and missing root notices are resolved/narrowed as above. Do not retain a general requirement to byte-reproduce all permissively licensed prebuilts. The specific outstanding attribution mapping is SwiftShader's actual prebuilt component inventory, affecting both full and app-only ZIPs because both include EGL/GLES. Project source and new SDK-excluding source companions are separate artifacts. No binary release is published in this preparation pass; historical archives remain intact.
+
+Apache's [redistribution conditions](https://www.apache.org/licenses/LICENSE-2.0) distinguish license/NOTICE preservation from exact build reproducibility. LGPL terms remain supplied in licenses/LICENSE and apply to the modified Miyoo backend.

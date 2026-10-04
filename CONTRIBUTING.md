@@ -94,15 +94,10 @@ The dispatch suite simulates host probes; it does not run every target OS.
 
 Dependency preparation downloads the pinned SDL Miyoo fork and extracts headers;
 it writes only generated `third_party` directories. It is a developer network step.
-The current script prepares json-c, SDL_ttf and SDL_image headers. SDL_mixer's header
-must also be extracted from its existing pinned archive:
+The script prepares json-c, SDL_ttf, SDL_image and SDL_mixer headers from the pinned archives.
 
 ```sh
 sh scripts/fetch-deps.sh
-mkdir -p third_party/sdl2_mixer/include
-tar -xzf third_party/sdl2_miyoo/sdl2/dependency/SDL2_mixer-2.6.3.tar.gz \
-  --strip-components=2 -C third_party/sdl2_mixer/include \
-  SDL2_mixer-2.6.3/include/SDL_mixer.h
 sh scripts/build.sh
 ```
 

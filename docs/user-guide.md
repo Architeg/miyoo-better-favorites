@@ -35,7 +35,7 @@ conflict checks precede atomic publication. External changes refuse removal.
 | --- | --- | --- |
 | Group by console | ON | Headings and console jumps; OFF is a flat list |
 | Numeric prefixes | Show | Display only; stored labels and sort stay unchanged |
-| Sorting | Original label | Literal-label sort; Alphabetical title ignores leading numeric prefix |
+| Sorting | Original label | Sorts the original full label; Alphabetical title ignores leading numeric prefix |
 | Automatic return | OFF | With integration available, B/START from GameSwitcher reopens this browser session, even after switching games |
 | Replace stock Favorites | OFF | With Home integration available, existing Home Favorites opens Better Favorites |
 
@@ -51,3 +51,7 @@ opened from Apps. It does not create automatic return ownership.
 
 Global shortcuts are deferred entirely for v1.0. Ordinary MainUI X/Y assignments
 are unchanged. Adding favorites still uses Onion's own menus.
+
+## First installation
+
+The full installer prepares both supported integrations but leaves their app switches OFF. A short Getting started notice appears once on a fresh installation and reports actual availability. Dismiss it with A, B or MENU; an update does not repeat a dismissed notice. Apps remains available at any time. Switching an option OFF disables its behavior; [complete uninstall](uninstall.md) restores the original system files.

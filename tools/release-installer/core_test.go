@@ -17,6 +17,11 @@ func root(t *testing.T) string {
 	if e != nil {
 		t.Fatal(e)
 	}
+	for _, d := range []string{"App", "Roms"} {
+		if e = os.MkdirAll(filepath.Join(real, d), 0700); e != nil {
+			t.Fatal(e)
+		}
+	}
 	return real
 }
 func mustWrite(t *testing.T, r, p string, d []byte) {

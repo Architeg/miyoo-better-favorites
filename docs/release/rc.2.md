@@ -26,11 +26,7 @@ Prepared 2026-10-04. RC1 artifacts/evidence/recovery originals are retained.
 
 ## Identity and checks
 
-This uncommitted private review snapshot identifies its base commit and a SHA-256
-source inventory in package.json/release.json/SOURCE-INVENTORY.json. Matching source
-companions contain that exact reviewed working source, not only the older commit.
-No commit/tag/publication is implied. Generated preparation reports list actual
-builds, host fixture checks, artifact hashes and unavailable checks.
+RC2 is committed at `a31f9a2fff42d12b2a9f2cc16118f3b8a43eb94a` and pushed to main. Annotated `v1.0.0-rc.2` remains at that commit. Its prerelease is an unpublished, asset-free draft. Follow-up copy-and-click work has a separate RC3 identity and does not replace these bytes.
 
 ## Acceptance received
 
@@ -40,7 +36,7 @@ are independently verified. [Diagnostic analysis](windows-acceptance.md) identif
 the earlier RC2 payload; it does not establish an exact later dispatcher/ZIP hash.
 Mac RC1 acceptance remains separate. Ordinary success does not qualify fault tests.
 
-## Remaining gates
+## Historical RC2 qualification notes
 
 - RC2 device install → Home OFF/ON/B → Apps/X/Y → A/MENU/return → complete uninstall
   → actual stock boot/behavior → reinstall, using these final package bytes.
@@ -53,7 +49,7 @@ Mac RC1 acceptance remains separate. Ordinary success does not qualify fault tes
   redistribution; companions/notices do not alone close that audit.
 - Mini/community device testing; hardware evidence currently covers Mini Plus only.
 
-No stable release or new device profiling/shortcut work is authorized by this pass.
+The current focused acceptance procedure is [RC3](rc.3.md); community targets are not a requirement to repeat a broad matrix. This historical list does not imply the existing RC2 tag/draft are still future work. No stable release or new profiling/shortcut work is authorized.
 
 ## Separate bootstrap preparation
 

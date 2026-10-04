@@ -66,7 +66,7 @@ func loadRecovery(path string) (Recovery, error) {
 	}
 	seen := map[string]bool{}
 	for _, s := range r.Files {
-		if !safeRel(s.Path) || seen[s.Path] || s.Mode > 0777 || (!s.Integration && (!strings.HasPrefix(s.Path, app) || !allowedAppFile(strings.TrimPrefix(s.Path, app)))) || (s.Integration && !allowedRestorePath(s.Path)) {
+		if !safeRel(s.Path) || seen[s.Path] || s.Mode > 0777 || (!s.Integration && (!strings.HasPrefix(s.Path, app) || (!allowedAppFile(strings.TrimPrefix(s.Path, app)) && !allowedTransportPath(strings.TrimPrefix(s.Path, app))))) || (s.Integration && !allowedRestorePath(s.Path)) {
 			return r, fmt.Errorf("unsafe recovery entry: %s", s.Path)
 		}
 		seen[s.Path] = true
@@ -105,6 +105,8 @@ func personalFile(name string, b []byte) bool {
 		return bytes.HasPrefix(b, []byte("BetterFavoritesHome1\n"))
 	case "home-diagnostics.conf":
 		return string(b) == "BetterFavoritesHomeDiagnostics1\n1\n"
+	case "welcome-pending":
+		return string(b) == "BetterFavoritesWelcome1\n"
 	case "better-favorites.log", "better-favorites.previous.log", "home-diagnostics.log":
 		return true // explicit app-owned log names, archived before removal
 	}
@@ -132,7 +134,7 @@ func ownedTree(root, rel string, check func(string, []byte) error) ([]change, er
 			return err
 		}
 		if s.IsDir() {
-			if relative != rel && (strings.HasPrefix(rel, strings.TrimSuffix(app, "/")) || strings.Contains(rel, "-backup")) {
+			if relative != rel && (strings.Contains(rel, "-backup")) {
 				return fmt.Errorf("unknown directory preserved: %s", relative)
 			}
 			return nil
@@ -154,7 +156,7 @@ func cleanupPlan(root, recovery, dir string) ([]change, error) {
 	if e != nil {
 		return nil, e
 	}
-	_, home, ret, e := loadPackage(dir)
+	pkg, home, ret, e := loadPackage(dir)
 	if e != nil {
 		return nil, e
 	}
@@ -172,8 +174,55 @@ func cleanupPlan(root, recovery, dir string) ([]change, error) {
 			}
 		}
 	}
+	current := map[string]string{}
+	for _, f := range pkg.Files {
+		if strings.HasPrefix(f.Path, app) {
+			current[f.Path] = f.SHA
+		}
+	}
+	transport, e := transportFiles(dir)
+	if e != nil {
+		return nil, e
+	}
+	for _, f := range transport {
+		current[app+f.Path] = f.SHA
+	}
+	expectedDirs := map[string]bool{strings.TrimSuffix(app, "/"): true}
+	for p := range current {
+		for d := filepath.ToSlash(filepath.Dir(p)); strings.HasPrefix(d, strings.TrimSuffix(app, "/")); d = filepath.ToSlash(filepath.Dir(d)) {
+			expectedDirs[d] = true
+		}
+	}
+	for p := range saved {
+		if strings.HasPrefix(p, app) {
+			for d := filepath.ToSlash(filepath.Dir(p)); strings.HasPrefix(d, strings.TrimSuffix(app, "/")); d = filepath.ToSlash(filepath.Dir(d)) {
+				expectedDirs[d] = true
+			}
+		}
+	}
+	appPath, _ := join(root, strings.TrimSuffix(app, "/"))
+	if e = filepath.Walk(appPath, func(p string, s os.FileInfo, e error) error {
+		if errors.Is(e, os.ErrNotExist) {
+			return nil
+		}
+		if e != nil {
+			return e
+		}
+		if s.IsDir() {
+			d, _ := filepath.Rel(root, p)
+			if !expectedDirs[filepath.ToSlash(d)] {
+				return fmt.Errorf("unknown app directory preserved: %s", d)
+			}
+		}
+		return nil
+	}); e != nil {
+		return nil, e
+	}
 	appFiles, e := ownedTree(root, strings.TrimSuffix(app, "/"), func(p string, b []byte) error {
 		if s, ok := saved[p]; ok && digest(b) == s.After {
+			return nil
+		}
+		if current[p] != "" && digest(b) == current[p] {
 			return nil
 		}
 		n := strings.TrimPrefix(p, app)
@@ -292,7 +341,12 @@ func cleanupPlan(root, recovery, dir string) ([]change, error) {
 		}
 		add(c)
 	}
-	// Independently verify every recovery mirror before archiving/removing it.
+	// Only the indexed journal and its verified update lineage are ours.
+	ownMirrors, e := ownedRecoveryMirrors(root, recovery)
+	if e != nil {
+		return nil, e
+	}
+	// Independently verify every owned recovery mirror before archiving/removing it.
 	config, e := join(root, system+"config")
 	if e != nil {
 		return nil, e
@@ -308,6 +362,9 @@ func cleanupPlan(root, recovery, dir string) ([]change, error) {
 		}
 		rel := system + "config/" + n
 		if strings.HasPrefix(n, "better-favorites-recovery-") {
+			if !ownMirrors[rel] {
+				return nil, fmt.Errorf("unrelated recovery directory preserved: %s", rel)
+			}
 			mirror, e := join(root, rel)
 			if e != nil {
 				return nil, e
@@ -317,6 +374,13 @@ func cleanupPlan(root, recovery, dir string) ([]change, error) {
 				return nil, e
 			}
 			checks := map[string]string{"recovery.json": digest(encode(m))}
+			for _, n := range []string{"SHA256SUMS", "RESTORE.txt"} {
+				if b, e := optional(mirror, n); e != nil {
+					return nil, e
+				} else if b != nil {
+					checks[n] = digest(b)
+				}
+			}
 			manifest, e := read(mirror, "recovery.json")
 			if e != nil {
 				return nil, e
@@ -341,6 +405,15 @@ func cleanupPlan(root, recovery, dir string) ([]change, error) {
 				return nil, e
 			}
 			add(c)
+		} else if n == "better-favorites-installation.json" {
+			if _, e := activeRecovery(root); e != nil {
+				return nil, e
+			}
+			b, e := read(root, rel)
+			if e != nil {
+				return nil, e
+			}
+			add([]change{{rel, b, nil, 0600, nil, true}})
 		} else if n != "better-favorites-home.json" && !dirs[rel] {
 			return nil, fmt.Errorf("unrecorded integration artifact preserved: %s", rel)
 		}
@@ -518,7 +591,7 @@ func completeUninstall(root, recovery, dir, host string, hook func(string, strin
 	if e = transact(root, restoreChanges, hook); e != nil {
 		return fmt.Errorf("uninstall incomplete; restoration: %w", e)
 	}
-	if e = verifyStock(root, dir); e != nil {
+	if e = verifyRestored(root, recovery, dir); e != nil {
 		return fmt.Errorf("uninstall incomplete: %w", e)
 	}
 	// Regenerate against our verified restored journals, refusing any intervening change.
@@ -544,13 +617,21 @@ func completeUninstall(root, recovery, dir, host string, hook func(string, strin
 			return fmt.Errorf("uninstall incomplete; late modification preserved: %s", c.Path)
 		}
 	}
-	if e = transact(root, after, hook); e != nil {
+	var artifacts, mirrors []change
+	for _, c := range after {
+		if strings.Contains(c.Path, "/better-favorites-recovery-") || c.Path == installationIndex {
+			mirrors = append(mirrors, c)
+		} else {
+			artifacts = append(artifacts, c)
+		}
+	}
+	if e = transact(root, artifacts, hook); e != nil {
 		return fmt.Errorf("uninstall incomplete; cleanup files retained/rolled back: %w", e)
 	}
 	// Remove empty owned directories only. No RemoveAll; a newly inserted file is preserved.
 	dirs := map[string]bool{}
 	dirs[strings.TrimSuffix(app, "/")] = true
-	for _, c := range cleanup {
+	for _, c := range artifacts {
 		p := filepath.ToSlash(filepath.Dir(c.Path))
 		for strings.HasPrefix(p, strings.TrimSuffix(app, "/")) || strings.HasPrefix(p, system+"config/better-favorites-") {
 			dirs[p] = true
@@ -571,7 +652,38 @@ func completeUninstall(root, recovery, dir, host string, hook func(string, strin
 			return fmt.Errorf("uninstall incomplete; nonempty/modified directory preserved: %s: %w", rel, e)
 		}
 	}
-	if e = verifyStock(root, dir); e != nil {
+	// Verify restoration again before the final recovery cleanup. Host archive already verifies every recovery file.
+	if e = verifyRestored(root, recovery, dir); e != nil {
+		return e
+	}
+	if e = transact(root, mirrors, hook); e != nil {
+		return fmt.Errorf("uninstall incomplete; portable recovery retained/rolled back: %w", e)
+	}
+
+	mirrorDirs := map[string]bool{}
+	for _, c := range mirrors {
+		if c.Path == installationIndex {
+			continue
+		}
+		for p := filepath.ToSlash(filepath.Dir(c.Path)); strings.HasPrefix(p, system+"config/better-favorites-recovery-"); p = filepath.ToSlash(filepath.Dir(p)) {
+			mirrorDirs[p] = true
+		}
+	}
+	order = nil
+	for p := range mirrorDirs {
+		order = append(order, p)
+	}
+	sort.Slice(order, func(i, j int) bool { return len(order[i]) > len(order[j]) })
+	for _, rel := range order {
+		p, e := join(root, rel)
+		if e != nil {
+			return e
+		}
+		if e = os.Remove(p); e != nil && !errors.Is(e, os.ErrNotExist) {
+			return fmt.Errorf("uninstall incomplete; recovery directory preserved: %s", rel)
+		}
+	}
+	if e = verifyRestored(root, filepath.Join(host, "recovery"), dir); e != nil {
 		return e
 	}
 	paths := []string{}
@@ -585,6 +697,14 @@ func completeUninstall(root, recovery, dir, host string, hook func(string, strin
 	return nil
 }
 func discoverRecovery(root, dir string) (string, error) {
+	if p, e := activeRecovery(root); e == nil {
+		if _, e = prepareRestore(root, p, dir, true); e != nil {
+			return "", e
+		}
+		return p, nil
+	} else if !errors.Is(e, os.ErrNotExist) {
+		return "", e
+	}
 	candidates := []string{}
 	seen := map[string]bool{}
 	for _, parent := range []string{dir, filepath.Dir(dir), filepath.Join(root, system+"config")} {

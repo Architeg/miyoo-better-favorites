@@ -20,5 +20,23 @@ case "$arm:$machine:$translated" in
  *) fail "inconsistent architecture/translation ($arm/$machine/$translated)";;
 esac
 tool="./better-favorites-installer-darwin-$arch"
+if [ -d computer ]; then
+ source=$(pwd -L)
+ tool="computer/${tool#./}"
+ [ -f "$tool" ] && [ ! -L "$tool" ] || fail "missing/unsafe packaged executable $tool"
+ stage=$(mktemp -d "${TMPDIR:-/tmp}/better-favorites-bootstrap.XXXXXX") || exit 2
+ trap 'rm -f "$stage/installer"; rmdir "$stage"' EXIT
+ trap 'exit 129' HUP
+ trap 'exit 130' INT
+ trap 'exit 143' TERM
+ cp "$tool" "$stage/installer" || exit 2
+ chmod 700 "$stage/installer" || exit 2
+ set +e
+ "$stage/installer" --card-launcher "$source" "$@"
+ result=$?
+ set -e
+ if [ "$#" -eq 0 ]; then printf "\nPress Enter to close. "; read -r answer || :; fi
+ exit "$result"
+fi
 [ -f "$tool" ] && [ ! -L "$tool" ] && [ -x "$tool" ] || fail "missing/unsafe packaged executable $tool"
 exec "$tool" "$@"

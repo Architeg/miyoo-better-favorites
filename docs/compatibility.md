@@ -51,7 +51,8 @@ verification: all five system files match this card's verified stock originals,
 with the app and active integration files absent. Fault tests do not become hardware
 acceptance merely because the normal flow passed.
 
-Unsigned distribution/quarantine/SmartScreen behavior, exact prebuilt/source/license
-closure and the later candidate's complete host/device matrix remain release gates.
-[Remaining gates](release/rc.2.md). Disk sizes are not RAM measurements; no measured
+The new copy-and-click candidate still needs its short final-package device cycle.
+Unsigned Finder/Explorer/desktop opening has not been established by shell fixtures.
+Component-specific attribution evidence is documented in the [dependency audit](release/dependency-audit.md); exact byte reproduction is a separate goal.
+[Current acceptance steps](release/rc.3.md). Earlier RC2 evidence is historical. Disk sizes are not RAM measurements; no measured
 cache speedup or gameplay/ON-OFF process-memory result is claimed. [Profiling evidence](m5-profiling.md).

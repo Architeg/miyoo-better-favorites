@@ -39,5 +39,11 @@ int main() {
     assert(!loadAppSettings(path, loaded, error) && !loaded.automaticReturn);
     assert(unlink(path.c_str()) == 0);
     assert(!setAutomaticReturn(std::string(directory) + "/missing/settings", false, settings, error));
+    const std::string marker=std::string(directory)+"/welcome-pending";
+    assert(!pendingWelcome(marker));
+    std::ofstream(marker)<<"BetterFavoritesWelcome1\n";
+    assert(pendingWelcome(marker));assert(dismissWelcome(marker,error));assert(!pendingWelcome(marker));
+    std::ofstream(marker)<<"foreign";assert(!pendingWelcome(marker));assert(!dismissWelcome(marker,error));assert(unlink(marker.c_str())==0);
+    assert(symlink("unrelated",marker.c_str())==0);assert(!pendingWelcome(marker));assert(unlink(marker.c_str())==0);
     assert(rmdir(directory) == 0);
 }

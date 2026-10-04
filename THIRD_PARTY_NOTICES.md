@@ -28,14 +28,14 @@ prebuilt binary. The common fork pin is
 
 | Component / upstream | Purpose | Recorded version or pin | License | Notice / source supplied |
 | --- | --- | --- | --- | --- |
-| [SDL2 Miyoo fork](https://github.com/Rparadise-Team/sdl2_miyoo_new) | Display, input, OSS audio | Common fork pin; SDL source header says 2.0.20 | Fork root LGPL-2.1; SDL core zlib; embedded components retain notices | `licenses/LICENSE`, `licenses/sdl2-LICENSE.txt`; dependency companion `sdl2/`, `mini/` |
-| [SDL2_image](https://github.com/libsdl-org/SDL_image) | Artwork decoding | Source archive 2.8.1 at fork pin | zlib; codec components have separate terms | `licenses/SDL2_image-*LICENSE.txt`; companion `sdl2/dependency/SDL2_image-2.8.1.tar.gz` |
-| [SDL2_mixer](https://github.com/libsdl-org/SDL_mixer) | Navigation sound | Source archive 2.6.3 at fork pin | zlib; codec components have separate terms | `licenses/SDL2_mixer-*`; companion `sdl2/dependency/SDL2_mixer-2.6.3.tar.gz` |
-| [SDL2_ttf](https://github.com/libsdl-org/SDL_ttf) | Theme font rendering | Source archive 2.20.2 at fork pin | zlib; embedded font/shaping components have separate terms | `licenses/SDL2_ttf-*`; companion `sdl2/dependency/SDL2_ttf-2.20.2.tar.gz` |
+| [SDL2 Miyoo fork](https://github.com/Rparadise-Team/sdl2_miyoo_new) | Display, input, OSS audio | Common fork pin; SDL source header says 2.0.20 | Fork root LGPL-2.1; SDL core zlib; embedded components retain notices | `licenses/LICENSE`, `licenses/sdl2-LICENSE.txt`; dependency companion `sdl2/` (restricted MI SDK excluded) |
+| [SDL2_image](https://github.com/libsdl-org/SDL_image) | Artwork decoding | Binary 2.0.5; developer headers 2.8.1 | zlib; codec components have separate terms | `licenses/SDL_image-2.0.5-COPYING.txt`; pinned official 2.0.5 source and embedded notices |
+| [SDL2_mixer](https://github.com/libsdl-org/SDL_mixer) | Navigation sound | Binary 2.0.4; developer headers 2.6.3 | zlib; codec components have separate terms | `licenses/SDL_mixer-2.0.4-COPYING.txt`; pinned official 2.0.4 source and codec notices |
+| [SDL2_ttf](https://github.com/libsdl-org/SDL_ttf) | Theme font rendering | Binary 2.0.15; developer headers 2.20.2 | zlib; embedded font/shaping components have separate terms | `licenses/SDL_ttf-2.0.15-COPYING.txt`; pinned official 2.0.15 source/notices |
 | [json-c](https://github.com/json-c/json-c) | JSON parsing | Source archive 0.15 at fork pin | MIT-style notices, including upstream authors | `licenses/json-c-*COPYING`; companion `sdl2/dependency/json-c-0.15.tar.gz` |
 | [SwiftShader](https://github.com/google/swiftshader) EGL/GLES | Graphics implementation libraries | Fork's `swiftshader/` tree; separate prebuilt revision unverified | Apache-2.0 at tree root; bundled components retain their own terms | `licenses/swiftshader-LICENSE.txt`, `licenses/swiftshader-AUTHORS.txt`; companion `swiftshader/` |
-| [libpng](http://www.libpng.org/pub/png/libpng.html) | PNG support | Binary reports 1.6.37; exact build correspondence unresolved | libpng license family; exact artifact obligations unresolved | `licenses/libpng-1.6.37-LICENSE.txt`; pinned upstream source companion; correspondence remains open |
-| [zlib](https://zlib.net/) | Compression support | Binary reports 1.2.11; exact build correspondence unresolved | zlib license family; artifact correspondence unresolved | `licenses/zlib-1.2.11-README.txt`; pinned upstream source companion; correspondence remains open |
+| [libpng](http://www.libpng.org/pub/png/libpng.html) | PNG support | Binary reports 1.6.37; exact build correspondence unresolved | libpng preserved upstream license | `licenses/libpng-1.6.37-LICENSE.txt`; pinned upstream source companion; exact byte reproduction is separate |
+| [zlib](https://zlib.net/) | Compression support | Binary reports 1.2.11; exact build correspondence unresolved | zlib preserved upstream license | `licenses/zlib-1.2.11-README.txt`; pinned upstream source companion; exact byte reproduction is separate |
 | [Go runtime / standard library](https://go.dev/) — modern | Windows/macOS/Linux host tools | Go 1.26.2; no external Go modules | BSD-3-Clause | `licenses/Go-LICENSE`; repository notice `third_party/notices/Go-BSD.txt` |
 | [Go runtime / standard library](https://go.dev/) — legacy | Windows 7/8/8.1 tools and x86 dispatcher | Official Go 1.20.14, isolated from normal module/toolchain | BSD-3-Clause | Same preserved Go notice; toolchain identity in `HOST-BUILDS.json` |
 
@@ -58,22 +58,8 @@ package's `SOURCE.txt`; keep those companions with binary distributions.
 <a id="what-remains-unresolved"></a>
 ## What remains unresolved
 
-The source companion preserves the pinned fork, extension archives and upstream
-license files. **That is not proof of complete corresponding source for every
-prebuilt.** The custom OSS SDL build needs fresh reproduction; extension/codec and
-SwiftShader prebuilt correspondence needs tracing. libpng/zlib version strings and
-upstream notices are now recorded; exact build/source correspondence remains open.
+The custom OSS SDL now reproduces the complete accepted ELF byte for byte. Actual extension versions are established by ARM disassembly; matching official sources and original notices are supplied. Exact rebuilds of permissively licensed libraries remain a separate goal, not a blanket publication gate.
 
-> **Publication status:** public binary redistribution remains gated by those specific
-> provenance/license items. Device acceptance and installer success do not close this audit. See the
-[developer dependency audit](docs/release/dependency-audit.md) and
-[build provenance](docs/release/build.md) before distributing binaries. No required
-license text has been removed or modified in this documentation rewrite.
+The specific remaining publication question is the **component/NOTICE inventory for the actual SwiftShader EGL/GLES prebuilts**. Their 4.1.0.7 version and custom entry match the supplied fork; all available root/third-party notice families are included. Upstream prebuilt attribution/build information is still needed to establish its exact component mapping. This affects both binary ZIPs. [Evidence and smallest remedy](docs/release/dependency-audit.md).
 
-## RC2 artifact investigation
-
-The hashed libpng and zlib binaries contain version strings **1.6.37** and
-**1.2.11** respectively. Their original upstream license/README notices and pinned
-source companions are now preserved. This closes the missing-notice/version-evidence
-items, not proof of exact compiler/source correspondence. SwiftShader reports
-4.1.0.7; its precise prebuilt source revision remains unverified.
+Restricted MI SDK headers/driver binaries are excluded from the new dependency source companion, and are not bundled into the app. No original license/copyright text has been changed. Source, device acceptance and exact build reproducibility remain separate evidence.

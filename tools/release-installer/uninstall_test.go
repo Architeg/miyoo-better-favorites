@@ -85,8 +85,48 @@ func TestCompleteUninstall(t *testing.T) {
 				if e := install(root, dir, second, true, true, nil); e != nil {
 					t.Fatal(e)
 				}
-				if _, e := discoverRecovery(root, filepath.Dir(recovery)); e == nil {
-					t.Fatal("ambiguous selection")
+				if selected, e := discoverRecovery(root, dir); e != nil || !strings.HasPrefix(selected, root) {
+					t.Fatal("portable active identity", selected, e)
+				}
+				if e := os.Remove(filepath.Join(root, installationIndex)); e != nil {
+					t.Fatal(e)
+				}
+				// Create a second valid independent recovery identity; old update
+				// journals with stale metadata must not count as candidates.
+				selected, err := discoverRecovery(root, dir)
+				if err != nil {
+					t.Fatal(err)
+				}
+				clone := filepath.Join(root, system+"config/better-favorites-recovery-independent")
+				if err = os.Mkdir(clone, 0700); err != nil {
+					t.Fatal(err)
+				}
+				if err = filepath.Walk(selected, func(p string, s os.FileInfo, e error) error {
+					if e != nil {
+						return e
+					}
+					if s.IsDir() {
+						return nil
+					}
+					rel, _ := filepath.Rel(selected, p)
+					b, e := os.ReadFile(p)
+					if e != nil {
+						return e
+					}
+					return writeNew(clone, filepath.ToSlash(rel), b, 0600)
+				}); err != nil {
+					t.Fatal(err)
+				}
+				independent, err := loadRecovery(clone)
+				if err != nil {
+					t.Fatal(err)
+				}
+				independent.Version = "1.0.0-rc.1"
+				if err = os.WriteFile(filepath.Join(clone, "recovery.json"), encode(independent), 0600); err != nil {
+					t.Fatal(err)
+				}
+				if _, e := discoverRecovery(root, dir); e == nil {
+					t.Fatal("unindexed ambiguous recovery selected")
 				}
 				return
 			}

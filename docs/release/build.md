@@ -6,7 +6,7 @@ runtime has its own BSD notice. Native user installation needs no Go/Python/WSL.
 ## Prepared checkout
 
 1. Prepare pinned headers/source via `sh scripts/fetch-deps.sh` (networked developer
-   step), plus the SDL_mixer extraction in [CONTRIBUTING](../../CONTRIBUTING.md), pin SDL fork `3c68ed01fee7feffd4ea338b1cc5018a455e2be9`.
+   step, including pinned SDL_mixer headers), pin SDL fork `3c68ed01fee7feffd4ea338b1cc5018a455e2be9`.
 2. Preserve the qualified OSS SDL library at
    `third_party/sdl2_miyoo/custom/libSDL2-2.0.so.0`. It must match the recorded
    working dependency hash; do not silently substitute the upstream mini-audio build.
@@ -16,10 +16,10 @@ runtime has its own BSD notice. Native user installation needs no Go/Python/WSL.
 4. `sh scripts/package.sh --output dist/<fresh-directory> --legacy-toolchain <Go1.20.14-root>` requires a clean pinned
    checkout. It pins Go1.26.2 for modern Windows x86/x64/ARM64, macOS ARM64/x64 and Linux
    ARM64/x64, plus explicit isolated Go1.20.14 for legacy Windows x86/x64 and the
-   read-only x86 dispatcher. It verifies Linux static linkage and Monterey Mach-O minima. It writes app-only/installer ZIPs, source companions, notices,
+   read-only x86 dispatcher. It verifies Linux static linkage and Monterey Mach-O minima. It writes app-only/full copy-to-card ZIPs, source companions, notices,
    dependency inventory and SHA256SUMS. Reusing an output directory is refused.
-5. Extract and test these ZIPs with `BF_RELEASE_PACKAGE` set to extracted installer
-   root and `BF_FIXTURE_REPO` to the prepared audited private fixture checkout.
+5. Extract and test these ZIPs with `BF_RELEASE_PACKAGE` set to the full ZIP's App/BetterFavoritesTest/computer
+   directory and `BF_FIXTURE_REPO` to the prepared audited private fixture checkout.
 
 ZIP timestamps/order and source compression timestamps are pinned to source commit.
 Go uses trimpath/buildvcs=false. App/compiler binaries can differ across toolchain
@@ -37,9 +37,7 @@ The tracked pinned fork source was unchanged. The existing build configuration i
 --disable-video-kmsdrm --disable-video-vulkan --disable-video-wayland
 --disable-video-dummy --disable-hidapi --disable-libudev --disable-dbus
 --disable-fcitx --disable-ime --disable-joystick-virtual --disable-power`.
-Use the pinned compiler and mini/SwiftShader libraries in an isolated dependency
-build. A fresh custom SDL reproduction and exact prebuilt correspondence audit
-remain release gates; prepared-checkout build success is not clean-source proof.
+Use the pinned compiler, separately authorized MI SDK and existing SwiftShader libraries in an isolated dependency build. The recovered MI/EGL link inputs reproduce the entire accepted custom SDL ELF; see [dependency audit](dependency-audit.md). SDK materials are not redistributed in new source companions.
 Do not alter audio/global system configuration to silence warnings.
 
 The package includes SDL/image/mixer/ttf/json-c/png/z and SwiftShader EGL/GLES
@@ -58,13 +56,13 @@ sections and all four generated MainUI SHA-256 values are **byte-identical** to
 the accepted deployment. This is metadata reproducibility, not a new redirect
 behavior or a replacement of accepted card files.
 
-## RC2 private review snapshots / Windows 7
+## Private review snapshots / Windows 7
 
 Normal release packaging still requires a clean pinned checkout. An explicit
 `--review-snapshot` prepares uncommitted private review artifacts with base commit
 and exact source SHA inventory; its source companion contains those actual files.
 This does not pretend to be a new committed checkpoint. Default candidate revision
-is rc.2; BETTER_FAVORITES_RELEASE_VERSION can explicitly select another build ID.
+is rc.3; BETTER_FAVORITES_RELEASE_VERSION can explicitly select another build ID.
 
 `tools/build-windows7-test.py --toolchain <isolated official Go1.20.14> --output
 <fresh-directory>` copies installer Go sources into a temporary test-only module

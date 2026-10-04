@@ -3,10 +3,12 @@ package main
 import (
 	"archive/zip"
 	"bufio"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -149,6 +151,12 @@ func trace(root string, on bool) error {
 	return transact(root, []change{{p, old, after, 0600, nil, false}}, nil)
 }
 func run(args []string) error {
+	if len(args) >= 2 && args[0] == "--card-launcher" {
+		return launchFromCard(args[1], args[2:])
+	}
+	if len(args) > 0 && args[0] == "--staged-card" {
+		return runStagedCard(args[1:])
+	}
 	in := bufio.NewReader(os.Stdin)
 	ask := func(prompt string) (string, error) {
 		fmt.Print(prompt)
@@ -159,15 +167,19 @@ func run(args []string) error {
 		return strings.Trim(strings.TrimSpace(answer), "\""), nil
 	}
 	if len(args) == 0 {
-		fmt.Println("Better Favorites — offline card tool\n1 Install app + optional integrations\n2 Complete uninstall (remove app/preferences/logs after verified stock restoration)\n3 Restore interrupted integrations (retain app/data)\n4 Export diagnostics\n5 Remove integrations only (retain app/data)\nPower the Miyoo OFF and close other card writers.")
-		a, e := ask("Action (1–5): ")
+		fmt.Println("Better Favorites — offline card tool\n1 Install / Update\n2 Uninstall completely\n0 Cancel")
+		a, e := ask("Action: ")
 		if e != nil {
 			return e
 		}
-		action := map[string]string{"1": "install", "2": "uninstall", "3": "restore", "4": "export-diagnostics", "5": "remove-integrations"}[a]
+		if a == "0" || a == "" {
+			return nil
+		}
+		action := map[string]string{"1": "install", "2": "uninstall"}[a]
 		if action == "" {
 			return fmt.Errorf("invalid action")
 		}
+
 		args = []string{action}
 	}
 	interactive := len(args) == 1
@@ -184,8 +196,8 @@ func run(args []string) error {
 	output := f.String("output", "", "new diagnostics ZIP")
 	archive := f.String("archive", "", "new computer archive directory for complete uninstall")
 	off := f.Bool("powered-off", false, "confirm Miyoo is powered off and no other writer is using the card")
-	home := f.Bool("home", false, "install optional Home Favorites redirect")
-	ret := f.Bool("return", false, "install optional session return")
+	home := f.Bool("home", true, "install optional Home Favorites redirect")
+	ret := f.Bool("return", true, "install optional session return")
 	if e := f.Parse(args[1:]); e != nil {
 		return e
 	}
@@ -213,20 +225,7 @@ func run(args []string) error {
 		}
 		*off = true
 	}
-	if interactive && action == "install" {
-		for _, choice := range []struct {
-			name  string
-			value *bool
-		}{{"Home", home}, {"Automatic return", ret}} {
-			if !*choice.value {
-				answer, e := ask("Install optional " + choice.name + " integration? (y/N): ")
-				if e != nil {
-					return e
-				}
-				*choice.value = strings.EqualFold(answer, "y")
-			}
-		}
-	}
+
 	var e error
 	*root, e = filepath.Abs(*root)
 	if e != nil {
@@ -313,6 +312,10 @@ func run(args []string) error {
 func main() {
 	if e := run(os.Args[1:]); e != nil {
 		fmt.Fprintln(os.Stderr, e)
+		var child *exec.ExitError
+		if errors.As(e, &child) && (child.ExitCode() > 0 || runtime.GOOS == "windows") {
+			os.Exit(child.ExitCode())
+		}
 		os.Exit(1)
 	}
 }

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Install or Uninstall Better Favorites
+Comment=Power off the Miyoo and connect its card first
+Terminal=true
+Exec=/bin/sh -c "p=\\$(dirname \\"\\$1\\"); exec /bin/sh \\"\\$p/Install-Linux.sh\\"" sh %k
+Icon=system-software-install
+Categories=Utility;

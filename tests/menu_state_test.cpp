@@ -4,6 +4,10 @@
 #include <cassert>
 #include <iostream>
 int main() {
+    MenuState welcome;welcome.showWelcome();assert(welcome.page()==MenuPage::Welcome);
+    assert(welcome.handle(MenuKey::A,true,true)==MenuAction::None && welcome.open());
+    assert(welcome.handle(MenuKey::Down,false,true)==MenuAction::PageDown);
+    welcome.handle(MenuKey::A,false,true);assert(!welcome.open());
     MenuState menu;
     auto key = [&](MenuKey k, bool favorite = true, bool repeat = false) { return menu.handle(k, repeat, favorite); };
     key(MenuKey::Select, true, true); assert(!menu.open());

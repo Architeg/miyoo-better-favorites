@@ -47,4 +47,4 @@ Separate tag readbacks detect movement; they do not make an ordinary tag immutab
 Before offering a remote one-liner, qualify the actual published immutable release
 assets, shell download stub, native Windows7/10 TLS and entry behavior, plus
 install/uninstall with retained recovery. Until then README documents only the
-already working extracted-package commands.
+offline copy-to-card installer. Its new full ZIP layout is not yet supported/qualified by the downloader, which still expects the earlier installer ZIP layout. Do not advertise a download-and-run URL until that separate adaptation and real route are qualified.

@@ -13,8 +13,9 @@ MenuAction MenuState::handle(MenuKey key, bool repeat, bool hasFavorite) {
     if (key == MenuKey::B || (key == MenuKey::Select && page() == MenuPage::Actions)) {
         stack_.pop_back(); return MenuAction::None;
     }
+    if(page()==MenuPage::Welcome && key==MenuKey::A){close();return MenuAction::None;}
     // Reading/paging never moves a destructive action selection.
-    if (page() == MenuPage::RemoveConfirm || page() == MenuPage::Help || (page() == MenuPage::ReturnInfo || page() == MenuPage::HomeInfo)) {
+    if (page() == MenuPage::Welcome || page() == MenuPage::RemoveConfirm || page() == MenuPage::Help || (page() == MenuPage::ReturnInfo || page() == MenuPage::HomeInfo)) {
         if (key == MenuKey::Up) return MenuAction::PageUp;
         if (key == MenuKey::Down) return MenuAction::PageDown;
     }

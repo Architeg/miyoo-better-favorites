@@ -667,6 +667,12 @@ int main(int argc, char* argv[])
     menuPhase.end();
     BrowserTitles browserTitles(listFont);
     MenuState menu;
+    const std::string welcomePath=homePreferencePath.substr(0,homePreferencePath.find_last_of('/'))+"/welcome-pending";
+    if(pendingWelcome(welcomePath)) {
+        appSettings.homeIntegrationStatus=homeEntryStatus("/mnt/SDCARD",homePreferencePath.substr(0,homePreferencePath.find_last_of('/')));
+        appSettings.homeIntegrationAvailable=appSettings.homeIntegrationStatus==HomeIntegrationStatus::Available;
+        menu.showWelcome();browserTitles.pause(SDL_GetTicks());
+    }
     std::string uiError;
     bool running = true;
     bool launchRequested = false;
@@ -754,7 +760,10 @@ int main(int argc, char* argv[])
                 }
                 // Observe even open/close events batched into a single SDL frame.
                 if (!wasMenuOpen && menu.open()) browserTitles.pause(SDL_GetTicks());
-                if (wasMenuOpen && !menu.open()) browserTitles.restartDelay(SDL_GetTicks());
+                if (wasMenuOpen && !menu.open()) {
+                    browserTitles.restartDelay(SDL_GetTicks());
+                    if(previousPage==MenuPage::Welcome){std::string error;if(!dismissWelcome(welcomePath,error))reportError(error);}
+                }
                 if (handled && event.key.repeat == 0 && action != MenuAction::PageUp && action != MenuAction::PageDown) uiError.clear();
                 if (action == MenuAction::Launch) launchSelected();
                 else if (action == MenuAction::Remove) {

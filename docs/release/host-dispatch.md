@@ -10,15 +10,14 @@ share the same restoration/hash/ownership/full-uninstall implementation.
 | Windows 7 / 8 / 8.1 | legacy x86, x64 — official Go 1.20.14 | NT 6.1–6.3, SSE2 for x86; local writable SD drive; native Windows system DLLs |
 | Windows 10 through current releases | modern x86, x64, ARM64 — Go 1.26.2 | Windows 10 build 10240 or later; ARM64 requires native Windows ARM64 and x86 bootstrap emulation |
 | macOS Monterey onward | native Intel x64 and Apple Silicon ARM64 — Go 1.26.2 | macOS 12+, /bin/sh, system uname/sw_vers/sysctl; locally mounted writable SD filesystem |
-| Linux x64 | amd64 baseline v1 — Go 1.26.2 | kernel 3.2+, POSIX sh and uname, futex/epoll, normal device randomness, executable extraction directory |
+| Linux x64 | amd64 baseline v1 — Go 1.26.2 | kernel 3.2+, POSIX sh and uname, futex/epoll, normal device randomness, executable private computer temporary directory |
 | Linux ARM64 | little-endian ARMv8.0 — Go 1.26.2 | kernel 3.7+ (AArch64 kernel availability), otherwise same requirements |
 
 Linux builds use CGO_ENABLED=0, default executable mode and internal linking.
 Packaging inspects ELF program headers: PT_INTERP and PT_DYNAMIC must both be
 absent. No libc/glibc/musl or other dynamic-library dependency is required.
 The wrapper needs a normal userspace shell/uname; the card needs mounted FAT-capable
-OS support and sufficient write permissions. Restricted containers/seccomp, noexec
-extraction volumes and WSL are not qualified substitutes for native Linux.
+OS support and sufficient write permissions. Restricted containers/seccomp and WSL are not qualified substitutes for native Linux. The card itself may be noexec: the wrapper copies the selected native executable to a private computer temporary directory before running it. A noexec computer temporary directory fails clearly.
 Mac tools load OS-provided system libraries; no Homebrew/Xcode/runtime installation
 is needed. Packaging inspects Mach-O deployment targets and refuses a minimum above
 12.0. Pin Go1.26.2: upgrading to Go1.27 would drop Monterey and needs a new decision.
@@ -27,7 +26,7 @@ WSL, compiler, Python, Docker or Internet is required by users.
 
 ## One entry script per platform
 
-From the extracted normal installer folder:
+The recommended route is to copy the full package app folder to the card, then open its platform launcher. These are optional support commands from that copied app folder:
 
 | Platform | Install | Complete uninstall |
 | --- | --- | --- |
@@ -57,14 +56,14 @@ x86_64 process on Apple Silicon selects arm64, including when its emulated CPU
 view reports hw.optional.arm64=0 or lacks that key. Intel lacking hw.optional.arm64 must
 identify its native hw.cputype explicitly. Contradictory probes fail. Linux checks
 uname OS/native architecture and kernel release before invoking the native tool.
-Unix wrappers exec the backend and retain its exit code. No host test overrides are
+Copied-card Unix wrappers wait for staged execution, retain its exit code and remove only their own bootstrap directory. Standalone advanced wrappers exec the backend. No host test overrides are
 accepted in production; tests substitute probes only in temporary copies.
 
 ## Evidence and remaining qualification
 
 - RC1: actual MacBook Air M1 / Ventura 13.7.8 packaged install; user confirmed six
   device checks. RC1 evidence and recovery remain preserved. Stock device boot after
-  its final removal remains pending.
+  that historical RC1 removal was not separately identified; later Windows uninstall/stock boot acceptance is recorded independently.
 - RC2: Mac-host installer safety/actual ZIP roundtrips and Linux Docker fixture
   execution. A Docker or QEMU run is not native-machine acceptance of both Linux
   architectures. Actual Rosetta x86_64 entry on this M1/Ventura13.7.8 selects/executes the native
@@ -110,3 +109,9 @@ flow passes do not qualify every version/architecture or later dispatcher binary
 - [GetNativeSystemInfo and ARM emulation caveat](https://learn.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getnativesysteminfo).
 
 These requirements and toolchain pins must be reviewed on each release update.
+
+## Copy-to-card follow-up evidence
+
+The RC3 entry captures the original logical app path before moving execution off-card. The backend validates App/BetterFavoritesTest, Onion version/runtime/ARM MainUI and all path ancestors, then verifies the transport/package before staging. Windows transfers its batch context and working directory to a private computer folder so the card folder can be removed. The active portable journal index uses card-relative paths/hash, not the original host username/mount.
+
+Native macOS shell-entry and Linux-container full-ZIP roundtrips exercise the new menu and complete removal. GLib desktop Exec parsing is tested with a non-terminal fixture; this is not a desktop terminal/Allow launching test. Finder quarantine/opening and Explorer's new staged batch execution cannot be established by these headless checks. Previous Mac/Windows install acceptance remains valid for its earlier package, not these new launcher bytes. Community target testing is welcome; this pass asks for one final-package fresh-user cycle, not a broad new OS matrix.

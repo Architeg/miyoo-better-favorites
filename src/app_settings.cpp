@@ -105,3 +105,19 @@ bool setAutomaticReturn(const std::string& path, bool enabled, AppSettings& sett
     settings.returnGeneration = epoch;
     return true;
 }
+
+// Installer-owned marker, never a switch or return generation. No font or
+// browser state is changed by this one-time informational page.
+bool pendingWelcome(const std::string& path) {
+ const int fd=open(path.c_str(),O_RDONLY|O_NONBLOCK|O_NOFOLLOW);
+ if(fd<0)return false;
+ struct stat s{};char buffer[25]{};
+ const bool regular=fstat(fd,&s)==0 && S_ISREG(s.st_mode) && s.st_size==24;
+ const auto count=regular?read(fd,buffer,sizeof(buffer)):-1;close(fd);
+ return count==24 && std::string(buffer,24)=="BetterFavoritesWelcome1\n";
+}
+bool dismissWelcome(const std::string& path,std::string& error) {
+ if(!pendingWelcome(path)){error="First-launch notice changed; it was kept.";return false;}
+ if(unlink(path.c_str())!=0){error="Cannot save first-launch acknowledgement.";return false;}
+ error.clear();return true;
+}

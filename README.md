@@ -5,7 +5,7 @@
 </div>
 
 <p align="center">
-  <a href="docs/release/rc.2.md"><img alt="Release candidate" src="https://img.shields.io/badge/status-RC2%20candidate-f59e0b"></a>
+  <a href="docs/release/rc.3.md"><img alt="Release candidate" src="https://img.shields.io/badge/status-RC3%20candidate-f59e0b"></a>
   <a href="docs/compatibility.md"><img alt="Tested on Onion v4.3.1-1" src="https://img.shields.io/badge/tested%20Onion-v4.3.1--1-7c5cbf"></a>
   <a href="LICENSE"><img alt="GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-2563eb"></a>
 </p>
@@ -25,7 +25,7 @@ A growing favorites list is easier to browse with console groups, readable title
 
 The native C++/SDL2 app reads Onion's `Roms/favourite.json`. Onion still handles game launching, cores, saves, recent history and GameSwitcher.
 
-> **Release status:** RC2 is prepared for review; no public release is available yet. Mini Plus hardware tests have passed, but dependency/source-license checks remain open before binary publication. [Current status →](docs/release/rc.2.md)
+> **Release status:** RC3 follows the committed/tagged RC2 checkpoint; no public release is available yet. Mini Plus hardware tests have passed, but dependency/source-license checks remain open before binary publication. [Current status →](docs/release/rc.3.md)
 
 <a id="features"></a>
 ## ✨ Features
@@ -38,7 +38,7 @@ The native C++/SDL2 app reads Onion's `Roms/favourite.json`. Onion still handles
 | 🎮 Quick navigation | Console jumps, shoulder paging and remembered selection/scroll |
 | 🔀 GameSwitcher | Open Onion's GameSwitcher directly with MENU |
 | 🏠 Optional Home access | Open the app through the existing Favorites tile |
-| ↩️ Optional return | B/START in GameSwitcher returns an originating app session here |
+| ↩️ Optional return | Return to Better Favorites with B/START after using GameSwitcher |
 | 🗑️ Favorite removal | Remove the entry while keeping the game, artwork and saves |
 
 Installation, recovery and diagnostic export work offline with the supplied package. No Miyoo Terminal commands are needed.
@@ -70,22 +70,20 @@ Physical Intel/Monterey, other Windows versions/architectures, Linux SD readers 
 <a id="install"></a>
 ## 📦 Install
 
-Use the supplied **installer ZIP** for the app and optional integrations. Extract it on your computer, outside the SD card.
+Download the **full package** when available. No public binary download is available yet; this candidate is awaiting its final package test and the specific [dependency checks](docs/release/dependency-audit.md).
 
-1. **Power off** the Miyoo and connect its SD card to the computer.
-2. Open a terminal in the extracted installer folder and run one command:
+1. Download and extract the **full ZIP** on your computer.
+2. **Power off** the Miyoo and connect its SD card.
+3. Copy the supplied **App/BetterFavoritesTest** folder into the card's **App** folder.
+4. Inside that copied folder, open **Install-Windows.cmd**, **Install-macOS.command**, or **Install-Linux.desktop** for your computer.
+5. Choose **Install / Update**, confirm the Miyoo is off, and wait for success.
+6. Safely eject, insert the card and boot.
 
-| Computer | Install |
-| --- | --- |
-| Windows PowerShell | `.\Install-Windows.cmd install` |
-| macOS Terminal | `./Install-macOS.command install` |
-| Linux terminal | `./Install-Linux.sh install` |
+The tool identifies the card automatically and prepares both supported integrations. Their app switches start **OFF**. No terminal commands, card-path entry, developer tools or Miyoo Terminal are needed. On Linux, your desktop may require **Allow launching**; unsigned tools may need a file-specific Open confirmation. [Simple platform steps →](docs/install.md)
 
-3. Follow the prompts. **SD-card root** means the card location, such as `E:\` or `/Volumes/MIYOO`, not the installer folder or the command again.
-4. Choose either optional integration, both, or neither. Keep the recovery folder.
-5. Wait for verified success, safely eject, insert the card and boot.
+**Updating?** Merge the new folder's contents into the existing folder. Replace supplied files, but keep preferences/state; do not delete or replace the entire existing app folder.
 
-**No Go, Python, Docker, WSL or compiler is required.** The script without an action opens its menu. [Detailed installation →](docs/install.md)
+**GitHub “Source code” archives are for developers**, not ready-to-install apps. The separate **app-only ZIP** supplies the browser without computer tools or system patches.
 
 <details>
 <summary><strong>Prefer drag and drop?</strong></summary>
@@ -102,7 +100,7 @@ This installs the browser without patches. The internal folder name is retained 
 Open **Apps → Better Favorites**, then press **Y** for Settings.
 
 - **Replace stock Favorites:** ON opens this app from the Home Favorites tile; OFF opens stock Favorites.
-- **Automatic return:** ON returns an originating session here with B/START in GameSwitcher, including after switching games. OFF uses Onion's normal main-menu return.
+- **Automatic return:** ON brings you back to Better Favorites with B/START in GameSwitcher, including after switching games. OFF uses Onion's normal main-menu return.
 
 Both switches default **OFF**, need their installed integrations, and work independently. Apps access and existing X/Y shortcuts stay available. Direct game exit ends the automatic-return session.
 
@@ -144,23 +142,13 @@ Press **SELECT → Remove from Favorites**. Cancel is selected first; choose wit
 
 <a id="update-or-uninstall"></a>
 <a id="uninstall"></a>
-## ↩️ Update or uninstall
+## 🧹 Complete uninstall
 
-**Update:** extract the new installer into a fresh computer folder and run `install` again. Preferences and browser position stay. Retain the recovery bundles.
+Power off and connect the card. Open the same computer launcher in **App/BetterFavoritesTest** and choose **Uninstall completely**.
 
-**Complete uninstall:** power off, connect the card, and run:
+The tool restores and verifies the original system files, then removes Better Favorites, its preferences, logs and owned installation files. Games, saves, artwork, favorites, recent history, themes and unrelated files remain. A verified copy of recovery is kept on that computer.
 
-| Computer | Uninstall |
-| --- | --- |
-| Windows PowerShell | `.\Install-Windows.cmd uninstall` |
-| macOS Terminal | `./Install-macOS.command uninstall` |
-| Linux terminal | `./Install-Linux.sh uninstall` |
-
-The tool restores and verifies original patched system files, retains a recovery archive on your computer, and removes owned app files, preferences, logs and integration artifacts. Games, saves, favorites/history and unrelated resources remain. Unknown modifications are preserved and reported as failure.
-
-> Deleting the app folder alone cannot undo system patches. Recovery works even if the Miyoo menu will not open.
-
-Use `remove-integrations` to keep the app while restoring its system integrations. [Uninstall and recovery →](docs/uninstall.md)
+Portable recovery is stored separately on the card, so uninstall can run on a different computer. **Deleting the app alone cannot undo the system patches.** Conflicts or missing recovery stop removal with an explanation. [Uninstall and recovery →](docs/uninstall.md)
 
 <a id="troubleshooting-and-diagnostics"></a>
 ## 🛟 Help and diagnostics

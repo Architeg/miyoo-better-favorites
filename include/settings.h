@@ -30,4 +30,6 @@ bool automaticReturnAvailable();
 bool setAutomaticReturn(const std::string& path, bool enabled, AppSettings& settings,
                         std::string& error);
 
+bool pendingWelcome(const std::string& path);
+bool dismissWelcome(const std::string& path, std::string& error);
 #endif

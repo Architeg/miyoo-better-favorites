@@ -16,5 +16,23 @@ if [ "$major" -lt 3 ] || { [ "$major" -eq 3 ] && [ "$minor" -lt 2 ]; }; then fai
 # AArch64 Linux was introduced after 3.2; do not qualify an impossible pair.
 if [ "$arch" = arm64 ] && [ "$major" -eq 3 ] && [ "$minor" -lt 7 ]; then fail "ARM64 kernel 3.7 or later required"; fi
 tool="./better-favorites-installer-linux-$arch"
+if [ -d computer ]; then
+ source=$(pwd -L)
+ tool="computer/${tool#./}"
+ [ -f "$tool" ] && [ ! -L "$tool" ] || fail "missing/unsafe packaged executable $tool"
+ stage=$(mktemp -d "${TMPDIR:-/tmp}/better-favorites-bootstrap.XXXXXX") || exit 2
+ trap 'rm -f "$stage/installer"; rmdir "$stage"' EXIT
+ trap 'exit 129' HUP
+ trap 'exit 130' INT
+ trap 'exit 143' TERM
+ cp "$tool" "$stage/installer" || exit 2
+ chmod 700 "$stage/installer" || exit 2
+ set +e
+ "$stage/installer" --card-launcher "$source" "$@"
+ result=$?
+ set -e
+ if [ "$#" -eq 0 ]; then printf "\nPress Enter to close. "; read -r answer || :; fi
+ exit "$result"
+fi
 [ -f "$tool" ] && [ ! -L "$tool" ] && [ -x "$tool" ] || fail "missing/unsafe packaged executable $tool"
 exec "$tool" "$@"

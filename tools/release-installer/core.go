@@ -65,10 +65,11 @@ type Saved struct {
 	Integration bool   `json:"integration"`
 }
 type Recovery struct {
-	Format  int     `json:"format"`
-	Version string  `json:"version"`
-	Commit  string  `json:"commit"`
-	Files   []Saved `json:"files"`
+	Format   int           `json:"format"`
+	Version  string        `json:"version"`
+	Commit   string        `json:"commit"`
+	Files    []Saved       `json:"files"`
+	Previous *Installation `json:"previous,omitempty"`
 }
 
 func digest(b []byte) string { h := sha256.Sum256(b); return hex.EncodeToString(h[:]) }
@@ -148,7 +149,11 @@ func read(root, rel string) ([]byte, error) {
 	if e != nil {
 		return nil, e
 	}
-	return regular(p)
+	b, e := regular(p)
+	if e != nil {
+		return nil, fmt.Errorf("%s: %w", rel, e)
+	}
+	return b, nil
 }
 func optional(root, rel string) ([]byte, error) {
 	p, e := join(root, rel)
@@ -367,7 +372,7 @@ func loadPackage(dir string) (Package, HomeSpec, ReturnSpec, error) {
 	if e = json.Unmarshal(d, &pkg); e != nil {
 		return pkg, home, ret, e
 	}
-	if pkg.Format != 1 || (pkg.Version != "1.0.0-rc.1" && pkg.Version != "1.0.0-rc.2") || len(pkg.Commit) != 40 {
+	if pkg.Format != 1 || (pkg.Version != "1.0.0-rc.1" && pkg.Version != "1.0.0-rc.2" && pkg.Version != "1.0.0-rc.3") || len(pkg.Commit) != 40 {
 		return pkg, home, ret, fmt.Errorf("unsupported package")
 	}
 	seen := map[string]bool{}
@@ -466,7 +471,15 @@ func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package,
 	if e != nil {
 		return nil, pkg, e
 	}
-	if e = cardVersion(root); e != nil {
+	if e = validateCard(root); e != nil {
+		return nil, pkg, e
+	}
+	if homeOn || returnOn {
+		if e = cardVersion(root); e != nil {
+			return nil, pkg, e
+		}
+	}
+	if e = validateAppInput(root, dir, pkg); e != nil {
 		return nil, pkg, e
 	}
 	var changes []change
@@ -475,7 +488,7 @@ func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package,
 		return nil, pkg, e
 	}
 	rh := digest(runtime)
-	if rh != r.Original && rh != r.Patched {
+	if (homeOn || returnOn) && rh != r.Original && rh != r.Patched {
 		return nil, pkg, fmt.Errorf("unknown runtime preserved")
 	}
 	if rh == r.Patched {
@@ -669,6 +682,35 @@ func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package,
 			return nil, pkg, e
 		}
 	}
+	if e = addTransport(root, dir, &changes); e != nil {
+		return nil, pkg, e
+	}
+	freshNotice := false
+	if p, err := activeRecovery(root); errors.Is(err, os.ErrNotExist) {
+		freshNotice = true
+	} else if err == nil {
+		b, _ := read(root, installationIndex)
+		var m Installation
+		prior, _ := loadRecovery(p)
+		freshNotice = json.Unmarshal(b, &m) == nil && m.Pending && prior.Previous == nil
+	}
+	if freshNotice {
+		oldHome, e := optional(root, homeManifest)
+		if e != nil {
+			return nil, pkg, e
+		}
+		oldReturn, e := optional(root, returnBackup+"manifest.json")
+		if e != nil {
+			return nil, pkg, e
+		}
+		if old, err := optional(root, app+"welcome-pending"); err != nil {
+			return nil, pkg, err
+		} else if old == nil && oldHome == nil && oldReturn == nil {
+			if e = add(root, &changes, app+"welcome-pending", []byte("BetterFavoritesWelcome1\n"), nil, 0600, false); e != nil {
+				return nil, pkg, e
+			}
+		}
+	}
 	// Retain backup changes first, then app, helper, runtime, MainUI and metadata.
 	sort.SliceStable(changes, func(i, j int) bool { return installRank(changes[i].Path) < installRank(changes[j].Path) })
 	return changes, pkg, nil
@@ -691,7 +733,7 @@ func installRank(p string) int {
 	}
 	return 5
 }
-func saveRecovery(root, host string, changes []change, pkg Package) (string, error) {
+func saveRecovery(root, host string, changes []change, pkg Package, previous *Installation) (string, error) {
 	if e := outsideCard(root, host); e != nil {
 		return "", e
 	}
@@ -705,7 +747,7 @@ func saveRecovery(root, host string, changes []change, pkg Package) (string, err
 	if e := os.Mkdir(host, 0700); e != nil {
 		return "", e
 	}
-	recovery := Recovery{1, pkg.Version, pkg.Commit, nil}
+	recovery := Recovery{Format: 1, Version: pkg.Version, Commit: pkg.Commit, Previous: previous}
 	var sums strings.Builder
 	for _, c := range changes {
 		stock := c.Stock
@@ -761,22 +803,52 @@ func saveRecovery(root, host string, changes []change, pkg Package) (string, err
 	if e := writeNew(root, cardRel+"/recovery.json", encode(recovery), 0600); e != nil {
 		return "", e
 	}
+	for _, n := range []string{"SHA256SUMS", "RESTORE.txt"} {
+		b, e := read(host, n)
+		if e != nil {
+			return "", e
+		}
+		if e = writeNew(root, cardRel+"/"+n, b, 0600); e != nil {
+			return "", e
+		}
+	}
 	return cardRel, nil
 }
 func install(root, dir, recovery string, homeOn, returnOn bool, hook func(string, string) error) error {
+	priorIndex, e := optional(root, installationIndex)
+	if e != nil {
+		return e
+	}
+	previous, e := previousRecovery(root, dir, priorIndex)
+	if e != nil {
+		return e
+	}
 	changes, pkg, e := prepareInstall(root, dir, homeOn, returnOn)
 	if e != nil {
 		return e
 	}
 	// Backup verification must complete for EVERY affected file before mutation.
-	mirror, e := saveRecovery(root, recovery, changes, pkg)
+	mirror, e := saveRecovery(root, recovery, changes, pkg, previous)
 	if e != nil {
 		return e
 	}
 	fmt.Println("Verified recovery:", recovery, "; card mirror:", mirror)
-	e = transact(root, changes, hook)
+	// The verified pending pointer is durable before system publication. An
+	// interrupted/rolled-back attempt remains in this installation's lineage.
+	journal, e := read(root, mirror+"/recovery.json")
 	if e != nil {
 		return e
+	}
+	pending := encode(Installation{Format: 1, Recovery: mirror, SHA: digest(journal), Pending: true})
+	if e = transact(root, []change{{installationIndex, priorIndex, pending, 0600, nil, true}}, nil); e != nil {
+		return fmt.Errorf("no system publication; recovery index failed: %w", e)
+	}
+	if e = transact(root, changes, hook); e != nil {
+		return fmt.Errorf("install incomplete; verified portable recovery retained: %w", e)
+	}
+	complete := encode(Installation{Format: 1, Recovery: mirror, SHA: digest(journal)})
+	if e = transact(root, []change{{installationIndex, pending, complete, 0600, nil, true}}, nil); e != nil {
+		return fmt.Errorf("installation applied but completion marker failed: %w", e)
 	}
 	fmt.Println("Install verified. Saved preferences unchanged. Optional integrations take effect after reboot.")
 	return nil
@@ -786,7 +858,7 @@ func prepareRestore(root, recovery, dir string, interrupted bool) ([]change, err
 	if err != nil {
 		return nil, err
 	}
-	if e := cardVersion(root); e != nil {
+	if e := validateCard(root); e != nil {
 		return nil, e
 	}
 	r, e := loadRecovery(recovery)
@@ -918,7 +990,7 @@ func allowedRestorePath(p string) bool {
 
 func allowedAppFile(name string) bool {
 	switch name {
-	case "better-favorites", "launch.sh", "config.json", "release.json", "icon.png", "libSDL2-2.0.so.0", "libSDL2_image-2.0.so.0", "libSDL2_mixer-2.0.so.0", "libSDL2_ttf-2.0.so.0", "libjson-c.so.5", "libpng16.so.16", "libz.so.1", "libEGL.so", "libGLESv2.so":
+	case "welcome-pending", "better-favorites", "launch.sh", "config.json", "release.json", "icon.png", "libSDL2-2.0.so.0", "libSDL2_image-2.0.so.0", "libSDL2_mixer-2.0.so.0", "libSDL2_ttf-2.0.so.0", "libjson-c.so.5", "libpng16.so.16", "libz.so.1", "libEGL.so", "libGLESv2.so":
 		return true
 	}
 	return false

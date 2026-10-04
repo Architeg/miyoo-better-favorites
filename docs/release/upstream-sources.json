@@ -18,5 +18,35 @@
     "notice_file": "zlib-1.2.11-README.txt",
     "notice_sha256": "7960b6b1cc63e619abb77acaea5427159605afee8c8b362664f4effc7d7f7d15",
     "correspondence": "Binary version strings match upstream version; exact build/source correspondence not proven"
+  },
+  {
+    "component": "SDL_image",
+    "version": "2.0.5",
+    "commit": "ab2a9c602623193d61827ccd395302d92d90fc38",
+    "url": "https://codeload.github.com/libsdl-org/SDL_image/tar.gz/ab2a9c602623193d61827ccd395302d92d90fc38",
+    "archive": "SDL_image-2.0.5-source.tar.gz",
+    "sha256": "246fd1907bb20b8faaa8b4960e5db1aa83629aa3b95ef95e4c7b5fbf258deae7",
+    "notice_file": "SDL_image-2.0.5-COPYING.txt",
+    "notice_sha256": "45079362e2230154205413a6940544ca94e3479ccf76205c71c4f542a6815d25"
+  },
+  {
+    "component": "SDL_mixer",
+    "version": "2.0.4",
+    "commit": "da75a58c19de9fedea62724a5f7770cbbe39adf9",
+    "url": "https://codeload.github.com/libsdl-org/SDL_mixer/tar.gz/da75a58c19de9fedea62724a5f7770cbbe39adf9",
+    "archive": "SDL_mixer-2.0.4-source.tar.gz",
+    "sha256": "93dfa0b4304462f0b5686cda0c8921a4a4ac5c4a7dca44fc822b8ce80b7115df",
+    "notice_file": "SDL_mixer-2.0.4-COPYING.txt",
+    "notice_sha256": "113727180e7956cb9718b03b41da85b63ea54743a33047071a623bf672895a10"
+  },
+  {
+    "component": "SDL_ttf",
+    "version": "2.0.15",
+    "commit": "33cdd1881e31184b49a68b4890d1d256fc0c6dc1",
+    "url": "https://codeload.github.com/libsdl-org/SDL_ttf/tar.gz/33cdd1881e31184b49a68b4890d1d256fc0c6dc1",
+    "archive": "SDL_ttf-2.0.15-source.tar.gz",
+    "sha256": "08e16be384153b27471310f0c99ea25e882a9a2b110ee2d067083502ce399c5b",
+    "notice_file": "SDL_ttf-2.0.15-COPYING.txt",
+    "notice_sha256": "f6370809c9f644760920d9945c5be07aed17664975f2e4741013d4d9a2ec696f"
   }
 ]

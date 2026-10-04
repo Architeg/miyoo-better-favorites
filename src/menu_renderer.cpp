@@ -474,7 +474,7 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
         return;
     }
     fill(screen,{0,0,640,480},bg);blit(resources_.background,screen,{0,0,640,480});blit(resources_.title,screen,{0,0,640,header});
-    const std::string title=page==MenuPage::Settings?"SETTINGS":page==MenuPage::Help?"HELP":
+    const std::string title=page==MenuPage::Welcome?"GETTING STARTED":page==MenuPage::Settings?"SETTINGS":page==MenuPage::Help?"HELP":
         page==MenuPage::ReturnInfo?"AUTOMATIC RETURN":page==MenuPage::HomeInfo?"HOW TO OPEN BETTER FAVORITES":"REMOVE FROM FAVORITES?";
     const auto titleLines=wrap(resources_.titleFont,title,600);
     // Titles are short fixed labels, measured and wrapped rather than clipped.
@@ -550,15 +550,20 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
             text(screen,resources_.bodyFont,item.second,list,210,y+(h-TTF_FontHeight(resources_.bodyFont))/2);y+=h;
         }
         p.footer({{browser?"DOWN":"UP",browser?"Inside menus":"Favorites list"},{"B","Back"}});
-    } else if(page==MenuPage::ReturnInfo || page==MenuPage::HomeInfo) {
+    } else if(page==MenuPage::Welcome || page==MenuPage::ReturnInfo || page==MenuPage::HomeInfo) {
         const auto font=descriptionFont_?descriptionFont_:resources_.bodyFont;
         struct Block {std::string value;bool heading;};
-        const std::vector<Block> blocks=page==MenuPage::HomeInfo?std::vector<Block>{
+        const std::vector<Block> blocks=page==MenuPage::Welcome?std::vector<Block>{
+            {"Open Apps > Better Favorites at any time.",false},
+            {settings.homeIntegrationAvailable?"Home replacement: available. Enable Replace stock Favorites in Settings to use the Home Favorites tile.":"Home replacement: unavailable on this installation. Apps access remains available.",false},
+            {available?"Automatic return: available. Enable it in Settings for [B]/[START] to return to Better Favorites from GameSwitcher.":"Automatic return: unavailable on this installation. Onion keeps its ordinary menu return.",false},
+            {"Both switches start OFF. Installation does not enable them.",false}
+        }:page==MenuPage::HomeInfo?std::vector<Block>{
             {settings.homeIntegrationAvailable?"Home access: Available":settings.homeIntegrationStatus==HomeIntegrationStatus::NotInstalled?"Home access: Not installed":"Home access: Unavailable on this system",false},
             {"From Home",true},{"Enable Replace stock Favorites, then choose Favorites on Home.",false},
             {"From Apps",true},{"Open Apps > Better Favorites.",false},
             {"Going Back",true},{"[B] returns to Home when opened from Home.",false},
-            {"Automatic return controls where you go after GameSwitcher.",false}}:std::vector<Block>{
+            {"Turning a switch OFF disables its behavior. Complete uninstall restores the original system files.",false}}:std::vector<Block>{
             {available?"Integration: available":"Integration: unavailable (optional patch required)",false},
             {"When enabled",true},{"[B]/[START] return to Better Favorites from GameSwitcher.",false},
             {"[A]: resume the game. Switching games keeps the session.",false},

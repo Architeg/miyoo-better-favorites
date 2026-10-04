@@ -26,7 +26,7 @@ func TestCardLocation(t *testing.T) {
 	if e != nil || got != r || source != p {
 		t.Fatal(got, source, e)
 	}
-	for _, p := range []string{r, filepath.Join(r, "BetterFavoritesTest"), filepath.Join(r, "App/Other")} {
+	for _, p := range []string{r, filepath.Join(r, "BetterFavorites"), filepath.Join(r, "App/Other")} {
 		if _, _, e := deriveCard(p); e == nil {
 			t.Fatal("wrong layout", p)
 		}

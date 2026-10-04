@@ -17,7 +17,8 @@ import (
 	"time"
 )
 
-const app = "App/BetterFavoritesTest/"
+const app = "App/BetterFavorites/"
+const legacyApp = "App/BetterFavoritesTest/"
 const system = ".tmp_update/"
 const homeManifest = system + "config/better-favorites-home.json"
 const returnBackup = system + "config/better-favorites-return-backup/"
@@ -372,7 +373,7 @@ func loadPackage(dir string) (Package, HomeSpec, ReturnSpec, error) {
 	if e = json.Unmarshal(d, &pkg); e != nil {
 		return pkg, home, ret, e
 	}
-	if pkg.Format != 1 || (pkg.Version != "1.0.0-rc.1" && pkg.Version != "1.0.0-rc.2" && pkg.Version != "1.0.0-rc.3") || len(pkg.Commit) != 40 {
+	if pkg.Format != 1 || (pkg.Version != "1.0.0-rc.1" && pkg.Version != "1.0.0-rc.2" && pkg.Version != "1.0.0-rc.3" && pkg.Version != "1.0.0-rc.4") || len(pkg.Commit) != 40 {
 		return pkg, home, ret, fmt.Errorf("unsupported package")
 	}
 	seen := map[string]bool{}
@@ -403,7 +404,7 @@ func loadPackage(dir string) (Package, HomeSpec, ReturnSpec, error) {
 	if e != nil {
 		return pkg, home, ret, e
 	}
-	if home.Version != "M6Home1" || ret.Version != "v4.3.1-1" || len(home.Original) != 4 || len(home.Patched) != 4 {
+	if home.Version != "M6Home2" || ret.Version != "v4.3.1-1" || len(home.Original) != 4 || len(home.Patched) != 4 {
 		return pkg, home, ret, fmt.Errorf("bad integration catalogue")
 	}
 	return pkg, home, ret, nil
@@ -498,10 +499,14 @@ func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package,
 			return nil, pkg, e
 		}
 	}
+	migration, e := prepareMigration(root, dir)
+	if e != nil {
+		return nil, pkg, e
+	}
 	if e = validateAppInput(root, dir, pkg); e != nil {
 		return nil, pkg, e
 	}
-	var changes []change
+	changes := migration
 	runtime, e := read(root, system+"runtime.sh")
 	if e != nil {
 		return nil, pkg, e
@@ -512,7 +517,7 @@ func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package,
 	}
 	if rh == r.Patched {
 		helper, e := read(root, system+"script/better_favorites_return.sh")
-		if e != nil || (digest(helper) != r.Helper && digest(helper) != r.Previous) {
+		if e != nil || !acceptedHelperHash(dir, digest(helper)) {
 			return nil, pkg, fmt.Errorf("changed return helper preserved")
 		}
 		orig, e := read(root, returnBackup+"runtime.sh")
@@ -639,6 +644,11 @@ func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package,
 		var manifest map[string]json.RawMessage
 		backupRel := ""
 		installed := false
+		legacyHome, e := legacyHomeSpec(dir)
+		if e != nil {
+			return nil, pkg, e
+		}
+		expectedHome := h
 		if prior != nil {
 			if json.Unmarshal(prior, &manifest) != nil {
 				return nil, pkg, fmt.Errorf("home manifest invalid")
@@ -647,10 +657,19 @@ func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package,
 			json.Unmarshal(manifest["status"], &status)
 			json.Unmarshal(manifest["version"], &version)
 			json.Unmarshal(manifest["backup"], &backupRel)
-			if version != h.Version || (status != "installed" && status != "uninstalled") || !strings.HasPrefix(backupRel, system+"config/better-favorites-home-backup-") || !safeRel(backupRel) {
+			if (version != h.Version && version != "M6Home1") || (status != "installed" && status != "uninstalled") || !strings.HasPrefix(backupRel, system+"config/better-favorites-home-backup-") || !safeRel(backupRel) {
 				return nil, pkg, fmt.Errorf("home manifest conflict")
 			}
 			installed = status == "installed"
+			if version == legacyHome.Version {
+				expectedHome = legacyHome
+			}
+			var originals, patched map[string]string
+			json.Unmarshal(manifest["original"], &originals)
+			json.Unmarshal(manifest["patched"], &patched)
+			if !bytes.Equal(encode(originals), encode(expectedHome.Original)) || !bytes.Equal(encode(patched), encode(expectedHome.Patched)) {
+				return nil, pkg, fmt.Errorf("home catalogue conflict")
+			}
 		}
 		if backupRel == "" {
 			backupRel = system + "config/better-favorites-home-backup-" + time.Now().UTC().Format("20060102T150405.000000000Z")
@@ -663,7 +682,7 @@ func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package,
 			}
 			expected := h.Original[n]
 			if installed {
-				expected = h.Patched[n]
+				expected = expectedHome.Patched[n]
 			}
 			if digest(current) != expected {
 				return nil, pkg, fmt.Errorf("unknown or conflicting MainUI preserved: %s", n)
@@ -689,8 +708,12 @@ func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package,
 				return nil, pkg, e
 			}
 		}
-		marker, e := optional(root, app+"home-integration.conf")
-		if e != nil || installed && !bytes.Equal(marker, receipt(h)) || !installed && marker != nil {
+		markerPath := app + "home-integration.conf"
+		if expectedHome.Version == legacyHome.Version {
+			markerPath = legacyApp + "home-integration.conf"
+		}
+		marker, e := optional(root, markerPath)
+		if e != nil || installed && !bytes.Equal(marker, receipt(expectedHome)) || !installed && marker != nil {
 			return nil, pkg, fmt.Errorf("home receipt conflict")
 		}
 		if e = add(root, &changes, app+"home-integration.conf", receipt(h), nil, 0600, true); e != nil {
@@ -713,7 +736,7 @@ func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package,
 		prior, _ := loadRecovery(p)
 		freshNotice = json.Unmarshal(b, &m) == nil && m.Pending && prior.Previous == nil
 	}
-	if freshNotice {
+	if freshNotice && len(migration) == 0 {
 		oldHome, e := optional(root, homeManifest)
 		if e != nil {
 			return nil, pkg, e
@@ -735,6 +758,9 @@ func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package,
 	return changes, pkg, nil
 }
 func installRank(p string) int {
+	if strings.HasPrefix(p, legacyApp) {
+		return 6
+	} // Retire legacy files only after new app/system publication.
 	if strings.Contains(p, "-backup") && strings.HasSuffix(p, ".json") == false {
 		return 0
 	}
@@ -794,7 +820,7 @@ func saveRecovery(root, host string, changes []change, pkg Package, previous *In
 	if e := writeNew(host, "SHA256SUMS", []byte(sums.String()), 0600); e != nil {
 		return "", e
 	}
-	guide := []byte("POWER OFF, remove the card and mount it on a computer. MainUI/Terminal are not needed.\nRestore uses this recovery.json and verifies every backup and destination.\nManual fallback: copy files/.tmp_update/runtime.sh (if present) and files/.tmp_update/bin/MainUI-* to the identical SD paths. Show hidden files. Verify SHA256SUMS first.\nDo not copy before/ or after/ blindly. Do not delete the app before restoring the integrations.\nAfter originals are verified, remove only the owned App/BetterFavoritesTest/home-integration.conf and .tmp_update/script/better_favorites_return.sh. Preserve all backups, preferences and data.\nIf destinations contain unrelated changes, preserve them and seek support before manual replacement. Reboot after restoration.\n")
+	guide := []byte("POWER OFF, remove the card and mount it on a computer. MainUI/Terminal are not needed.\nRestore uses this recovery.json and verifies every backup and destination.\nManual fallback: copy files/.tmp_update/runtime.sh (if present) and files/.tmp_update/bin/MainUI-* to the identical SD paths. Show hidden files. Verify SHA256SUMS first.\nDo not copy before/ or after/ blindly. Do not delete the app before restoring the integrations.\nAfter originals are verified, remove only the owned App/BetterFavorites/home-integration.conf and .tmp_update/script/better_favorites_return.sh. Preserve all backups, preferences and data.\nIf destinations contain unrelated changes, preserve them and seek support before manual replacement. Reboot after restoration.\n")
 	if e := writeNew(host, "RESTORE.txt", guide, 0600); e != nil {
 		return "", e
 	}
@@ -869,6 +895,9 @@ func install(root, dir, recovery string, homeOn, returnOn bool, hook func(string
 	if e = transact(root, []change{{installationIndex, pending, complete, 0600, nil, true}}, nil); e != nil {
 		return fmt.Errorf("installation applied but completion marker failed: %w", e)
 	}
+	if e = removeEmptyLegacy(root); e != nil {
+		return e
+	}
 	fmt.Println("Install verified. Saved preferences unchanged. Optional integrations take effect after reboot.")
 	return nil
 }
@@ -897,14 +926,14 @@ func prepareRestore(root, recovery, dir string, interrupted bool) ([]change, err
 		if s.Path == system+"runtime.sh" && (s.Stock != ret.Original || s.After != ret.Patched) {
 			return nil, fmt.Errorf("unknown recovery runtime")
 		}
-		if s.Path == system+"script/better_favorites_return.sh" && (s.Stock != "absent" || (s.After != ret.Helper && s.After != ret.Previous)) {
+		if s.Path == system+"script/better_favorites_return.sh" && (s.Stock != "absent" || !acceptedHelperHash(dir, s.After)) {
 			return nil, fmt.Errorf("unknown recovery helper")
 		}
-		if s.Path == app+"home-integration.conf" && (s.Stock != "absent" || s.After != digest(receipt(home))) {
+		if (s.Path == app+"home-integration.conf" || s.Path == legacyApp+"home-integration.conf") && (s.Stock != "absent" || !acceptedReceipt(dir, s.After, s.Path)) {
 			return nil, fmt.Errorf("unknown recovery receipt")
 		}
 		for _, name := range names {
-			if s.Path == system+"bin/"+name && (s.Stock != home.Original[name] || s.After != home.Patched[name]) {
+			if s.Path == system+"bin/"+name && (s.Stock != home.Original[name] || !acceptedHomeHash(dir, name, s.After)) {
 				return nil, fmt.Errorf("unknown recovery MainUI")
 			}
 			if strings.Contains(s.Path, "better-favorites-home-backup-") && strings.HasSuffix(s.Path, "/"+name) && s.After != home.Original[name] {
@@ -991,7 +1020,7 @@ func allowedRestorePath(p string) bool {
 	if !safeRel(p) {
 		return false
 	}
-	if p == system+"runtime.sh" || p == system+"script/better_favorites_return.sh" || p == homeManifest || p == app+"home-integration.conf" || p == returnBackup+"manifest.json" || p == returnBackup+"runtime.sh" {
+	if p == system+"runtime.sh" || p == system+"script/better_favorites_return.sh" || p == homeManifest || p == app+"home-integration.conf" || p == legacyApp+"home-integration.conf" || p == returnBackup+"manifest.json" || p == returnBackup+"runtime.sh" {
 		return true
 	}
 	for _, n := range names {

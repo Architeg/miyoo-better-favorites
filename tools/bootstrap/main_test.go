@@ -21,9 +21,9 @@ const testCommit = "0123456789012345678901234567890123456789"
 func testZip(extra string, symlink bool) []byte {
 	b := new(bytes.Buffer)
 	w := zip.NewWriter(b)
-	contents := map[string]string{"package.json": `{"commit":"` + testCommit + `"}`, "Install-macOS.command": "#!/bin/sh\nexit 17\n", "Install-Linux.sh": "#!/bin/sh\nexit 17\n"}
+	contents := map[string]string{"package.json": `{"commit":"` + testCommit + `"}`, "App/BetterFavorites/computer/Install-macOS.command": "#!/bin/sh\nexit 17\n", "App/BetterFavorites/computer/Install-Linux.sh": "#!/bin/sh\nexit 17\n"}
 	sums := ""
-	for _, n := range []string{"package.json", "Install-macOS.command", "Install-Linux.sh"} {
+	for _, n := range []string{"package.json", "App/BetterFavorites/computer/Install-macOS.command", "App/BetterFavorites/computer/Install-Linux.sh"} {
 		sums += hash([]byte(contents[n])) + "  " + n + "\n"
 	}
 	contents["SHA256SUMS"] = sums
@@ -59,9 +59,9 @@ func fixture(t *testing.T, mutation string) (options, *int) {
 	var server *httptest.Server
 	server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case "/releases/latest", "/releases/tags/v1.0.0-rc.2":
-			tag := "v1.0.0-rc.2"
-			name := "better-favorites-1.0.0-rc.2-installer.zip"
+		case "/releases/latest", "/releases/tags/v1.0.0-rc.4":
+			tag := "v1.0.0-rc.4"
+			name := "better-favorites-1.0.0-rc.4.zip"
 			draft := mutation == "draft"
 			pre := mutation == "prerelease"
 			published := "2026-10-04T00:00:00Z"
@@ -79,7 +79,7 @@ func fixture(t *testing.T, mutation string) (options, *int) {
 				assets[0].Digest = "sha256:" + strings.Repeat("0", 64)
 			}
 			json.NewEncoder(w).Encode(release{Immutable: mutation != "mutable", Tag: tag, Draft: draft, Prerelease: pre, Published: published, Assets: assets})
-		case "/git/ref/tags/v1.0.0-rc.2":
+		case "/git/ref/tags/v1.0.0-rc.4":
 			refCalls++
 			sha := strings.Repeat("a", 40)
 			if mutation == "moved" && refCalls > 1 {
@@ -103,13 +103,13 @@ func fixture(t *testing.T, mutation string) (options, *int) {
 			if mutation == "hash" {
 				digest = strings.Repeat("0", 64)
 			}
-			fmt.Fprintf(w, "%s  better-favorites-1.0.0-rc.2-installer.zip\n", digest)
+			fmt.Fprintf(w, "%s  better-favorites-1.0.0-rc.4.zip\n", digest)
 		default:
 			http.Error(w, "missing", 404)
 		}
 	}))
 	t.Cleanup(server.Close)
-	o := options{action: "install", tag: "v1.0.0-rc.2", store: filepath.Join(t.TempDir(), "durable"), api: server.URL, testing: true, client: server.Client(), invoke: func(dir string, args []string) error {
+	o := options{action: "install", tag: "v1.0.0-rc.4", store: filepath.Join(t.TempDir(), "durable"), api: server.URL, testing: true, client: server.Client(), invoke: func(dir string, args []string) error {
 		calls++
 		if args[0] != "install" && args[0] != "uninstall" {
 			t.Fatal(args)
@@ -159,7 +159,7 @@ func TestStableSelectionAndUninstall(t *testing.T) {
 	if _, e := run(o); e == nil || *c != 0 {
 		t.Fatal(e)
 	}
-	o.tag = "v1.0.0-rc.2"
+	o.tag = "v1.0.0-rc.4"
 	if _, e := run(o); e != nil || *c != 1 {
 		t.Fatal(e)
 	}

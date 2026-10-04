@@ -4,7 +4,7 @@ No MainUI or Miyoo Terminal is needed. Power the device off, remove its card and
 
 ## Preferred recovery
 
-Open the computer launcher in `App/BetterFavoritesTest` and choose **Uninstall completely**. It validates the card-side installation index and recovery hashes. If the app folder/launcher was removed during interruption, merge the matching full package files back into it and retry. Do not erase the hidden recovery directory.
+Open the computer launcher in `App/BetterFavorites` and choose **Uninstall completely**. It validates the card-side installation index and recovery hashes. If the app folder/launcher was removed during interruption, merge the matching ready-to-install package files back into it and retry. Do not erase the hidden recovery directory.
 
 Portable recovery directories are `.tmp_update/config/better-favorites-recovery-*`; `.tmp_update/config/better-favorites-installation.json` identifies the active verified journal. Paths inside are relative to the card, so moving computers/mounts works. Original stock files are not replaced by patched files on update. The pending index remains valid through an interrupted attempt; verified previous-journal hashes identify this installation’s update chain. Unrelated recovery directories are preserved, not adopted for cleanup.
 

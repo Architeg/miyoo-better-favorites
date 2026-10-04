@@ -47,27 +47,27 @@ class Transactions(unittest.TestCase):
 @unittest.skipUnless(INPUTS and PAYLOAD,'Supply read-only audited binary directory and payload for full tests')
 class Installer(unittest.TestCase):
  def seed(self,root):
-  for name in ('.tmp_update/bin','.tmp_update/config','.tmp_update/onionVersion','App/BetterFavoritesTest'): (root/name).mkdir(parents=True,exist_ok=True)
+  for name in ('.tmp_update/bin','.tmp_update/config','.tmp_update/onionVersion','App/BetterFavorites'): (root/name).mkdir(parents=True,exist_ok=True)
   (root/'.tmp_update/onionVersion/version.txt').write_text('v4.3.1-1\n')
   source=INPUTS.parent
   original=source/'config/better-favorites-return-backup/runtime.sh'
   (root/'.tmp_update/runtime.sh').write_bytes(manage.regular(original if original.exists() else source/'runtime.sh'))
   for name in manage.prototype.HASHES:shutil.copy2(INPUTS/name,root/'.tmp_update/bin'/name)
-  for name,data in (('settings.conf',b'personal-generation'),('browser-preferences.conf',b'personal'),('home-entry.conf',b'BetterFavoritesHome1\n1\n')):(root/'App/BetterFavoritesTest'/name).write_bytes(data)
+  for name,data in (('settings.conf',b'personal-generation'),('browser-preferences.conf',b'personal'),('home-entry.conf',b'BetterFavoritesHome1\n1\n')):(root/'App/BetterFavorites'/name).write_bytes(data)
  def test_roundtrip_and_diagnostics(self):
   with tempfile.TemporaryDirectory() as tmp:
    root=Path(tmp)/'card';root.mkdir();self.seed(root)
    before={p:p.read_bytes() for p in root.rglob('*') if p.is_file()}
    manage.manage(root,'install',PAYLOAD)
-   marker=root/'App/BetterFavoritesTest/home-integration.conf';self.assertEqual(marker.read_bytes(),manage.receipt(manage.catalogue()))
+   marker=root/'App/BetterFavorites/home-integration.conf';self.assertEqual(marker.read_bytes(),manage.receipt(manage.catalogue()))
    for name,h in manage.catalogue()['patched'].items():self.assertEqual(manage.prototype.digest((root/'.tmp_update/bin'/name).read_bytes()),h)
-   diagnostics.run(root,'enable');diagnostics.run(root,'disable');self.assertFalse((root/'App/BetterFavoritesTest/home-diagnostics.conf').exists())
-   (root/'App/BetterFavoritesTest/home-diagnostics.log').write_text('evidence')
+   diagnostics.run(root,'enable');diagnostics.run(root,'disable');self.assertFalse((root/'App/BetterFavorites/home-diagnostics.conf').exists())
+   (root/'App/BetterFavorites/home-diagnostics.log').write_text('evidence')
    diagnostics.run(root,'collect',Path(tmp)/'archive');self.assertEqual((Path(tmp)/'archive/home-diagnostics.log').read_text(),'evidence')
-   unknown=root/'App/BetterFavoritesTest/home-diagnostics.conf';unknown.write_text('foreign')
+   unknown=root/'App/BetterFavorites/home-diagnostics.conf';unknown.write_text('foreign')
    with self.assertRaisesRegex(RuntimeError,'preserved'):diagnostics.run(root,'remove')
    self.assertEqual(unknown.read_text(),'foreign');unknown.unlink()
-   diagnostics.run(root,'remove');self.assertEqual((root/'App/BetterFavoritesTest/home-diagnostics.log').read_text(),'evidence')
+   diagnostics.run(root,'remove');self.assertEqual((root/'App/BetterFavorites/home-diagnostics.log').read_text(),'evidence')
    manage.manage(root,'uninstall');self.assertFalse(marker.exists())
    for p,data in before.items():self.assertEqual(p.read_bytes(),data)
  def test_conflicts_and_backup(self):
@@ -75,7 +75,7 @@ class Installer(unittest.TestCase):
    root=Path(tmp);self.seed(root);manage.manage(root,'install',PAYLOAD)
    binary=root/'.tmp_update/bin/MainUI-283-clean';binary.write_bytes(b'foreign')
    with self.assertRaisesRegex(RuntimeError,'preserved'):manage.manage(root,'uninstall')
-   self.assertEqual(binary.read_bytes(),b'foreign');self.assertTrue((root/'App/BetterFavoritesTest/home-integration.conf').exists())
+   self.assertEqual(binary.read_bytes(),b'foreign');self.assertTrue((root/'App/BetterFavorites/home-integration.conf').exists())
  def test_install_and_uninstall_rollback(self):
   for action in ('install','uninstall'):
    with tempfile.TemporaryDirectory() as tmp:
@@ -104,7 +104,7 @@ class Installer(unittest.TestCase):
    root=Path(tmp);self.seed(root);manage.manage(root,'install',PAYLOAD)
    path=root/'.tmp_update/config/better-favorites-home.json';manifest=json.loads(path.read_text());manifest['status']='prepared';path.write_text(json.dumps(manifest))
    backup=root/manifest['backup'];name='MainUI-283-clean';(root/'.tmp_update/bin'/name).write_bytes((backup/name).read_bytes())
-   (root/'App/BetterFavoritesTest/home-integration.conf').unlink()
+   (root/'App/BetterFavorites/home-integration.conf').unlink()
    manage.manage(root,'uninstall')
    for n,h in manage.prototype.HASHES.items():self.assertEqual(manage.prototype.digest((root/'.tmp_update/bin'/n).read_bytes()),h)
  def test_interrupted_uninstall_and_legacy_recovery(self):
@@ -142,8 +142,8 @@ class Installer(unittest.TestCase):
    cpp=Path(tmp)/'availability.cpp';exe=Path(tmp)/'availability'
    cpp.write_text('#include "home_entry_settings.h"\nint main(int c,char** v){return c==3?int(homeEntryStatus(v[1],v[2])):3;}\n')
    subprocess.run(['c++','-std=c++17','-I'+str(ROOT/'include'),str(cpp),str(ROOT/'src/home_entry_settings.cpp'),'-o',str(exe)],check=True)
-   args=[str(exe),str(root),str(root/'App/BetterFavoritesTest')];self.assertEqual(subprocess.run(args).returncode,0)
-   marker=root/'App/BetterFavoritesTest/home-integration.conf';saved=marker.read_bytes();marker.write_text('foreign');self.assertEqual(subprocess.run(args).returncode,2);marker.write_bytes(saved)
+   args=[str(exe),str(root),str(root/'App/BetterFavorites')];self.assertEqual(subprocess.run(args).returncode,0)
+   marker=root/'App/BetterFavorites/home-integration.conf';saved=marker.read_bytes();marker.write_text('foreign');self.assertEqual(subprocess.run(args).returncode,2);marker.write_bytes(saved)
    binary=root/'.tmp_update/bin/MainUI-354-clean';saved=binary.read_bytes();binary.write_bytes(saved+b'foreign');self.assertEqual(subprocess.run(args).returncode,2);binary.write_bytes(saved)
    manage.manage(root,'uninstall');self.assertEqual(subprocess.run(args).returncode,1)
    version=root/'.tmp_update/onionVersion/version.txt';version.write_text('unsupported');self.assertEqual(subprocess.run(args).returncode,2);version.write_text('v4.3.1-1\n')
@@ -151,9 +151,9 @@ class Installer(unittest.TestCase):
  def test_six_file_recovery_without_device_ui(self):
   with tempfile.TemporaryDirectory() as tmp:
    root=Path(tmp)/'card';root.mkdir();self.seed(root);backup=Path(tmp)/'host-backup';backup.mkdir()
-   app=root/'App/BetterFavoritesTest'
+   app=root/'App/BetterFavorites'
    for name in ('better-favorites','launch.sh'):(app/name).write_bytes(('old '+name).encode())
-   paths=['.tmp_update/bin/'+n for n in manage.prototype.HASHES]+['App/BetterFavoritesTest/better-favorites','App/BetterFavoritesTest/launch.sh']
+   paths=['.tmp_update/bin/'+n for n in manage.prototype.HASHES]+['App/BetterFavorites/better-favorites','App/BetterFavorites/launch.sh']
    records={}
    for relative in paths:
     data=(root/relative).read_bytes();saved=backup/relative;saved.parent.mkdir(parents=True,exist_ok=True);saved.write_bytes(data)

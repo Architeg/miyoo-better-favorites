@@ -17,7 +17,7 @@ namespace
 {
 
 const std::string appCommand =
-    "cd /mnt/SDCARD/App/BetterFavoritesTest; chmod a+x ./launch.sh; "
+    "cd /mnt/SDCARD/App/BetterFavorites; chmod a+x ./launch.sh; "
     "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so   ./launch.sh \n";
 
 std::string readFile(const std::string& path)

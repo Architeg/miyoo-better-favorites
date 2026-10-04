@@ -208,11 +208,11 @@ func TestActualPackage(t *testing.T) {
 			t.Fatal(err)
 		}
 		oldHelper, err := os.ReadFile(filepath.Join(repo, "build/m6-accepted-fixture/.tmp_update/script/better_favorites_return.sh"))
-		if err != nil || digest(oldHelper) != r.Previous {
+		if err != nil || !acceptedHelperHash(dir, digest(oldHelper)) {
 			t.Fatal("accepted helper fixture mismatch", err)
 		}
 		mustWrite(t, root, returnBackup+"runtime.sh", original)
-		oldManifest := encode(map[string]any{"status": "installed", "version": r.Version, "original_git_blob": r.Blob, "original_sha256": r.Original, "patched_sha256": r.Patched, "helper_sha256": r.Previous, "mode": 448})
+		oldManifest := encode(map[string]any{"status": "installed", "version": r.Version, "original_git_blob": r.Blob, "original_sha256": r.Original, "patched_sha256": r.Patched, "helper_sha256": digest(oldHelper), "mode": 448})
 		mustWrite(t, root, returnBackup+"manifest.json", oldManifest)
 		mustWrite(t, root, system+"script/better_favorites_return.sh", oldHelper)
 		os.WriteFile(filepath.Join(root, system+"runtime.sh"), patched, 0700)

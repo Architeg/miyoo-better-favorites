@@ -281,7 +281,7 @@ func run(o options) (string, error) {
 	if e != nil {
 		return "", e
 	}
-	name := "better-favorites-" + strings.TrimPrefix(r.Tag, "v") + "-installer.zip"
+	name := "better-favorites-" + strings.TrimPrefix(r.Tag, "v") + ".zip"
 	a, e := archiveAsset(r, name)
 	if e != nil {
 		return "", e
@@ -350,18 +350,19 @@ func run(o options) (string, error) {
 	if o.invoke != nil {
 		return dir, o.invoke(pkg, append([]string{o.action}, o.args...))
 	}
+	hostTools := filepath.Join(pkg, "App", "BetterFavorites", "computer")
 	var cmd *exec.Cmd
 	if runtime.GOOS == "windows" {
-		cmd = exec.Command(filepath.Join(pkg, "better-favorites-dispatch-windows-386.exe"), append([]string{o.action}, o.args...)...)
+		cmd = exec.Command(filepath.Join(hostTools, "better-favorites-dispatch-windows-386.exe"), append([]string{o.action}, o.args...)...)
 	} else {
 		entry := "Install-Linux.sh"
 		if runtime.GOOS == "darwin" {
 			entry = "Install-macOS.command"
 		}
-		cmd = exec.Command("/bin/sh", filepath.Join(pkg, entry))
+		cmd = exec.Command("/bin/sh", filepath.Join(hostTools, entry))
 		cmd.Args = append(cmd.Args, append([]string{o.action}, o.args...)...)
 	}
-	cmd.Dir = pkg
+	cmd.Dir = hostTools
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

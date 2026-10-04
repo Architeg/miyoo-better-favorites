@@ -23,18 +23,18 @@ struct Transaction {
 extern "C" { Transaction bf_transaction; }
 
 extern "C" const char bf_variant[24] = "unassigned";
-static const char diagnostic_flag[] = "/mnt/SDCARD/App/BetterFavoritesTest/home-diagnostics.conf";
-static const char diagnostic_log[] = "/mnt/SDCARD/App/BetterFavoritesTest/home-diagnostics.log";
+static const char diagnostic_flag[] = "/mnt/SDCARD/App/BetterFavorites/home-diagnostics.conf";
+static const char diagnostic_log[] = "/mnt/SDCARD/App/BetterFavorites/home-diagnostics.log";
 static char attempt[28];
-static const char preference[] = "/mnt/SDCARD/App/BetterFavoritesTest/home-entry.conf";
-static const char app_config[] = "/mnt/SDCARD/App/BetterFavoritesTest/config.json";
-static const char binary[] = "/mnt/SDCARD/App/BetterFavoritesTest/better-favorites";
-static const char launcher[] = "/mnt/SDCARD/App/BetterFavoritesTest/launch.sh";
+static const char preference[] = "/mnt/SDCARD/App/BetterFavorites/home-entry.conf";
+static const char app_config[] = "/mnt/SDCARD/App/BetterFavorites/config.json";
+static const char binary[] = "/mnt/SDCARD/App/BetterFavorites/better-favorites";
+static const char launcher[] = "/mnt/SDCARD/App/BetterFavorites/launch.sh";
 static const char pending[] = "/tmp/cmd_to_run.sh";
 static const char shutdown[] = "/tmp/.offOrder";
 static const char enabled[] = "BetterFavoritesHome1\n1\n";
 extern "C" const char bf_expected_command[] =
-    "cd /mnt/SDCARD/App/BetterFavoritesTest; chmod a+x ./launch.sh; "
+    "cd /mnt/SDCARD/App/BetterFavorites; chmod a+x ./launch.sh; "
     "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so   ./launch.sh";
 
 static long call(long nr, long a=0, long b=0, long c=0) {
@@ -190,7 +190,7 @@ static void append(char* out,unsigned& n,const volatile char* text) {
 static void diagnostic(const char* event,const char* reason,int result=-99) {
     if(!diagnostics_enabled())return;
     char line[512];unsigned n=0;
-    append(line,n,"M6Home1 variant=");append(line,n,bf_variant);
+    append(line,n,"M6Home2 variant=");append(line,n,bf_variant);
     append(line,n," pid=");char id[9]={};hex(id,(unsigned)call(__NR_getpid));append(line,n,id);
     append(line,n," attempt=");append(line,n,attempt[0]?attempt:"none");
     append(line,n," event=");append(line,n,event);append(line,n," reason=");append(line,n,reason);

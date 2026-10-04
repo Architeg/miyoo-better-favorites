@@ -14,9 +14,9 @@ with tempfile.TemporaryDirectory(prefix='better-favorites-runtime-test-') as dir
     root = Path(directory).resolve()
     card = root / 'card'
     temp = root / 'tmp'
-    for folder in (card / '.tmp_update/config', card / '.tmp_update/logs', card / 'App/BetterFavoritesTest', card / 'Roms/GB', temp):
+    for folder in (card / '.tmp_update/config', card / '.tmp_update/logs', card / 'App/BetterFavorites', card / 'Roms/GB', temp):
         folder.mkdir(parents=True, exist_ok=True)
-    launcher = card / 'App/BetterFavoritesTest/launch.sh'
+    launcher = card / 'App/BetterFavorites/launch.sh'
     launcher.write_text('#!/bin/sh\nexit 0\n')
     launcher.chmod(0o700)
     (card / 'Roms/GB/one.gb').write_text('fixture')
@@ -35,13 +35,13 @@ log() { printf '%s\n' "$*" >> "$TEST_LOG"; }
 # Default tracing writes nothing. Opt-in lifecycle evidence is separate.
 bf_return_diag test-default-off
 [ ! -e "$sysdir/logs/better-favorites-return.log" ]
-printf 'BetterFavoritesHomeDiagnostics1\n1\n' > "$CARD/App/BetterFavoritesTest/home-diagnostics.conf"
+printf 'BetterFavoritesHomeDiagnostics1\n1\n' > "$CARD/App/BetterFavorites/home-diagnostics.conf"
 # Disabled by default, even when callers provide forged origin state.
 bf_origin=forged
 bf_context=''
 bf_return init
 [ -z "$bf_origin" ] && [ -z "${BETTER_FAVORITES_RETURN_DIR:-}" ]
-setting="$CARD/App/BetterFavoritesTest/settings.conf"
+setting="$CARD/App/BetterFavorites/settings.conf"
 epoch=0123456789abcdef0123456789abcdef
 printf 'BetterFavoritesSettings1\n1\n%s\n' "$epoch" > "$setting"
 app=$(bf_return_app_command)
@@ -298,7 +298,7 @@ done
 
 # Sourced profiling does not change the exact Apps command or exported context.
 rm -f "$sysdir/cmd_to_run.sh"
-APP_DIR="$CARD/App/BetterFavoritesTest"
+APP_DIR="$CARD/App/BetterFavorites"
 LOG="$APP_DIR/profile-fixture.log"
 printf fixture > "$LOG"
 printf 'BetterFavoritesProfilePilot1\n' > "$APP_DIR/profile.enabled"
@@ -337,7 +337,7 @@ if command -v bf_return_diag >/dev/null; then
     bf_return_diag cap-test
     [ "$(wc -c < "$diagnostic")" -eq 131072 ]
     mv "$diagnostic.evidence" "$diagnostic"
-    rm "$CARD/App/BetterFavoritesTest/home-diagnostics.conf"
+    rm "$CARD/App/BetterFavorites/home-diagnostics.conf"
     bf_return_diag disabled-test
     ! grep -q disabled-test "$diagnostic"
 fi

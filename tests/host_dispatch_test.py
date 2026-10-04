@@ -95,16 +95,27 @@ case "$1" in
    if name.endswith('.sh'):e.update(BF_SYSTEM='Linux',BF_MACHINE='x86_64')
    p=subprocess.run([str(package/name),'uninstall'],env=e,capture_output=True,timeout=10);assert p.returncode==17
   # Copied-card wrapper branch: staged mock verifies args/status and cleanup.
-  copied=t/'card 日本語'/'App'/'BetterFavoritesTest';copied.mkdir(parents=True);(copied/'computer').mkdir();hosttmp=t/'hosttmp';hosttmp.mkdir()
+  copied=t/'card 日本語'/'App'/'BetterFavorites';copied.mkdir(parents=True);(copied/'computer').mkdir();hosttmp=t/'hosttmp';hosttmp.mkdir()
   for name,host in [('Install-macOS.command','darwin'),('Install-Linux.sh','linux')]:
    shutil.copy2(package/name,copied/name)
    for arch in ('amd64','arm64'):
     dest=copied/'computer'/('better-favorites-installer-'+host+'-'+arch);shutil.copy2(package/dest.name,dest);dest.chmod(0o644)
-   e={**os.environ,**defaults,'BF_CHILD_STATUS':'17','TMPDIR':str(hosttmp)};e['PATH']=str(mock)+os.pathsep+os.environ['PATH']
+   e={**os.environ,**defaults,'BF_CHILD_STATUS':'17','TMPDIR':str(hosttmp),'HOME':str(t/'home')};Path(e['HOME']).mkdir(exist_ok=True);e['PATH']=str(mock)+os.pathsep+os.environ['PATH']
    if host=='linux':e.update(BF_SYSTEM='Linux',BF_MACHINE='x86_64')
    child=subprocess.run([str(copied/name),'uninstall'],env=e,capture_output=True,timeout=10);assert child.returncode==17,(name,child.stderr)
    assert (t/'result').read_text().splitlines()[1:]==['--card-launcher',str(copied),'uninstall']
    assert not list(hosttmp.iterdir()),'bootstrap stage remains'
+   if host=='darwin':
+    approved=list((Path(e['HOME'])/'Library/Caches/BetterFavorites').glob('*/BetterFavorites-Installer'))
+    assert len(approved)==1 and approved[0].read_bytes()==(copied/'computer/better-favorites-installer-darwin-arm64').read_bytes()
+    identity=approved[0].stat().st_ino
+    retry=subprocess.run([str(copied/name),'install'],env=e,input='r\nx\n',text=True,capture_output=True,timeout=10)
+    assert retry.returncode==17 and 'file is retained' in retry.stdout and approved[0].stat().st_ino==identity
+    assert (t/'result').read_text().splitlines()[1:]==['--card-launcher',str(copied),'install']
+    approved[0].write_bytes(b'foreign cache bytes');(t/'result').unlink()
+    refused=subprocess.run([str(copied/name),'uninstall'],env=e,capture_output=True,timeout=10)
+    assert refused.returncode!=0 and not (t/'result').exists() and approved[0].read_bytes()==b'foreign cache bytes'
+
   p=package/'better-favorites-installer-darwin-arm64';p.unlink()
   e=dict(os.environ,**defaults);assert subprocess.run([str(package/'Install-macOS.command'),'install'],env=e,capture_output=True).returncode!=0
   print('Unix dispatch: 23 simulated OS/version/native/Rosetta/kernel combinations, unsupported-before-invocation, arguments and failure status PASS; not native acceptance')

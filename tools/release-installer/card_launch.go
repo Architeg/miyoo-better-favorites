@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -65,8 +64,8 @@ func deriveCard(source string) (string, string, error) {
 	if e != nil {
 		return "", "", e
 	}
-	if filepath.Base(p) != "BetterFavoritesTest" || filepath.Base(filepath.Dir(p)) != "App" {
-		return "", "", fmt.Errorf("open this installer inside the card's App/BetterFavoritesTest folder")
+	if filepath.Base(p) != "BetterFavorites" || filepath.Base(filepath.Dir(p)) != "App" {
+		return "", "", fmt.Errorf("open this installer inside the card's App/BetterFavorites folder")
 	}
 	root := filepath.Dir(filepath.Dir(p))
 	if e = safeCardAncestors(root); e != nil {
@@ -240,6 +239,42 @@ func validateAppInput(root, dir string, pkg Package) error {
 			}
 		}
 	}
+	own, e := migrationOwnership(root)
+	if e != nil {
+		return e
+	}
+	for p, hashes := range own {
+		for h := range hashes {
+			accept(p, h)
+		}
+	}
+
+	expectedDirs := map[string]bool{strings.TrimSuffix(app, "/"): true}
+	for p := range accepted {
+		if strings.HasPrefix(p, app) {
+			for d := filepath.ToSlash(filepath.Dir(p)); strings.HasPrefix(d, strings.TrimSuffix(app, "/")); d = filepath.ToSlash(filepath.Dir(d)) {
+				expectedDirs[d] = true
+			}
+		}
+	}
+	location, _ := join(root, strings.TrimSuffix(app, "/"))
+	if err := filepath.Walk(location, func(p string, s os.FileInfo, e error) error {
+		if errors.Is(e, os.ErrNotExist) {
+			return nil
+		}
+		if e != nil {
+			return e
+		}
+		if s.IsDir() {
+			rel, _ := filepath.Rel(root, p)
+			if !expectedDirs[filepath.ToSlash(rel)] {
+				return fmt.Errorf("unknown app directory preserved: %s", rel)
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
 	_, e = ownedTree(root, strings.TrimSuffix(app, "/"), func(p string, b []byte) error {
 		n := strings.TrimPrefix(p, app)
 		switch n {
@@ -341,14 +376,7 @@ func launchFromCard(source string, args []string) error {
 	if found == "" {
 		return fmt.Errorf("running %s is not the package-verified installer", name)
 	}
-	c := exec.Command(found, append([]string{"--staged-card", root, temp}, args...)...)
-	c.Stdin = os.Stdin
-	c.Stdout = os.Stdout
-	c.Stderr = os.Stderr
-	if e = c.Run(); e != nil {
-		return e
-	}
-	return nil
+	return runStagedCard(append([]string{root, temp}, args...))
 }
 func runStagedCard(args []string) error {
 	if len(args) < 2 {

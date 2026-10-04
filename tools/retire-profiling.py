@@ -11,10 +11,10 @@ def read(path):
 def retire(card,archive):
     if card.resolve()==archive.resolve() or card.resolve() in archive.resolve().parents:
         raise RuntimeError('Evidence archive must be on the host, outside the card')
-    subprocess.run(['sh','-n',str(REPO/'App/BetterFavoritesTest/launch.sh')],check=True)
+    subprocess.run(['sh','-n',str(REPO/'App/BetterFavorites/launch.sh')],check=True)
     app=card/'App/BetterFavoritesTest';backup=app/'.profiling-backup'
     manifest=json.loads(read(backup/'manifest.json'))
-    normal=read(REPO/'App/BetterFavoritesTest/launch.sh')
+    normal=read(REPO/'App/BetterFavorites/launch.sh')
     if manifest['version']!=1 or manifest['original']['better-favorites']!=M4 or manifest['original']['launch.sh']!=sha(normal):
         raise RuntimeError('Unexpected rollback checkpoint')
     for name,digest in manifest['original'].items():

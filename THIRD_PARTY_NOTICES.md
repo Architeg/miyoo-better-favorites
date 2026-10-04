@@ -60,6 +60,6 @@ package's `SOURCE.txt`; keep those companions with binary distributions.
 
 The custom OSS SDL now reproduces the complete accepted ELF byte for byte. Actual extension versions are established by ARM disassembly; matching official sources and original notices are supplied. Exact rebuilds of permissively licensed libraries remain a separate goal, not a blanket publication gate.
 
-The specific remaining publication question is the **component/NOTICE inventory for the actual SwiftShader EGL/GLES prebuilts**. Their 4.1.0.7 version and custom entry match the supplied fork; all available root/third-party notice families are included. Upstream prebuilt attribution/build information is still needed to establish its exact component mapping. This affects both binary ZIPs. [Evidence and smallest remedy](docs/release/dependency-audit.md).
+The SwiftShader audit now maps known source-supported components, preserves all available third-party notice families and explicitly supplies missing LLVM root texts plus the Bison skeleton exception. No further specific missing notice was identified. Exact prebuilt LLVM revision/link inventory remains unverified; the unchanged libraries are not claimed byte-reproduced. [Component mapping and evidence limits](docs/release/swiftshader-attribution.md).
 
 Restricted MI SDK headers/driver binaries are excluded from the new dependency source companion, and are not bundled into the app. No original license/copyright text has been changed. Source, device acceptance and exact build reproducibility remain separate evidence.

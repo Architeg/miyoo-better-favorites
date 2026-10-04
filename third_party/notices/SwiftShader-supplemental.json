@@ -1,0 +1,20 @@
+[
+  {
+    "file": "LLVM-10.0.0-LICENSE.TXT",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/llvmorg-10.0.0/llvm/LICENSE.TXT",
+    "sha256": "8d85c1057d742e597985c7d4e6320b015a9139385cff4cbae06ffc0ebe89afee",
+    "purpose": "Conservative LLVM reactor coverage; exact binary LLVM revision unverified"
+  },
+  {
+    "file": "LLVM-7.0.0-LICENSE.TXT",
+    "url": "https://raw.githubusercontent.com/llvm/llvm-project/llvmorg-7.0.0/llvm/LICENSE.TXT",
+    "sha256": "0303dfeaac87b80d2d1e543aa38d5be77b0eac93c3d04fe7e3c8eaa71a778667",
+    "purpose": "Conservative LLVM reactor coverage; exact binary LLVM revision unverified"
+  },
+  {
+    "file": "SwiftShader-Bison-skeleton.txt",
+    "source": "swiftshader/src/OpenGL/compiler/glslang_tab.cpp",
+    "sha256": "875899f7d3ad8115b293d1db20afcbed01233eac8cd9dc0b867c97b450639525",
+    "purpose": "Original skeleton attribution and larger-work exception"
+  }
+]

@@ -63,8 +63,8 @@ parser.add_argument('--binary',type=Path,default=REPO/'build/better-favorites')
 parser.add_argument('--output',type=Path,help='New host directory for prepared launcher/helper')
 parser.add_argument('--powered-off',action='store_true',help='Operator confirms powered-off device, mounted card')
 args=parser.parse_args()
-app=args.card/'App/BetterFavoritesTest';backup=app/'.profiling-backup'
-original=(REPO/'App/BetterFavoritesTest/launch.sh').read_bytes()
+app=args.card/'App/BetterFavorites';backup=app/'.profiling-backup'
+original=(REPO/'App/BetterFavorites/launch.sh').read_bytes()
 launcher=diagnostic_launcher(original);hook=(REPO/'tools/profile-device-launch.sh').read_bytes()
 if args.operation=='prepare':
     if args.output is None:parser.error('--output required for prepare')

@@ -16,7 +16,7 @@ fault recovery are not covered by that acceptance.
 ## Installation is separate from activation
 
 Settings adds **Use Better Favorites on Home: ON/OFF** (or **Home Favorites** when the measured row width requires it), default OFF. Its independent
-`App/BetterFavoritesTest/home-entry.conf` is exactly `BetterFavoritesHome1\n0\n`
+`App/BetterFavorites/home-entry.conf` is exactly `BetterFavoritesHome1\n0\n`
 or `BetterFavoritesHome1\n1\n`. Missing/malformed/unreadable/nonregular files use
 OFF. Atomic save failures retain the previous in-memory setting. This file does
 not change `settings.conf`, Automatic return's generation, browser preferences,
@@ -111,7 +111,7 @@ The exact `home-diagnostics.conf` marker enables diagnostics independently of Ho
 replacement and Automatic return. Off/absent is the default. No polling process,
 daemon, per-frame log or device Terminal command is needed.
 
-MainUI writes `App/BetterFavoritesTest/home-diagnostics.log`, bounded to 128 KiB:
+MainUI writes `App/BetterFavorites/home-diagnostics.log`, bounded to 128 KiB:
 
 - `M6Home1`, exact MainUI variant, PID and attempt ID (`pid.seconds.microseconds`, hex).
 - Actual ELF entry (`event=mainui-startup`) when that process starts.
@@ -281,7 +281,7 @@ available. This does **not** repair a MainUI startup failure or uninstall hooks.
 
 ```sh
 BF_SD='/Volumes/MIYOO' # Linux: set the actual mount instead.
-BF_PREF="$BF_SD/App/BetterFavoritesTest/home-entry.conf"
+BF_PREF="$BF_SD/App/BetterFavorites/home-entry.conf"
 if [ -f "$BF_PREF" ] && [ ! -L "$BF_PREF" ]; then
   mv -n "$BF_PREF" "$BF_PREF.disabled-$(date -u +%Y%m%dT%H%M%SZ)"
 fi
@@ -293,7 +293,7 @@ binary installer. This command is documented but not executed on Windows here:
 
 ```powershell
 $BfSd = 'E:\' # Verify the real SD drive.
-$BfPref = Join-Path $BfSd 'App\BetterFavoritesTest\home-entry.conf'
+$BfPref = Join-Path $BfSd 'App\BetterFavorites\home-entry.conf'
 if (Test-Path -LiteralPath $BfPref -PathType Leaf) {
     $BfItem = Get-Item -LiteralPath $BfPref
     if (($BfItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {

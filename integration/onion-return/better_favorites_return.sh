@@ -8,7 +8,7 @@ bf_return_diag() {
 bf_return_diag_write() {
     # Detailed tracing is independent of either feature preference, OFF normally.
     # Logging is bounded/best effort and never changes ownership or handoff.
-    bf_diag_marker=/mnt/SDCARD/App/BetterFavoritesTest/home-diagnostics.conf
+    bf_diag_marker=/mnt/SDCARD/App/BetterFavorites/home-diagnostics.conf
     [ -f "$bf_diag_marker" ] && [ ! -L "$bf_diag_marker" ] || return 0
     [ "$(wc -c < "$bf_diag_marker" 2>/dev/null)" -eq 34 ] 2>/dev/null || return 0
     [ "$(cat "$bf_diag_marker" 2>/dev/null)" = "$(printf 'BetterFavoritesHomeDiagnostics1\n1')" ] || return 0
@@ -43,7 +43,7 @@ bf_return_read_settings() {
     bf_enabled=0
     bf_setting_reason=missing-or-nonregular
     bf_setting_epoch=""
-    bf_setting_file=/mnt/SDCARD/App/BetterFavoritesTest/settings.conf
+    bf_setting_file=/mnt/SDCARD/App/BetterFavorites/settings.conf
     if [ -L "$bf_setting_file" ] || [ ! -f "$bf_setting_file" ]; then return 0; fi
     bf_setting_reason=oversized-or-unreadable
     [ "$(wc -c < "$bf_setting_file")" -le 128 ] || return 0
@@ -80,7 +80,7 @@ bf_return_clear_context() {
 }
 
 bf_return_app_command() {
-    printf '%s' 'cd /mnt/SDCARD/App/BetterFavoritesTest; chmod a+x ./launch.sh; LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so   ./launch.sh'
+    printf '%s' 'cd /mnt/SDCARD/App/BetterFavorites; chmod a+x ./launch.sh; LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so   ./launch.sh'
 }
 
 bf_return_is_app() {
@@ -229,7 +229,7 @@ bf_return() {
                 log 'Better Favorites return: unrelated pending command/flag; return skipped'
                 bf_return_finish; return 0
             fi
-            if [ ! -x /mnt/SDCARD/App/BetterFavoritesTest/launch.sh ]; then
+            if [ ! -x /mnt/SDCARD/App/BetterFavorites/launch.sh ]; then
                 bf_return_diag 'action=skip reason=launcher-unavailable'
                 log 'Better Favorites return: launcher unavailable'
                 bf_return_finish; return 0

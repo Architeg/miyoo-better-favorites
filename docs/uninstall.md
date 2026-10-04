@@ -3,7 +3,7 @@
 [Install](install.md) · [Recovery](recovery.md)
 
 1. Power off the Miyoo and connect its card to any supported computer.
-2. Open the appropriate computer launcher inside `App/BetterFavoritesTest`.
+2. Open the appropriate computer launcher inside `App/BetterFavorites`.
 3. Choose **Uninstall completely**, confirm the card and that the Miyoo is off.
 4. Wait for verified success, safely eject and boot stock Onion.
 
@@ -15,7 +15,7 @@ Do not delete the app as a substitute for uninstall. It cannot restore patched M
 
 ## If removal stops
 
-The tool reports the unresolved path and returns failure. Unknown/modified files are preserved. Missing or corrupt originals are never guessed. Recovery remains available through restoration/app-cleanup failures; retry after resolving the reported problem. After an interruption that removed the launcher, copy the matching full package contents back into the app folder and reopen it. Do not replace personal files.
+The tool reports the unresolved path and returns failure. Unknown/modified files are preserved. Missing or corrupt originals are never guessed. Recovery remains available through restoration/app-cleanup failures; retry after resolving the reported problem. After an interruption that removed the launcher, copy the matching ready-to-install package contents back into the app folder and reopen it. Do not replace personal files.
 
 [Recovery without MainUI or device Terminal](recovery.md).
 

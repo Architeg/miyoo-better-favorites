@@ -20,12 +20,12 @@ def main():
  ap=argparse.ArgumentParser();ap.add_argument('--release',type=Path,required=True);ap.add_argument('--fixtures',type=Path,required=True);a=ap.parse_args();host=platform.system()
  assert host in ('Darwin','Linux'), 'Windows requires native Explorer/cmd qualification separately'
  with tempfile.TemporaryDirectory(prefix='bf-click-test-') as td:
-  t=Path(td).resolve();package=t/'package';extract(next(a.release.glob('*-full.zip')),package)
+  t=Path(td).resolve();package=t/'package';extract(next(a.release.glob('better-favorites-*.zip')),package)
   if host=='Linux' and ctypes.util.find_library('gio-2.0'):
    # Real GLib desktop Exec parsing, without claiming a graphical terminal test.
    desktop=t/'desktop 日本語';desktop.mkdir();result=desktop/'received'
    script=desktop/'Install-Linux.sh';script.write_text('#!/bin/sh\nprintf "%s" "$0" > "'+str(result)+'"\n')
-   entry=desktop/'Install-Linux.desktop';entry.write_text((package/'App/BetterFavoritesTest/Install-Linux.desktop').read_text().replace('Terminal=true','Terminal=false'))
+   entry=desktop/'Install-Linux.desktop';entry.write_text((package/'App/BetterFavorites/Install-Linux.desktop').read_text().replace('Terminal=true','Terminal=false'))
    gio=ctypes.CDLL(ctypes.util.find_library('gio-2.0'));objects=ctypes.CDLL(ctypes.util.find_library('gobject-2.0'))
    gio.g_desktop_app_info_new_from_filename.argtypes=[ctypes.c_char_p];gio.g_desktop_app_info_new_from_filename.restype=ctypes.c_void_p
    gio.g_app_info_launch.argtypes=[ctypes.c_void_p,ctypes.c_void_p,ctypes.c_void_p,ctypes.POINTER(ctypes.c_void_p)];gio.g_app_info_launch.restype=ctypes.c_int
@@ -36,9 +36,9 @@ def main():
     if result.exists():break
     time.sleep(.1)
    assert result.read_text()==str(script), 'desktop path/quoting failed'
-  source=package/'App/BetterFavoritesTest';computer=source/'computer';p=json.loads((computer/'package.json').read_text());h=json.loads((computer/'payload/integration/mainui-home/package.json').read_text());r=json.loads((computer/'payload/integration/onion-return/hashes.json').read_text())
-  assert p['version']=='1.0.0-rc.3';assert (source/'Install-Windows.cmd').is_file();assert (source/'Install-Linux.desktop').is_file()
-  card=t/'SD card 日本語';app=card/'App/BetterFavoritesTest'
+  source=package/'App/BetterFavorites';computer=source/'computer';p=json.loads((computer/'package.json').read_text());h=json.loads((computer/'payload/integration/mainui-home/package.json').read_text());r=json.loads((computer/'payload/integration/onion-return/hashes.json').read_text())
+  assert p['version']=='1.0.0-rc.4';assert (source/'Install-Windows.cmd').is_file();assert (source/'Install-Linux.desktop').is_file()
+  card=t/'SD card 日本語';app=card/'App/BetterFavorites'
   for name in ('App','.tmp_update/bin','.tmp_update/config','.tmp_update/script','.tmp_update/onionVersion','Roms','Saves','Themes'):(card/name).mkdir(parents=True,exist_ok=True)
   (card/'.tmp_update/onionVersion/version.txt').write_text('v4.3.1-1\n')
   for n in h['originals']:shutil.copy2(a.fixtures/'.tmp_update/bin'/n,card/'.tmp_update/bin'/n)
@@ -79,9 +79,9 @@ def main():
   for n,b in prefs.items():assert (app/n).read_bytes()==b,n
   assert not (app/'welcome-pending').exists()
   bad=app/'foreign.txt';bad.write_text('foreign');run('1\ny\n',ok=False);assert bad.read_text()=='foreign';bad.unlink()
-  payload=app/'computer/payload/App/BetterFavoritesTest/icon.png';original=payload.read_bytes();payload.write_bytes(b'tampered');before=(card/'.tmp_update/runtime.sh').read_bytes();run('1\ny\n',ok=False);assert (card/'.tmp_update/runtime.sh').read_bytes()==before;payload.write_bytes(original)
+  payload=app/'computer/payload/App/BetterFavorites/icon.png';original=payload.read_bytes();payload.write_bytes(b'tampered');before=(card/'.tmp_update/runtime.sh').read_bytes();run('1\ny\n',ok=False);assert (card/'.tmp_update/runtime.sh').read_bytes()==before;payload.write_bytes(original)
   # Relocation + another computer HOME: no original computer recovery exists.
-  moved=t/'Other mount – новый';card.rename(moved);card=moved;app=card/'App/BetterFavoritesTest';env['HOME']=str(t/'second-computer');Path(env['HOME']).mkdir()
+  moved=t/'Other mount – новый';card.rename(moved);card=moved;app=card/'App/BetterFavorites';env['HOME']=str(t/'second-computer');Path(env['HOME']).mkdir()
   run('2\ny\n');assert not app.exists();stock()
   assert not any(n.name.startswith('better-favorites-') for n in (card/'.tmp_update/config').iterdir())
   archives=list((Path(env['HOME'])/'BetterFavorites-Recovery').glob('uninstall-*'));assert len(archives)==1

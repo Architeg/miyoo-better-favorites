@@ -55,7 +55,7 @@ def directory(root, path):
 def card(root):
     require_posix()
     root = root.absolute()
-    for path in (root, root/'.tmp_update/bin', root/'.tmp_update/config', root/'App/BetterFavoritesTest'):
+    for path in (root, root/'.tmp_update/bin', root/'.tmp_update/config', root/'App/BetterFavorites'):
         directory(root, path)
     version = regular(root/'.tmp_update/onionVersion/version.txt').decode().strip()
     if version != 'v4.3.1-1':
@@ -147,7 +147,7 @@ def transaction(changes, check=lambda: None, hook=lambda phase, path: None):
 
 def catalogue():
     spec = json.loads(regular(PACKAGE/'package.json'))
-    if spec['version'] != 'M6Home1' or spec['originals'] != prototype.HASHES:
+    if spec['version'] != 'M6Home2' or spec['originals'] != prototype.HASHES:
         raise RuntimeError('Unsupported package catalogue')
     return spec
 
@@ -160,7 +160,7 @@ def receipt(spec):
 def manage(root, action, payload=None, hook=lambda phase, path: None):
     root, runtime = card(root); spec = catalogue()
     manifest_path = root/'.tmp_update/config/better-favorites-home.json'
-    marker = root/'App/BetterFavoritesTest/home-integration.conf'
+    marker = root/'App/BetterFavorites/home-integration.conf'
     binaries = {name: root/'.tmp_update/bin'/name for name in prototype.HASHES}
     if action == 'status':
         manifest = snapshot(manifest_path)

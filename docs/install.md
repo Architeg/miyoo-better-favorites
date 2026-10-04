@@ -2,19 +2,15 @@
 
 [README](../README.md) · [Uninstall](uninstall.md) · [Compatibility](compatibility.md)
 
-## Choose the download
+## One ready-to-install download
 
-- **Full ZIP:** app and clickable computer tools; prepares Home replacement and Automatic return when supported.
-- **App-only ZIP:** browser for Apps, without system patches or computer installer.
-- **GitHub Source code:** contributor sources, not a ready-to-install package.
-
-No public download link is advertised until the asset exists. RC3 is a new candidate, not the tagged RC2 bytes.
+`better-favorites-<version>.zip` contains the app and offline computer tools. GitHub Source code and dependency/source companions are for developers. There is no separate app-only download. RC4 is a new identity; earlier RC2/RC3 bytes and acceptance are retained separately.
 
 ## Recommended: copy, then click
 
-1. Extract the full ZIP on your computer.
+1. Extract the ready-to-install ZIP on your computer.
 2. Power off the Miyoo, remove its card and connect it to the computer.
-3. Copy `App/BetterFavoritesTest` into the card's `App` folder.
+3. Copy `App/BetterFavorites` into the card's `App` folder.
 4. Open that copied folder and the launcher for your computer:
 
 | Computer | Open |
@@ -26,15 +22,13 @@ No public download link is advertised until the asset exists. RC3 is a new candi
 5. The launcher opens a terminal automatically. Choose **Install / Update**, confirm the displayed card and that the Miyoo is powered off.
 6. Wait for verified success, safely eject, insert the card and boot.
 
-You do not enter a card path or select integrations. Both supported integrations are installed; their app switches remain **OFF** on a fresh install. Updates preserve switches, preferences and browser position. Unsupported Onion versions offer app-only installation explicitly. An app-only installer update cannot discard an existing integration’s recovery: complete uninstall first, or use the supported full update. Manual app-only copying does not replace that recovery. Corruption, modified audited files and transaction failures stop with an error; they do not silently become app-only success.
+Both supported integrations are installed by default; their app switches remain **OFF** on a fresh install. Updates preserve switches, preferences and browser position. OFF disables the installed behavior; it does not remove patches. Unsupported versions and conflicting system files are never patched. The support-only explicit app-without-patches fallback is not a second download and cannot discard an existing integration's recovery.
 
 Portable verified recovery lives in the card's hidden `.tmp_update/config` directory, outside the app. Keep it. Optional computer copies are additional protection, not an uninstall dependency. Installation and restoration take effect after reboot.
 
-## Opening unsigned files
+## First opening
 
-Windows may show a file-specific security confirmation for downloaded tools. macOS may require Control-click → Open for that file. Do not disable SmartScreen or Gatekeeper globally. A downloaded `.command` may need executable permission if your extractor discards it; use an extractor preserving ZIP permissions. Linux launchers vary by desktop: approve **Allow launching/Trust** for this file. It opens a terminal and stages the native executable on the computer, so the SD volume may be mounted `noexec`.
-
-If your desktop cannot launch `.desktop` files, use the explicit support command below. No claim is made that every Linux desktop launches identically.
+See [Mac/Windows file-specific security approval](security-opening.md). Approving the Mac script does not approve its child. The launcher retains an identifiable, byte-verified host helper for approval and retry. No quarantine attributes or global protection settings are changed. Linux uses its desktop's **Allow launching/Trust** step; if unavailable, use the shell command below.
 
 ## First launch
 
@@ -47,13 +41,13 @@ Turning a switch OFF disables its behavior. Complete uninstall restores the orig
 
 ## Update without losing preferences
 
-Copy the **contents** of the new `BetterFavoritesTest` folder into the existing folder and replace supplied files. Keep files already there that the package does not supply. On macOS, do not choose whole-folder Replace; open both folders and copy their contents or use Merge.
+Copy the **contents** of the new `BetterFavorites` folder into the existing folder and replace supplied files. Keep files already there that the package does not supply. On macOS, do not choose whole-folder Replace; open both folders and copy their contents or use Merge.
 
 Open the copied computer launcher and choose Install / Update. The package contains no personal preferences/state. Existing verified originals remain stock originals through updates; newly copied exact package files are recognized. Unknown or modified files are preserved and reported.
 
-## App-only drag and drop
+## Migrating BetterFavoritesTest
 
-Copy the app-only package's `App/BetterFavoritesTest` folder into `App` while powered off. Safely eject and boot; open Apps. There are no system patches to enable unless previously installed. App-only does not overwrite or uninstall existing integrations.
+Copy the new `BetterFavorites` folder beside the old `BetterFavoritesTest`, then open the **new** launcher. A verified portable recovery lineage authenticates old files and stock originals. A never-installed exact RC3 copy is also recognized when every system file is stock and no integration is active. Install / Update migrates preferences, browser position and dismissed guidance, replaces both integration commands, then retires the old owned folder. It refuses unknown files or conflicting saved data instead of merging them. Keep recovery and use the matching development restoration procedure first if an older development install has no portable journal. Do not manually rename a patched installation.
 
 ## Advanced/support commands
 

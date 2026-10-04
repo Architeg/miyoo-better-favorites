@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.0-rc.4 — preparation, not published
+
+- One user ZIP and canonical BetterFavorites path.
+- Verified legacy migration, interrupted recovery and portable complete uninstall.
+- Retained Mac helper for file-specific approval and byte-checked retry.
+- Concrete SwiftShader attribution mapping and supplemental LLVM/Bison notices.
+- No game, UI or audio changes; renamed-package hardware acceptance pending.
+
+
 ## 1.0.0-rc.3 — preparation, not published
 
 - Copy-to-card computer launchers with Install / Update and Uninstall completely.

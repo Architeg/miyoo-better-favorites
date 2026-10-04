@@ -24,17 +24,46 @@ if [ -d computer ]; then
  source=$(pwd -L)
  tool="computer/${tool#./}"
  [ -f "$tool" ] && [ ! -L "$tool" ] || fail "missing/unsafe packaged executable $tool"
- stage=$(mktemp -d "${TMPDIR:-/tmp}/better-favorites-bootstrap.XXXXXX") || exit 2
- trap 'rm -f "$stage/installer"; rmdir "$stage"' EXIT
- trap 'exit 129' HUP
- trap 'exit 130' INT
- trap 'exit 143' TERM
- cp "$tool" "$stage/installer" || exit 2
- chmod 700 "$stage/installer" || exit 2
- set +e
- "$stage/installer" --card-launcher "$source" "$@"
- result=$?
- set -e
+ # A stable per-byte-identity path retains file-specific approval across actions.
+ # Never erase quarantine or replace an existing cached file with different bytes.
+ hash=$(/usr/bin/shasum -a 256 "$tool") || exit 2
+ hash=${hash%% *}
+ case "$hash" in *[!0-9a-f]*|'') fail "invalid executable checksum";; esac
+ cache="$HOME/Library/Caches/BetterFavorites"
+ for parent in "$HOME/Library" "$HOME/Library/Caches" "$cache" "$cache/$hash"; do
+  [ ! -L "$parent" ] || fail "unsafe approval cache $parent"
+  if [ ! -d "$parent" ]; then mkdir -m 700 "$parent" || exit 2; fi
+  [ -O "$parent" ] || fail "approval cache is not owned by this user"
+ done
+ stage="$cache/$hash"
+ approved="$stage/BetterFavorites-Installer"
+ if [ ! -e "$approved" ]; then
+  temporary=$(mktemp "$stage/.copy.XXXXXX") || exit 2
+  trap 'rm -f "$temporary"' EXIT
+  cp -p "$tool" "$temporary" && chmod 700 "$temporary" && mv -n "$temporary" "$approved" || exit 2
+  rm -f "$temporary"
+ fi
+ verify() {
+  [ -f "$approved" ] && [ ! -L "$approved" ] && [ -O "$approved" ] || fail "unsafe cached installer"
+  actual=$(/usr/bin/shasum -a 256 "$approved") || exit 2
+  [ "${actual%% *}" = "$hash" ] || fail "cached installer changed; preserved for inspection"
+ }
+ while :; do
+  verify
+  set +e
+  "$approved" --card-launcher "$source" "$@"
+  result=$?
+  set -e
+  [ "$result" -ne 0 ] || break
+  printf '\nInstaller did not complete (status %s).\n' "$result"
+  printf 'If macOS blocked this file, use its file-specific Open Anyway approval:\n%s\n' "$approved"
+  printf 'Monterey: System Preferences > Security & Privacy > General.\n'
+  printf 'Newer macOS: System Settings > Privacy & Security.\n'
+  printf 'Do not override malware/damaged-file or managed-policy warnings.\n'
+  printf 'The verified file is retained. After approval, type r to retry; anything else closes: '
+  read -r answer || answer=
+  [ "$answer" = r ] || break
+ done
  if [ "$#" -eq 0 ]; then printf "\nPress Enter to close. "; read -r answer || :; fi
  exit "$result"
 fi

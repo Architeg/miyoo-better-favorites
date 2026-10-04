@@ -236,7 +236,7 @@ int main(int argc, char* argv[])
 
     const char* settingsEnvironment = std::getenv("BETTER_FAVORITES_SETTINGS");
     const std::string appSettingsPath = settingsEnvironment && *settingsEnvironment
-        ? settingsEnvironment : "/mnt/SDCARD/App/BetterFavoritesTest/settings.conf";
+        ? settingsEnvironment : "/mnt/SDCARD/App/BetterFavorites/settings.conf";
     AppSettings appSettings;
     std::string settingsError;
     { startup_profile::Scope phase("settings.return"); loadAppSettings(appSettingsPath, appSettings, settingsError); }
@@ -269,7 +269,7 @@ int main(int argc, char* argv[])
     long firstRow = 0;
     const char* stateEnvironment = std::getenv("BETTER_FAVORITES_BROWSER_STATE");
     const std::string browserStatePath = stateEnvironment && *stateEnvironment
-        ? stateEnvironment : "/mnt/SDCARD/App/BetterFavoritesTest/browser-state";
+        ? stateEnvironment : "/mnt/SDCARD/App/BetterFavorites/browser-state";
     std::string stateError;
     { startup_profile::Scope phase("browser.restore"); restoreBrowserState(browserStatePath, rows, selectedRow, firstRow, stateError); }
     if (!stateError.empty()) std::cerr << stateError << std::endl;

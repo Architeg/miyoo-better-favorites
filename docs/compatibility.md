@@ -52,7 +52,7 @@ with the app and active integration files absent. Fault tests do not become hard
 acceptance merely because the normal flow passed.
 
 The new copy-and-click candidate still needs its short final-package device cycle.
-Unsigned Finder/Explorer/desktop opening has not been established by shell fixtures.
+User confirms Mac/Windows double-click routes were exercised; supplied Mac screenshots show the second executable blocked before the menu. New helper approval/retry and renamed-package acceptance remain pending.
 Component-specific attribution evidence is documented in the [dependency audit](release/dependency-audit.md); exact byte reproduction is a separate goal.
-[Current acceptance steps](release/rc.3.md). Earlier RC2 evidence is historical. Disk sizes are not RAM measurements; no measured
+[Current acceptance steps](release/rc.4.md). Earlier RC2 evidence is historical. Disk sizes are not RAM measurements; no measured
 cache speedup or gameplay/ON-OFF process-memory result is claimed. [Profiling evidence](m5-profiling.md).

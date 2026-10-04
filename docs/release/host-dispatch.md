@@ -26,7 +26,7 @@ WSL, compiler, Python, Docker or Internet is required by users.
 
 ## One entry script per platform
 
-The recommended route is to copy the full package app folder to the card, then open its platform launcher. These are optional support commands from that copied app folder:
+The recommended route is to copy the ready-to-install package app folder to the card, then open its platform launcher. These are optional support commands from that copied app folder:
 
 | Platform | Install | Complete uninstall |
 | --- | --- | --- |
@@ -38,7 +38,7 @@ Action-only prompts, no-argument menu, explicit flags, export-diagnostics,
 remove-integrations and emergency restore all share this interface. Uninstall
 restores and verifies stock before full owned-file removal; computer-side verified
 recovery remains outside SD. Foreign changes fail without claiming completion.
-Drag/drop app-only installation remains available; it cannot install/remove patches.
+Both integrations are installed by default on supported cards; saved switches default OFF.
 
 Windows cmd invokes a read-only Go1.20.14 x86 bootstrap. RtlGetVersion obtains the
 actual NT version, unaffected by compatibility-limited GetVersionEx. On systems
@@ -112,6 +112,6 @@ These requirements and toolchain pins must be reviewed on each release update.
 
 ## Copy-to-card follow-up evidence
 
-The RC3 entry captures the original logical app path before moving execution off-card. The backend validates App/BetterFavoritesTest, Onion version/runtime/ARM MainUI and all path ancestors, then verifies the transport/package before staging. Windows transfers its batch context and working directory to a private computer folder so the card folder can be removed. The active portable journal index uses card-relative paths/hash, not the original host username/mount.
+The RC3 entry captures the original logical app path before moving execution off-card. The backend validates App/BetterFavorites, Onion version/runtime/ARM MainUI and all path ancestors, then verifies the transport/package before staging. Windows transfers its batch context and working directory to a private computer folder so the card folder can be removed. The active portable journal index uses card-relative paths/hash, not the original host username/mount.
 
-Native macOS shell-entry and Linux-container full-ZIP roundtrips exercise the new menu and complete removal. GLib desktop Exec parsing is tested with a non-terminal fixture; this is not a desktop terminal/Allow launching test. Finder quarantine/opening and Explorer's new staged batch execution cannot be established by these headless checks. Previous Mac/Windows install acceptance remains valid for its earlier package, not these new launcher bytes. Community target testing is welcome; this pass asks for one final-package fresh-user cycle, not a broad new OS matrix.
+Native macOS shell-entry and Linux-container user-ZIP roundtrips exercise the new menu and complete removal. GLib desktop Exec parsing is tested with a non-terminal fixture; this is not a desktop terminal/Allow launching test. Finder quarantine/opening and Explorer's new staged batch execution cannot be established by these headless checks. Previous Mac/Windows install acceptance remains valid for its earlier package, not these new launcher bytes. Community target testing is welcome; this pass asks for one final-package fresh-user cycle, not a broad new OS matrix.

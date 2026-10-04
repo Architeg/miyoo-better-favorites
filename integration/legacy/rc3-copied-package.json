@@ -1,0 +1,1421 @@
+{
+  "version": "1.0.0-rc.3",
+  "commit": "b1c9bd15eb0640133737c4aeebf3b9f180a1358e",
+  "files": [
+    {
+      "path": "App/BetterFavoritesTest/config.json",
+      "sha256": "2772927b2056b68fdac647c7ec7d36b53725ce740d7c7527d63bd72618cce107",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/launch.sh",
+      "sha256": "f103f5ce8be4872590c3bc122b4d62a19726529d44c5a8f67d0416cc52e3c494",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/icon.png",
+      "sha256": "bfc30f99b0afa4c35fe738a3207a4f8cdcf28fb01a283cdf224073507e30b909",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/better-favorites",
+      "sha256": "8751f10ff5955446f064a5ff6515f0a1a7e64da5c974bd355f29cb10f705a9bd",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/libSDL2-2.0.so.0",
+      "sha256": "f103f5439d62a570b8977dcd7352779404cfb5112fc79008899c91c718a85d8a",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/libSDL2_image-2.0.so.0",
+      "sha256": "987f7326276c251010591cde4d0e3c627d2601a5e375e5a717896b4eb8a8da1d",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/libSDL2_mixer-2.0.so.0",
+      "sha256": "0ef3183ccb52d7761296e76b9346cc5ac8715c676f40702bd3cbf64ca051af3b",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/libSDL2_ttf-2.0.so.0",
+      "sha256": "e78fae7da6c688e16004a8c2343cacb7053d66cf7b2e01a71fe84448328a4762",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/libjson-c.so.5",
+      "sha256": "52977c53de8cbe7f230f0956931b3040fdbab7a6b70400d99fae67512e3bdef4",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/libpng16.so.16",
+      "sha256": "07d588538e7922145f163fbbba33806269e345de4c7d292c2ac44b128b3b217d",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/libz.so.1",
+      "sha256": "480907f680d4feea4d98a10aa0355fd73fa8aacf21fd67ce84b1a65d4de24e73",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/libEGL.so",
+      "sha256": "58e07aec9d59058b02c3ab8478038eec7e7c7964bedb8707f369998425692570",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/libGLESv2.so",
+      "sha256": "80374f563291d83042f1fe1970f9c99063bcd48f1578cfec83ea8613d36382fe",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/release.json",
+      "sha256": "ad064ee6bb8d6bf34cab4cb15a26e559c6cd5e6a66a287224b34528bbec5cb16",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/CHANGELOG.md",
+      "sha256": "7f3807b53f358dffdeafdfc791919b985a55b7aba182a38ccc7dc3043d3c9176",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/CONTRIBUTING.md",
+      "sha256": "7d3fd11d0147fbf51ba03f0132be7759894523c84a3c668e8960cead8bbfd38e",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/HOST-BUILDS.json",
+      "sha256": "e73c460f2f8b2ae8da54c00ad94c7241e506a02152d6817a8ec40cf26caf5b1d",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/Install-Linux.sh",
+      "sha256": "97af2b96914f21c1ddddd06726ead61ef95f6f2e9e3586124a508b3bb3c249f1",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/Install-Windows.cmd",
+      "sha256": "34f5ab8301610e82043d09fca34e2d2fcd127d5422daa252a9daecd1100d6d63",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/Install-macOS.command",
+      "sha256": "7118adca06ab14656ed32f0e45374df348f3d2af996ed92897bb9f6a82c78351",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/LICENSE",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/README.md",
+      "sha256": "27ada3ecc2df14ab13461a19de2526639fee45e28bddecda7229dddfc2f8d82e",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/README.txt",
+      "sha256": "96bd79757900bc507aef7e17d250d022fc1d20114e8cfffebdc474fa5d3d59b0",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/SHA256SUMS",
+      "sha256": "cfddf7a4886680f197a85a6d9b30afd61f82cd5856b281fd4482db5bf7444fce",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/SOURCE-INVENTORY.json",
+      "sha256": "d815adb28e641453f82aa7eeebaef3e46a61989815224dbe3c35a662f6e88bd3",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/SOURCE.txt",
+      "sha256": "022820e5f85a796b9d6ce45f87f4980ffb3f7a9264379aab73675576d5777c0c",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/THIRD_PARTY_NOTICES.md",
+      "sha256": "a014ce7d848aec49d2d6a654ca562fe118a7f01fd34abc19e2d05fac636228eb",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/better-favorites-dispatch-windows-386.exe",
+      "sha256": "9f638b29e2021c2836f2d84f642a9acb934f16289671cd12d5110f393cd37148",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/better-favorites-installer-darwin-amd64",
+      "sha256": "81bf3fc31756f2cd3b2328b1d17631c66f65c7ecba98b0fb7116fce6b0073470",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/better-favorites-installer-darwin-arm64",
+      "sha256": "e1dc949806e59c1aa1c62c2b66402b5e5c693472ba74938adaa8bad1e1e4e956",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/better-favorites-installer-linux-amd64",
+      "sha256": "92e6c9ffa9cc94a38776b01d7d138d9b00330b31867396935f74c75b515bc077",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/better-favorites-installer-linux-arm64",
+      "sha256": "93ba514775c5aaba3eddf1af73171dac68f6ff73234b47b87230226fe79dab89",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/better-favorites-installer-windows-386.exe",
+      "sha256": "9b6f304f1f49bedcd8e1270cbcb50020621ad2db2e12156f1b1c1c69877f1d4e",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/better-favorites-installer-windows-amd64.exe",
+      "sha256": "603bc4dd4537d2215fa9a1a4288361f861920e612c191a198e0c6cae478de72f",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/better-favorites-installer-windows-arm64.exe",
+      "sha256": "e238f7bd1164df8b9773cb2c5a045c8ff1466a85af23d37c82a44b806ea102cb",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/better-favorites-installer-windows7-386.exe",
+      "sha256": "57c5d4e0599db318ddbfe8726b76efe2c6b06253a39aa4ef6deb8ad247c01896",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/better-favorites-installer-windows7-amd64.exe",
+      "sha256": "f2fb05c1d2b26072b0c582e7c69543298df9c202edaa4c6e7e98f8f002a059bc",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/architecture.md",
+      "sha256": "3b7a96e1f0788827b3b486eb82fb54710b94ec4534a8de4642435a3421c3057a",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/archive/development-status-pre-release.md",
+      "sha256": "4a1d55b2c42ee54b0bca4e0bea1487a2b7a6fb2ba06c6e80b82ac42fb3c16c37",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/browser-settings.md",
+      "sha256": "35b3c30f8378bae9fc5e77ef8c231c6caffbeee924056a53b2982b46442e014b",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/browser-title-scrolling.md",
+      "sha256": "7df40dcc310e28f2cb601bcdf94a040274d25d0e92cbf7aea14660f30f15edcb",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/compatibility.md",
+      "sha256": "b25e1bda5c4f9bfb3ddb5a226329f800e8eddb7f3cbb6c50f200bb6ac783ab9d",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/developer-index.md",
+      "sha256": "5d7bf63cd430bcbd8ef7ef9a53cffdea5f1442c9870a872dc16efe5577b116bd",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/development-status.md",
+      "sha256": "61247bd433564263e37dd3baa3a54f39d4779a4555d0ce9366dcc0474f114b35",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/development.md",
+      "sha256": "82bf17b241481f72c56c71c2ffb13d9cf8cecab3f26f33083580921181e33f2f",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/diagnostics.md",
+      "sha256": "d1939f4f4af6116315c4a12913628afa89d0e52fdddeb076a0803f9baac9ab9a",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/install.md",
+      "sha256": "d664d9ed948a3fb0ff9e907821ef1c1c2925db5ffa200c99aa9b89e2cfd31d1a",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/m4-audit.md",
+      "sha256": "84e3b9350532baf2e9ab724464dfddecafb527af8d200dc30b4dd3bb3d97ac3f",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/m5-emulator-label-cache.md",
+      "sha256": "818f241f26b2401055a85082fbbe6fed5365ec3b138368aac2bbd25c11f68629",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/m5-profiling.md",
+      "sha256": "6dd8646e5f4f417f5b5d497241ba17662e92c0337f851cd4281a35e29d80d6df",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/m6-acceptance.md",
+      "sha256": "35426158387ad2b9ba1ec507e2540cb2587aaf91e1038b9f7cdbb39c837158c1",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/m6-home-integration.md",
+      "sha256": "8cf7dbd15aa093de23b1f835f5c4a6005363280806f7962d029a673a51b7a97a",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/m6-mainui-prototype.md",
+      "sha256": "62c50937833eb16f0a5908a6c762e6729dcaf40d74414dfb69ddd05d565c27de",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/m6-shortcut-investigation.md",
+      "sha256": "2c8a3bfa84378cd5470a1dbf06568a333fdd1c6cb22c75643c25641305972345",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/menu-presentation.md",
+      "sha256": "a11ad39e1cbb8b167a8ed2d63092e93d4851001be9608823a9ace4125474f21c",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/menu-removal.md",
+      "sha256": "9652a8340dd7c3794922536355288e426ec78d8bfaee35658d1301e1bb43bc19",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/onion-return.md",
+      "sha256": "e0f1eb87791e621e0e310d0f4974adb1d0371d965cf56061ce708f2d83004dae",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/recovery.md",
+      "sha256": "b79726c824b77a14edd66155b03ca4c2115dd1f408e0cf6cc918a0c121cafdd6",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/release/build.md",
+      "sha256": "4a80721f4f455606202a85ca767b3637ef776d4c92e0bee98c073d3331de7358",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/release/dependency-audit.md",
+      "sha256": "7e0ff6c98e36e726ffce977153f9e791cbae1ea3c90cc5e53961e73c45720e80",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/release/dependency-components.json",
+      "sha256": "57dcd4747581d6bb70e1279a9e4b9a3eb890a33355b1eeb0585d9556635b37d6",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/release/dependency-hashes.json",
+      "sha256": "2d1bdc33205ed68997bfe1ac93bc521aa540b8aec11491d89bd83808dce23048",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/release/host-dispatch.md",
+      "sha256": "1c9c32836988943cbf5867f93adea9c5256661e95dbfc6a0c71d4472e5b4cd2e",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/release/notes-rc.2.md",
+      "sha256": "bfbf450959302a125165690b2fb080175120664c41830afc3cd7fe2aa86975a6",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/release/notes-rc.3.md",
+      "sha256": "f44d146061c442a37cc9f7a53676ed7f56fbc1e111f157df259584ea3c4b1bad",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/release/rc.1.md",
+      "sha256": "898b929172127dcd410c6dc9b4ca3630fdd65a1e1c59fb999d4e10b0988273e8",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/release/rc.2.md",
+      "sha256": "7c9a00d04bb2a88d031c189b7f2624b1c3f337614e216f64cad6f9ebeffd3d2d",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/release/rc.3.md",
+      "sha256": "4592ff17deb7e4644fd569fbb87bc01e8dd8e46e5f52ac47ed8e42294b350447",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/release/rc1-mac-acceptance.md",
+      "sha256": "f44869e3ff15244d2013e50a673de42fc4144bfc02804b3cfd19e1200070f5f6",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/release/upstream-sources.json",
+      "sha256": "5110173a67e045bec9966b48c93c84ed9f5fbd0fd6ef2f2ac9706def3495d0fd",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/release/windows-acceptance.md",
+      "sha256": "566fc60cd14e257794dc509848d92b5bb169b856973ec5c67e02b3b8fc721774",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/roadmap.md",
+      "sha256": "9f8ccc2d608d60af53fa7854aa665ec569a02868bbcf96a17653caaf39cca6f8",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/uninstall.md",
+      "sha256": "8847209e883f6bb6ef2f2814d8b1b9bd41ddbbc05bc68e151a62d517b5bee1c1",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/docs/user-guide.md",
+      "sha256": "a5f94816729f1d4b7a180b30db70c77d324e6021073934fb31b8d4410aee4a24",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/Go-LICENSE",
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/LICENSE",
+      "sha256": "bb117c0fbd7f57f64170b690285d7df07c2371b578e3b3cd3aa2e1155ef461a0",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_image-2.8.1.tar-SDL2_image-2.8.1-LICENSE.txt",
+      "sha256": "1852c8549e3d154687197d46abababd3e8faae035f19991b2ca850fa3a43ad57",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_image-2.8.1.tar-SDL2_image-2.8.1-VisualC-external-optional-x64-LICENSE.avif.txt",
+      "sha256": "5a6e603c08d02a173954aced9957fa7e5fcd72c43ff78775b758fc7109da18a6",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_image-2.8.1.tar-SDL2_image-2.8.1-VisualC-external-optional-x64-LICENSE.dav1d.txt",
+      "sha256": "b327887de263238deaa80c34cdd2ff3e0ba1d35db585ce14a37ce3e74ee389e9",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_image-2.8.1.tar-SDL2_image-2.8.1-VisualC-external-optional-x64-LICENSE.tiff.txt",
+      "sha256": "8f859efd8916b7df374bd39dc9eeea9d53dbcf35e62fcf670d2b3b4c4d8f251a",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_image-2.8.1.tar-SDL2_image-2.8.1-VisualC-external-optional-x64-LICENSE.webp.txt",
+      "sha256": "17c029a902ad45a199dfe8e3a1c39305ab28d302b0703360c4a27351a4673dcb",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_image-2.8.1.tar-SDL2_image-2.8.1-VisualC-external-optional-x86-LICENSE.avif.txt",
+      "sha256": "5a6e603c08d02a173954aced9957fa7e5fcd72c43ff78775b758fc7109da18a6",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_image-2.8.1.tar-SDL2_image-2.8.1-VisualC-external-optional-x86-LICENSE.dav1d.txt",
+      "sha256": "b327887de263238deaa80c34cdd2ff3e0ba1d35db585ce14a37ce3e74ee389e9",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_image-2.8.1.tar-SDL2_image-2.8.1-VisualC-external-optional-x86-LICENSE.tiff.txt",
+      "sha256": "8f859efd8916b7df374bd39dc9eeea9d53dbcf35e62fcf670d2b3b4c4d8f251a",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_image-2.8.1.tar-SDL2_image-2.8.1-VisualC-external-optional-x86-LICENSE.webp.txt",
+      "sha256": "17c029a902ad45a199dfe8e3a1c39305ab28d302b0703360c4a27351a4673dcb",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_image-2.8.1.tar-SDL2_image-2.8.1-Xcode-iOS-SDL2.framework-License.txt",
+      "sha256": "218e120812f1fd02025335087d3c3f3011a86a1e13cecb7231ea137f0592b833",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_image-2.8.1.tar-SDL2_image-2.8.1-Xcode-macOS-SDL2.framework-Versions-A-Resources-License.txt",
+      "sha256": "218e120812f1fd02025335087d3c3f3011a86a1e13cecb7231ea137f0592b833",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_image-2.8.1.tar-SDL2_image-2.8.1-Xcode-tvOS-SDL2.framework-License.txt",
+      "sha256": "218e120812f1fd02025335087d3c3f3011a86a1e13cecb7231ea137f0592b833",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_mixer-2.6.3.tar-SDL2_mixer-2.6.3-LICENSE.txt",
+      "sha256": "1852c8549e3d154687197d46abababd3e8faae035f19991b2ca850fa3a43ad57",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_mixer-2.6.3.tar-SDL2_mixer-2.6.3-VisualC-external-optional-x64-LICENSE.modplug.txt",
+      "sha256": "0c68419a8cb5785cc963daac39187534f4d2a4a35807d4986e065f7a5ee85c0e",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_mixer-2.6.3.tar-SDL2_mixer-2.6.3-VisualC-external-optional-x64-LICENSE.ogg-vorbis.txt",
+      "sha256": "dd292660913d2052c8405bf634e8386908654b4abe60334b721d71de700b3210",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_mixer-2.6.3.tar-SDL2_mixer-2.6.3-VisualC-external-optional-x64-LICENSE.opus.txt",
+      "sha256": "113738704d44ece5a62519426b4c661e44b94a7e0d38e2207f321175478c264d",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_mixer-2.6.3.tar-SDL2_mixer-2.6.3-VisualC-external-optional-x64-LICENSE.opusfile.txt",
+      "sha256": "15c55f8c6a88ef9ee9a18ada9dbb2459bebaaf2527c91159fc23818f275f32b2",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_mixer-2.6.3.tar-SDL2_mixer-2.6.3-VisualC-external-optional-x86-LICENSE.modplug.txt",
+      "sha256": "0c68419a8cb5785cc963daac39187534f4d2a4a35807d4986e065f7a5ee85c0e",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_mixer-2.6.3.tar-SDL2_mixer-2.6.3-VisualC-external-optional-x86-LICENSE.ogg-vorbis.txt",
+      "sha256": "dd292660913d2052c8405bf634e8386908654b4abe60334b721d71de700b3210",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_mixer-2.6.3.tar-SDL2_mixer-2.6.3-VisualC-external-optional-x86-LICENSE.opus.txt",
+      "sha256": "113738704d44ece5a62519426b4c661e44b94a7e0d38e2207f321175478c264d",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_mixer-2.6.3.tar-SDL2_mixer-2.6.3-VisualC-external-optional-x86-LICENSE.opusfile.txt",
+      "sha256": "15c55f8c6a88ef9ee9a18ada9dbb2459bebaaf2527c91159fc23818f275f32b2",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_mixer-2.6.3.tar-SDL2_mixer-2.6.3-Xcode-iOS-SDL2.framework-License.txt",
+      "sha256": "77edc2b8cb8d4eebe362cf87383cf8e1bde7b0e1f0c09aa573240eabbaa100f7",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_mixer-2.6.3.tar-SDL2_mixer-2.6.3-Xcode-macOS-SDL2.framework-Versions-A-Resources-License.txt",
+      "sha256": "77edc2b8cb8d4eebe362cf87383cf8e1bde7b0e1f0c09aa573240eabbaa100f7",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_mixer-2.6.3.tar-SDL2_mixer-2.6.3-Xcode-tvOS-SDL2.framework-License.txt",
+      "sha256": "77edc2b8cb8d4eebe362cf87383cf8e1bde7b0e1f0c09aa573240eabbaa100f7",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_mixer-2.6.3.tar-SDL2_mixer-2.6.3-src-codecs-dr_libs-LICENSE",
+      "sha256": "dd1c647e6f767f8ff4b2dfae0fed314726600a01e0cf1ef556afddd5fa96ff15",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_mixer-2.6.3.tar-SDL2_mixer-2.6.3-src-codecs-timidity-COPYING",
+      "sha256": "188de23cc548f2afd04bfb85217220f6864ca2412dc3af003f0d89a9641f42c3",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_ttf-2.20.2.tar-SDL2_ttf-2.20.2-LICENSE.txt",
+      "sha256": "1852c8549e3d154687197d46abababd3e8faae035f19991b2ca850fa3a43ad57",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_ttf-2.20.2.tar-SDL2_ttf-2.20.2-VisualC-external-lib-x64-LICENSE.freetype.txt",
+      "sha256": "ea247c82c8065ac0f60f3c415e6bd2bf61a4360887172e95a07c2e039862ef5c",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_ttf-2.20.2.tar-SDL2_ttf-2.20.2-VisualC-external-lib-x64-LICENSE.harfbuzz.txt",
+      "sha256": "c37d6429fd49148d2b4c8b15ae68edb90dfb3e3b6471ab661f0c531f335511f2",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_ttf-2.20.2.tar-SDL2_ttf-2.20.2-VisualC-external-lib-x64-LICENSE.zlib.txt",
+      "sha256": "24cb8f0040d026442bfd59e621f7e30c85880f804b4377a5344a4c04e7910182",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_ttf-2.20.2.tar-SDL2_ttf-2.20.2-VisualC-external-lib-x86-LICENSE.freetype.txt",
+      "sha256": "ea247c82c8065ac0f60f3c415e6bd2bf61a4360887172e95a07c2e039862ef5c",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_ttf-2.20.2.tar-SDL2_ttf-2.20.2-VisualC-external-lib-x86-LICENSE.harfbuzz.txt",
+      "sha256": "c37d6429fd49148d2b4c8b15ae68edb90dfb3e3b6471ab661f0c531f335511f2",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_ttf-2.20.2.tar-SDL2_ttf-2.20.2-VisualC-external-lib-x86-LICENSE.zlib.txt",
+      "sha256": "24cb8f0040d026442bfd59e621f7e30c85880f804b4377a5344a4c04e7910182",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_ttf-2.20.2.tar-SDL2_ttf-2.20.2-Xcode-iOS-SDL2.framework-License.txt",
+      "sha256": "77edc2b8cb8d4eebe362cf87383cf8e1bde7b0e1f0c09aa573240eabbaa100f7",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_ttf-2.20.2.tar-SDL2_ttf-2.20.2-Xcode-macOS-SDL2.framework-Versions-A-Resources-License.txt",
+      "sha256": "77edc2b8cb8d4eebe362cf87383cf8e1bde7b0e1f0c09aa573240eabbaa100f7",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_ttf-2.20.2.tar-SDL2_ttf-2.20.2-Xcode-tvOS-SDL2.framework-License.txt",
+      "sha256": "77edc2b8cb8d4eebe362cf87383cf8e1bde7b0e1f0c09aa573240eabbaa100f7",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_ttf-2.20.2.tar-SDL2_ttf-2.20.2-external-freetype-LICENSE.TXT",
+      "sha256": "c85e842b7ff04d95dab7d68e812773de0f8b67940e5449d35b42c66eb0f619fe",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_ttf-2.20.2.tar-SDL2_ttf-2.20.2-external-harfbuzz-COPYING",
+      "sha256": "4345e1735f8bc6d812fed5180cabb5a5e88a4109d332652f2a45c13cfa5ee692",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL2_ttf-2.20.2.tar-SDL2_ttf-2.20.2-external-harfbuzz-src-ms-use-COPYING",
+      "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/COPYING.txt",
+      "sha256": "45079362e2230154205413a6940544ca94e3479ccf76205c71c4f542a6815d25",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/VisualC/external/lib/x64/LICENSE.jpeg.txt",
+      "sha256": "25bf843e90ea09448ecf9f8a8bf94ef50b182075a551bf326a51cc05d1b76f76",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/VisualC/external/lib/x64/LICENSE.png.txt",
+      "sha256": "f40671f236201909a843efc805bded4a04aac79980bab4e62a9655e675c82d4d",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/VisualC/external/lib/x64/LICENSE.tiff.txt",
+      "sha256": "58e15005ea45d16482a2dc2f5daa47e75bfab250e57f55c68ee057e457004a3d",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/VisualC/external/lib/x64/LICENSE.webp.txt",
+      "sha256": "234c8f47e6d3ff26271a75f046a29ec132b55e37884307bbf62ea44910af6c46",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/VisualC/external/lib/x64/LICENSE.zlib.txt",
+      "sha256": "49a398f1686d02ce6ff23b32a1214c5af2485682c61e6cbe8fb60bd37ad314d3",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/VisualC/external/lib/x86/LICENSE.jpeg.txt",
+      "sha256": "25bf843e90ea09448ecf9f8a8bf94ef50b182075a551bf326a51cc05d1b76f76",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/VisualC/external/lib/x86/LICENSE.png.txt",
+      "sha256": "f40671f236201909a843efc805bded4a04aac79980bab4e62a9655e675c82d4d",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/VisualC/external/lib/x86/LICENSE.tiff.txt",
+      "sha256": "58e15005ea45d16482a2dc2f5daa47e75bfab250e57f55c68ee057e457004a3d",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/VisualC/external/lib/x86/LICENSE.webp.txt",
+      "sha256": "234c8f47e6d3ff26271a75f046a29ec132b55e37884307bbf62ea44910af6c46",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/VisualC/external/lib/x86/LICENSE.zlib.txt",
+      "sha256": "49a398f1686d02ce6ff23b32a1214c5af2485682c61e6cbe8fb60bd37ad314d3",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/Xcode/Frameworks/webp.framework/Versions/A/Resources/LICENSE.webp.txt",
+      "sha256": "2a8cecf661ba95d7b209b2ba4da9ad024c41975a0e78af37c27f4d0240d1ecdc",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/debian/copyright",
+      "sha256": "111f73eaa499d986c340e8a1604c725280c7771123cf9ab77390327cab8e0eb2",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/external/libpng-1.6.37/LICENSE",
+      "sha256": "bf5e22b9dce8464064ae17a48ea1133c3369ac9e1d80ef9e320e5219aa14ea9b",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/external/libpng-1.6.37/contrib/gregbook/COPYING",
+      "sha256": "d6cb0e9e560f51085556949a84af12b79a00f10ab8b66c752537faf7cd665572",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/external/libpng-1.6.37/contrib/gregbook/LICENSE",
+      "sha256": "b6a03c1803eb58ffb1f1278d5c7d4096c4c116e66dce8a7553e8c77d163c3438",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/external/libpng-1.6.37/contrib/pngminus/LICENSE.txt",
+      "sha256": "71778de2e263e60e18d6e0112e65fc7229e90e4dc0d2b8e06640e442125a6dbe",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/external/libwebp-1.0.2/COPYING",
+      "sha256": "5aec868f669e384a22372a4e8a1a6cd7d44c64cd451f960ca69cc170d1e13acf",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/external/tiff-4.0.9/COPYRIGHT",
+      "sha256": "fbd6fed7938541d2c809c0826225fc85e551fdbfa8732b10f0c87e0847acafd7",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/external/zlib-1.2.11/contrib/dotzlib/LICENSE_1_0.txt",
+      "sha256": "36266a8fd073568394cb81cdb2b124f7fdae2c64c1a7ed09db34b4d22efa2951",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/miniz.h",
+      "sha256": "1efed4ca8576b883bef72662fee6bbd15e704eb179d67cb7832bde451cea7580",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/nanosvg.h",
+      "sha256": "2757f22782ff63f0e94a184c2068671fc530663df3b6616293edbec870b32a07",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5/nanosvgrast.h",
+      "sha256": "0cd72cdc1f08eab33136132c64b0a99dd106249854bb1460737802077cb564d4",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_image-2.0.5-COPYING.txt",
+      "sha256": "45079362e2230154205413a6940544ca94e3479ccf76205c71c4f542a6815d25",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/COPYING.txt",
+      "sha256": "113727180e7956cb9718b03b41da85b63ea54743a33047071a623bf672895a10",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/VisualC/external/lib/x64/LICENSE.FLAC.txt",
+      "sha256": "3335ec1badce668895809c158185b1d29299e718a7192ad6c020158b89e7524a",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/VisualC/external/lib/x64/LICENSE.modplug.txt",
+      "sha256": "0c68419a8cb5785cc963daac39187534f4d2a4a35807d4986e065f7a5ee85c0e",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/VisualC/external/lib/x64/LICENSE.mpg123.txt",
+      "sha256": "a18d7ae28a3b695e1a3df2970d133495e4899f7d746ad46a4b0d5dd222441456",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/VisualC/external/lib/x64/LICENSE.ogg-vorbis.txt",
+      "sha256": "a853081d4111fa74a47f75b28bc74c2218d3254292f097c31096f1387ee7865a",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/VisualC/external/lib/x64/LICENSE.opus.txt",
+      "sha256": "124717414895f2a518600f6a04ef0518ec28693c401966dfa1e66ca27b8e0fe3",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/VisualC/external/lib/x64/LICENSE.opusfile.txt",
+      "sha256": "15c55f8c6a88ef9ee9a18ada9dbb2459bebaaf2527c91159fc23818f275f32b2",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/VisualC/external/lib/x86/LICENSE.FLAC.txt",
+      "sha256": "3335ec1badce668895809c158185b1d29299e718a7192ad6c020158b89e7524a",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/VisualC/external/lib/x86/LICENSE.modplug.txt",
+      "sha256": "0c68419a8cb5785cc963daac39187534f4d2a4a35807d4986e065f7a5ee85c0e",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/VisualC/external/lib/x86/LICENSE.mpg123.txt",
+      "sha256": "a18d7ae28a3b695e1a3df2970d133495e4899f7d746ad46a4b0d5dd222441456",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/VisualC/external/lib/x86/LICENSE.ogg-vorbis.txt",
+      "sha256": "a853081d4111fa74a47f75b28bc74c2218d3254292f097c31096f1387ee7865a",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/VisualC/external/lib/x86/LICENSE.opus.txt",
+      "sha256": "124717414895f2a518600f6a04ef0518ec28693c401966dfa1e66ca27b8e0fe3",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/VisualC/external/lib/x86/LICENSE.opusfile.txt",
+      "sha256": "15c55f8c6a88ef9ee9a18ada9dbb2459bebaaf2527c91159fc23818f275f32b2",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/Xcode/Frameworks/FLAC.framework/Versions/A/Resources/LICENSE.FLAC.txt",
+      "sha256": "38f74c0e849d2c41261b1188c546dcd051b47c4f3dca5cff2e4b28436774a878",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/Xcode/Frameworks/Ogg.framework/Versions/A/Resources/LICENSE.ogg-vorbis.txt",
+      "sha256": "f2d872dbc3431c2f05900ac501f7d636367fe6dcbc3301eb60d9120f9c465949",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/Xcode/Frameworks/Opus.framework/Versions/A/Resources/LICENSE.opus.txt",
+      "sha256": "9e038e02a487b3db23ed88cd1c7c2e2c8b8ec44294294e31f9bccab5094b0004",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/Xcode/Frameworks/OpusFile.framework/Versions/A/Resources/LICENSE.opusfile.txt",
+      "sha256": "0267ae795ab744c4e0f9c45e249440fdf2e75dac8c804f36066b28649bf74aaf",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/Xcode/Frameworks/Vorbis.framework/Versions/A/Resources/LICENSE.ogg-vorbis.txt",
+      "sha256": "f2d872dbc3431c2f05900ac501f7d636367fe6dcbc3301eb60d9120f9c465949",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/Xcode/Frameworks/modplug.framework/Versions/A/Resources/LICENSE.modplug.txt",
+      "sha256": "b64d05522976d26e870bfbbf701e5a89cc5e2ab8fbde677e24f07ddaf0dac7c1",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/Xcode/Frameworks/mpg123.framework/Versions/A/Resources/LICENSE.mpg123.txt",
+      "sha256": "f40e0dd86b27b52e429b693a87b3ca63ae0a98a4d142e77207aa6bdf1db7a295",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/debian/copyright",
+      "sha256": "ccdcce4f299a452527c596618d384d1a27a1592eb9153ba98ba4c9ca3e396ac5",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/external/flac-1.3.2/COPYING.FDL",
+      "sha256": "f45cc81b400a048b56c9edbd4c3317f7a8958463dfd55aa96f268ecfd6baa12c",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/external/flac-1.3.2/COPYING.GPL",
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/external/flac-1.3.2/COPYING.LGPL",
+      "sha256": "5df07007198989c622f5d41de8d703e7bef3d0e79d62e24332ee739a452af62a",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/external/flac-1.3.2/COPYING.Xiph",
+      "sha256": "fa27cb11f13f97b0c5f3ff363b1e2610c6efe87ed175779cb2a78e44eb19d34c",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/external/flac-1.3.2/doc/html/license.html",
+      "sha256": "dc999159ef5b418fd6e36794e9e27b23e61e13ace22fa08a2a8a40fb377582e4",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/external/libmodplug-0.8.9.0/COPYING",
+      "sha256": "49942e7b3b175f549e751feb08b5270ca6f6c5fb7a1be9f9517db275ec32c92e",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/external/libogg-1.3.2/COPYING",
+      "sha256": "d2ab5758336489da61c12cc5bb757da5339c4ae9001f9bb0562b4370249af814",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/external/libvorbis-1.3.5/COPYING",
+      "sha256": "5c0905d21494102e4d579a3c42216f8de1c2ac738443db4f189f93a01ca31a93",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/external/libvorbisidec-1.2.1/COPYING",
+      "sha256": "d2ab5758336489da61c12cc5bb757da5339c4ae9001f9bb0562b4370249af814",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/external/mpg123-1.25.6/COPYING",
+      "sha256": "f40e0dd86b27b52e429b693a87b3ca63ae0a98a4d142e77207aa6bdf1db7a295",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/external/mpg123-1.25.6/doc/LICENSE",
+      "sha256": "cca79ea6fc0a7715e52450df2d86311f990e85067dd13f4d7f5a88d4fd23a07c",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/external/opus-1.0.3/COPYING",
+      "sha256": "9e038e02a487b3db23ed88cd1c7c2e2c8b8ec44294294e31f9bccab5094b0004",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/external/opusfile-0.10/COPYING",
+      "sha256": "0267ae795ab744c4e0f9c45e249440fdf2e75dac8c804f36066b28649bf74aaf",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4/timidity/COPYING",
+      "sha256": "188de23cc548f2afd04bfb85217220f6864ca2412dc3af003f0d89a9641f42c3",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_mixer-2.0.4-COPYING.txt",
+      "sha256": "113727180e7956cb9718b03b41da85b63ea54743a33047071a623bf672895a10",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_ttf-2.0.15/COPYING.txt",
+      "sha256": "f6370809c9f644760920d9945c5be07aed17664975f2e4741013d4d9a2ec696f",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_ttf-2.0.15/VisualC/external/lib/x64/LICENSE.freetype.txt",
+      "sha256": "93b9dccf7920fd46d3938f86bc222a45677de62dc8e41f28808ae315b776daf0",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_ttf-2.0.15/VisualC/external/lib/x64/LICENSE.zlib.txt",
+      "sha256": "7c02bd8395f3318e3eb4e7f251f69c3fabd3f12ba08be174f47a7184c33ce277",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_ttf-2.0.15/VisualC/external/lib/x86/LICENSE.freetype.txt",
+      "sha256": "93b9dccf7920fd46d3938f86bc222a45677de62dc8e41f28808ae315b776daf0",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_ttf-2.0.15/VisualC/external/lib/x86/LICENSE.zlib.txt",
+      "sha256": "7c02bd8395f3318e3eb4e7f251f69c3fabd3f12ba08be174f47a7184c33ce277",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_ttf-2.0.15/Xcode/Frameworks/FreeType.framework/Versions/A/Resources/LICENSE.freetype.txt",
+      "sha256": "7e8bc99dd13b4c2f6a5f7b8129ebb56beffa188c80c134127aab64ce7f53d225",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_ttf-2.0.15/debian/copyright",
+      "sha256": "157306b8429ba74cac8f2687ef3b432621cacf28fbc7d2eb87430e8acec6fc28",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_ttf-2.0.15/external/freetype-2.9.1/docs/LICENSE.TXT",
+      "sha256": "fd056de4196903a676208ef58cfddafc7d583d1f28fa2e44c309cf84a59e62fb",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/SDL_ttf-2.0.15-COPYING.txt",
+      "sha256": "f6370809c9f644760920d9945c5be07aed17664975f2e4741013d4d9a2ec696f",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/json-c-0.15.tar-json-c-0.15-COPYING",
+      "sha256": "74c1e6ca5eba76b54d0ad00d4815c8315c1b3bc45ff99de61d103dc92486284c",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/libpng-1.6.37-LICENSE.txt",
+      "sha256": "bf5e22b9dce8464064ae17a48ea1133c3369ac9e1d80ef9e320e5219aa14ea9b",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/sdl2-LICENSE.txt",
+      "sha256": "fcb07e07ac6bc8b2fcf047b50431ef4ebe5b619d7ca7c82212018309a9067426",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-AUTHORS.txt",
+      "sha256": "046ab79547a7a472672457031cf7ccf9388fa22676131b6773410744cb8d1bd4",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-LICENSE.txt",
+      "sha256": "3ddf9be5c28fe27dad143a5dc76eea25222ad1dd68934a047064e56ed2fa40c5",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/LICENSE.txt",
+      "sha256": "3ddf9be5c28fe27dad143a5dc76eea25222ad1dd68934a047064e56ed2fa40c5",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/PowerVR_SDK/License.txt",
+      "sha256": "7edf13ec40ce6fc1e2b5d52d9904b80c5de4f5ab348c10e926aec7f88b15272d",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/SPIRV-Headers/LICENSE",
+      "sha256": "9b243f6f0bf44e295ff411a0f7b7642d1d0dff7cdc42507e9f7206f439e51b5a",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/SPIRV-Tools/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/SPIRV-Tools/utils/vscode/src/lsp/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/angle/angle/LICENSE",
+      "sha256": "bf4da21bd20bcfb5b60b7ecc67fa864a79be049e21d6178076887f178dd6c71a",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/angle/angle/src/common/third_party/smhasher/LICENSE",
+      "sha256": "3f6f1b520bc53e878ccbb698ad0bacef3752a5f4e4b50a26552bd70f60b40748",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/angle/angle/src/common/third_party/xxhash/LICENSE",
+      "sha256": "86ec6953794503942b70fcd4f35b565d44f63f703b7037ce44dad965c4aaae91",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/angle/angle/src/libANGLE/renderer/vulkan/shaders/src/third_party/ffx_spd/LICENSE",
+      "sha256": "09a7c3fbc0b4ae6a9ccc4ffdcbfa511c14b8647a24f24783838862cf6c226d4e",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/angle/angle/src/tests/test_utils/third_party/LICENSE",
+      "sha256": "0e64c1e9cd62f47682caeb545d2943fb4c38a9b2e5d9fd7e3b456973bb430d1b",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/angle/angle/src/third_party/libXNVCtrl/LICENSE",
+      "sha256": "31346421254a3e6e12687cf17f19f6357ee73a617fa7b3d3ccefdcbabe49bdd3",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/angle/angle/src/third_party/volk/LICENSE.md",
+      "sha256": "336f505f8d5aa73ea40b4d798dde86953e9c1f6525757f1d7f18120fea09bb1d",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/angle/angle/third_party/android_system_sdk/LICENSE",
+      "sha256": "8f1bd8841582bdee098eeae9eeb3862d9e7af011e94e54c14aef0568e816be19",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/angle/angle/third_party/bazel/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/angle/angle/third_party/colorama/LICENSE",
+      "sha256": "15137d6c822e3ab097093a33c3a39a9df699f373f6438867ad534ff60762a947",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/angle/angle/third_party/proguard/LICENSE",
+      "sha256": "294f58267c6f473c4ce7270bf5c8d34b2003cb43804552459654c36553431276",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/angle/angle/third_party/r8/LICENSE",
+      "sha256": "68834f116f8ff545f05d14753357b620748156d60ee36b26beab4cb3f317efe4",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/angle/angle/third_party/turbine/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/angle/angle/tools/flex-bison/third_party/m4sugar/LICENSE",
+      "sha256": "ab15fd526bd8dd18a9e77ebc139656bf4d33e97fc7238cd11bf60e2b9b8666c6",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/angle/angle/tools/flex-bison/third_party/skeletons/LICENSE",
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/angle/angle/util/windows/third_party/StackWalker/LICENSE",
+      "sha256": "bfec18debedcb337f8af53f143ccf0b1575d0b7c30deaee137f10397eca0d353",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/astc-encoder/LICENSE.txt",
+      "sha256": "494accc32e50eb523a0e384d0ae6d4b702db867a89d6971216760e92b240ee12",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/benchmark/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/cppdap/LICENSE",
+      "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/cppdap/third_party/googletest/LICENSE",
+      "sha256": "9702de7e4117a8e2b20dafab11ffda58c198aede066406496bef670d40a22138",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/cppdap/third_party/googletest/googlemock/LICENSE",
+      "sha256": "9702de7e4117a8e2b20dafab11ffda58c198aede066406496bef670d40a22138",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/cppdap/third_party/googletest/googlemock/scripts/generator/LICENSE",
+      "sha256": "5e0df8c845c742e76f2f64d2d9ce1b7e74a2422fddbc577ae6a56319083de0bf",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/cppdap/third_party/googletest/googletest/LICENSE",
+      "sha256": "9702de7e4117a8e2b20dafab11ffda58c198aede066406496bef670d40a22138",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/cppdap/third_party/json/LICENSE.MIT",
+      "sha256": "7400586ce89c6a2cc65f6ca46997da5d356a230673d3a211e040b783f23578a1",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/cppdap/third_party/json/benchmarks/thirdparty/benchmark/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/cppdap/third_party/json/test/data/big-list-of-naughty-strings/LICENSE",
+      "sha256": "b62d4b4f54d088b5555a0438744d61c1b03c74184db73901e7c79fa7dd144980",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/cppdap/third_party/json/test/data/nst_json_testsuite/LICENSE",
+      "sha256": "8bd0e0578be788c617ea01d18b2a8146e3746ae50bddadc65a5f9d3aad08ad49",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/cppdap/third_party/json/test/data/nst_json_testsuite2/LICENSE",
+      "sha256": "8bd0e0578be788c617ea01d18b2a8146e3746ae50bddadc65a5f9d3aad08ad49",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/cppdap/third_party/json/test/thirdparty/doctest/LICENSE.txt",
+      "sha256": "d52754215630f475e9cf4feb7f973187f65f6b29ec3a634fdd6320d5f8b1e234",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/cppdap/third_party/json/test/thirdparty/fastcov/LICENSE",
+      "sha256": "6005e2c3abed7d54170e2b5ca260f7e95804b99695c41b1ffe89b9cb357a870c",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/cppdap/third_party/json/test/thirdparty/fifo_map/LICENSE.MIT",
+      "sha256": "842217cbb8aefea4834d2d4132f934afb0e018481bb7289d129a7010f9008535",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/cppdap/third_party/json/third_party/amalgamate/LICENSE.md",
+      "sha256": "2ef7ef27af194a22edf4086439104ba038636877356e6e8eeb009e7de89894e4",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/cppdap/third_party/json/third_party/cpplint/LICENSE",
+      "sha256": "02fd655b9adb79e771fd60267a722f0862d43381f95bb38bd6ada5e2080272c4",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/glslang/LICENSE.txt",
+      "sha256": "d3cbc77d99642114bc925cce51eda84b48ae4879947ac89941a2e2aa4150db76",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/googletest/LICENSE",
+      "sha256": "9702de7e4117a8e2b20dafab11ffda58c198aede066406496bef670d40a22138",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/googletest/googlemock/LICENSE",
+      "sha256": "9702de7e4117a8e2b20dafab11ffda58c198aede066406496bef670d40a22138",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/googletest/googlemock/scripts/generator/LICENSE",
+      "sha256": "5e0df8c845c742e76f2f64d2d9ce1b7e74a2422fddbc577ae6a56319083de0bf",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/googletest/googletest/LICENSE",
+      "sha256": "9702de7e4117a8e2b20dafab11ffda58c198aede066406496bef670d40a22138",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/json/LICENSE.MIT",
+      "sha256": "7400586ce89c6a2cc65f6ca46997da5d356a230673d3a211e040b783f23578a1",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/json/benchmarks/thirdparty/benchmark/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/json/test/data/big-list-of-naughty-strings/LICENSE",
+      "sha256": "b62d4b4f54d088b5555a0438744d61c1b03c74184db73901e7c79fa7dd144980",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/json/test/data/nst_json_testsuite/LICENSE",
+      "sha256": "8bd0e0578be788c617ea01d18b2a8146e3746ae50bddadc65a5f9d3aad08ad49",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/json/test/data/nst_json_testsuite2/LICENSE",
+      "sha256": "8bd0e0578be788c617ea01d18b2a8146e3746ae50bddadc65a5f9d3aad08ad49",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/json/test/thirdparty/doctest/LICENSE.txt",
+      "sha256": "d52754215630f475e9cf4feb7f973187f65f6b29ec3a634fdd6320d5f8b1e234",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/json/test/thirdparty/fastcov/LICENSE",
+      "sha256": "6005e2c3abed7d54170e2b5ca260f7e95804b99695c41b1ffe89b9cb357a870c",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/json/test/thirdparty/fifo_map/LICENSE.MIT",
+      "sha256": "842217cbb8aefea4834d2d4132f934afb0e018481bb7289d129a7010f9008535",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/json/third_party/amalgamate/LICENSE.md",
+      "sha256": "2ef7ef27af194a22edf4086439104ba038636877356e6e8eeb009e7de89894e4",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/json/third_party/cpplint/LICENSE",
+      "sha256": "02fd655b9adb79e771fd60267a722f0862d43381f95bb38bd6ada5e2080272c4",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/libbacktrace/src/LICENSE",
+      "sha256": "ef8a9b3247488f8901ca60de9b17b745d7bd67e5ec1e622f80d62364572200d8",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/llvm-10.0/llvm/include/llvm/Support/LICENSE.TXT",
+      "sha256": "a012d664e4e01df52a65b2eeafdfb8aeb856fec0e6c372265d01b0109c3f5e2a",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/llvm-10.0/llvm/lib/Support/COPYRIGHT.regex",
+      "sha256": "0424e57d4303164dc59a8509c20dae0518b853692e5c2b0e98b11816fdbc97c7",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/llvm-7.0/llvm/LICENSE.TXT",
+      "sha256": "0303dfeaac87b80d2d1e543aa38d5be77b0eac93c3d04fe7e3c8eaa71a778667",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/llvm-7.0/llvm/include/llvm/Support/LICENSE.TXT",
+      "sha256": "a012d664e4e01df52a65b2eeafdfb8aeb856fec0e6c372265d01b0109c3f5e2a",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/llvm-7.0/llvm/lib/Support/COPYRIGHT.regex",
+      "sha256": "0424e57d4303164dc59a8509c20dae0518b853692e5c2b0e98b11816fdbc97c7",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/llvm-7.0/llvm/lib/Target/ARM/LICENSE.TXT",
+      "sha256": "28cbd5f6dac844fc3d94e879dba83c3ca87328ece8e0d388284f8cec6a042a97",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/llvm-7.0/llvm/test/YAMLParser/LICENSE.txt",
+      "sha256": "d0d8b09800a45cd982e9568fc7669d9c1a4c330e275a821bbe24d54366d16fe9",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/llvm-7.0/llvm/tools/msbuild/license.txt",
+      "sha256": "8b2385799844925a9d857e145601eec6000c8a89850e6e37cf2c949910a8a3f1",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/llvm-7.0/llvm/utils/unittest/googlemock/LICENSE.txt",
+      "sha256": "9702de7e4117a8e2b20dafab11ffda58c198aede066406496bef670d40a22138",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/llvm-7.0/llvm/utils/unittest/googletest/LICENSE.TXT",
+      "sha256": "9702de7e4117a8e2b20dafab11ffda58c198aede066406496bef670d40a22138",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/llvm-subzero/LICENSE.TXT",
+      "sha256": "9c9a05118ed1b6d96781a2e52335f7d4ec3dd6e7139340a8aa95fbf7eb4f199a",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/marl/LICENSE",
+      "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/swiftshader-components/third_party/subzero/LICENSE.TXT",
+      "sha256": "c55ce1e876843853a8a2e5c936df6dc8dd3d185f83d85e6d113143b8c24f542e",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/licenses/zlib-1.2.11-README.txt",
+      "sha256": "7960b6b1cc63e619abb77acaea5427159605afee8c8b362664f4effc7d7f7d15",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/package.json",
+      "sha256": "c7892f83e01b47af91b0964d65155f33f0728bc93e2e1a7c6d55be2398596e1b",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/payload/App/BetterFavoritesTest/better-favorites",
+      "sha256": "8751f10ff5955446f064a5ff6515f0a1a7e64da5c974bd355f29cb10f705a9bd",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/payload/App/BetterFavoritesTest/config.json",
+      "sha256": "2772927b2056b68fdac647c7ec7d36b53725ce740d7c7527d63bd72618cce107",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/payload/App/BetterFavoritesTest/icon.png",
+      "sha256": "bfc30f99b0afa4c35fe738a3207a4f8cdcf28fb01a283cdf224073507e30b909",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/payload/App/BetterFavoritesTest/launch.sh",
+      "sha256": "f103f5ce8be4872590c3bc122b4d62a19726529d44c5a8f67d0416cc52e3c494",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/payload/App/BetterFavoritesTest/libEGL.so",
+      "sha256": "58e07aec9d59058b02c3ab8478038eec7e7c7964bedb8707f369998425692570",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/payload/App/BetterFavoritesTest/libGLESv2.so",
+      "sha256": "80374f563291d83042f1fe1970f9c99063bcd48f1578cfec83ea8613d36382fe",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/payload/App/BetterFavoritesTest/libSDL2-2.0.so.0",
+      "sha256": "f103f5439d62a570b8977dcd7352779404cfb5112fc79008899c91c718a85d8a",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/payload/App/BetterFavoritesTest/libSDL2_image-2.0.so.0",
+      "sha256": "987f7326276c251010591cde4d0e3c627d2601a5e375e5a717896b4eb8a8da1d",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/payload/App/BetterFavoritesTest/libSDL2_mixer-2.0.so.0",
+      "sha256": "0ef3183ccb52d7761296e76b9346cc5ac8715c676f40702bd3cbf64ca051af3b",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/payload/App/BetterFavoritesTest/libSDL2_ttf-2.0.so.0",
+      "sha256": "e78fae7da6c688e16004a8c2343cacb7053d66cf7b2e01a71fe84448328a4762",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/payload/App/BetterFavoritesTest/libjson-c.so.5",
+      "sha256": "52977c53de8cbe7f230f0956931b3040fdbab7a6b70400d99fae67512e3bdef4",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/payload/App/BetterFavoritesTest/libpng16.so.16",
+      "sha256": "07d588538e7922145f163fbbba33806269e345de4c7d292c2ac44b128b3b217d",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/payload/App/BetterFavoritesTest/libz.so.1",
+      "sha256": "480907f680d4feea4d98a10aa0355fd73fa8aacf21fd67ce84b1a65d4de24e73",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/payload/App/BetterFavoritesTest/release.json",
+      "sha256": "ad064ee6bb8d6bf34cab4cb15a26e559c6cd5e6a66a287224b34528bbec5cb16",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/payload/integration/mainui-home/adapter.elf",
+      "sha256": "c8110095a3da0637ffd21788968e9c2f7b3a6637d57d7f333c1acacefd908146",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/payload/integration/mainui-home/package.json",
+      "sha256": "550d4894271553856d52264a263d53c098208ebcecbb6c65caa4a799546e25f8",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/payload/integration/onion-return/better_favorites_return.sh",
+      "sha256": "6d8cc4789bad0811ccea1d59e5a859981dc61e499a0e947c385d97e7e5972381",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/payload/integration/onion-return/hashes.json",
+      "sha256": "49bfa8c59e593b803298469b450d72a363281a01c1383dca2002b07f66da43ea",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/payload/integration/onion-return/runtime.patch",
+      "sha256": "f9dad7c556cf96a4374cecd30f8c59b15c0db8b29153c028d71e0d0b73874e5c",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/tools/bootstrap/README.md",
+      "sha256": "c024cabbcc427c79b9fcc0b16ce6b180dd4e67d0de320d503b05b83af4df9fa0",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/Install-Windows.cmd",
+      "sha256": "34f5ab8301610e82043d09fca34e2d2fcd127d5422daa252a9daecd1100d6d63",
+      "mode": 420
+    },
+    {
+      "path": "App/BetterFavoritesTest/Install-macOS.command",
+      "sha256": "7118adca06ab14656ed32f0e45374df348f3d2af996ed92897bb9f6a82c78351",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/Install-Linux.sh",
+      "sha256": "97af2b96914f21c1ddddd06726ead61ef95f6f2e9e3586124a508b3bb3c249f1",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/Install-Linux.desktop",
+      "sha256": "fa357ccb182a63e8e530a849b2e3f2b2ccbefc18e8efb27c5bc9c809cffa6191",
+      "mode": 493
+    },
+    {
+      "path": "App/BetterFavoritesTest/computer/transport.json",
+      "sha256": "074b1ee9c37960a9711bdaac6bc1fdd1d937142ac32b6868c5528fa30efb9f67",
+      "mode": 420
+    }
+  ]
+}

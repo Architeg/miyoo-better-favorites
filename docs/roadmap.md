@@ -606,3 +606,7 @@ hardware acceptance. [Details](release/rc.2.md), [audit](release/dependency-audi
 ### Copy-and-click release preparation — RC3
 
 RC2 remains immutable at its existing annotated tag. Follow-up RC3 implements the full-package copy → click workflow, both supported integrations with fresh switches OFF, off-card staging, portable recovery, complete uninstall and once-only guidance. Updates preserve browser/settings data. The app-only package remains separate; source archives are developer material. Host fixtures and cross-builds do not establish new device or graphical launcher acceptance. See [RC3's one fresh-user cycle](release/rc.3.md) and [component-specific dependency audit](release/dependency-audit.md). No shortcuts, profiling, new core feature or mounted-card deployment is part of this pass.
+
+### RC4 release preparation
+
+One user ZIP and `App/BetterFavorites` replace the live test identifier. Verified legacy migration and portable recovery are host-tested; renamed-package device acceptance remains pending. Shortcuts remain deferred. See [RC4](release/rc.4.md).

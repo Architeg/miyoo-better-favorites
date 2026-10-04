@@ -34,4 +34,4 @@ python3 tests/profiling_retirement_test.py
 python3 tests/mainui-home/installer_test.py
 python3 tests/launcher_handoff_test.py
 python3 tests/runtime_return_test.py
-sh -n App/BetterFavoritesTest/launch.sh integration/onion-return/better_favorites_return.sh tools/profile-device-launch.sh tools/profile-memory-session.sh tools/sample-device-memory.sh
+sh -n App/BetterFavorites/launch.sh integration/onion-return/better_favorites_return.sh tools/profile-device-launch.sh tools/profile-memory-session.sh tools/sample-device-memory.sh

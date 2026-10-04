@@ -49,7 +49,7 @@ HomeIntegrationStatus homeEntryStatus(const std::string& root,const std::string&
     (version!="v4.3.1-1\n" && version!="v4.3.1-1"))return HomeIntegrationStatus::Unavailable;
  const auto runtime=homeFileSha256(root+"/.tmp_update/runtime.sh");
  if(runtime!=homeOriginalRuntime&&runtime!=homeReturnRuntime)return HomeIntegrationStatus::Unavailable;
- std::string marker;std::string wanted="BetterFavoritesHomeInstalled1\nM6Home1\n";
+ std::string marker;std::string wanted="BetterFavoritesHomeInstalled1\nM6Home2\n";
  for(const auto& item:homePackageBinaries)wanted+=std::string(item.hash)+"\n";
  if(!small(app+"/home-integration.conf",marker)){
   if(errno!=ENOENT)return HomeIntegrationStatus::Unavailable;

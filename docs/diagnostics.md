@@ -2,7 +2,7 @@
 
 ## Export a report
 
-Power off the Miyoo, connect its card and open the copied App/BetterFavoritesTest folder.
+Power off the Miyoo, connect its card and open the copied App/BetterFavorites folder.
 Use the same entry script as installation:
 
 | Platform | Export |
@@ -32,7 +32,7 @@ those in your test report. Offline inspection does not measure RAM or prove a re
 
 ## Basic logs
 
-`App/BetterFavoritesTest/better-favorites.log` and `better-favorites.previous.log`
+`App/BetterFavorites/better-favorites.log` and `better-favorites.previous.log`
 each cap at 65,536 bytes (128KiB total). They rotate at launcher entry and record
 startup, errors, SDL/audio cleanup and handoff boundaries. No normal navigation or
 per-frame logger, watcher or resident gameplay helper is added.

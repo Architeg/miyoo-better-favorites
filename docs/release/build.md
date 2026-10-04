@@ -16,9 +16,9 @@ runtime has its own BSD notice. Native user installation needs no Go/Python/WSL.
 4. `sh scripts/package.sh --output dist/<fresh-directory> --legacy-toolchain <Go1.20.14-root>` requires a clean pinned
    checkout. It pins Go1.26.2 for modern Windows x86/x64/ARM64, macOS ARM64/x64 and Linux
    ARM64/x64, plus explicit isolated Go1.20.14 for legacy Windows x86/x64 and the
-   read-only x86 dispatcher. It verifies Linux static linkage and Monterey Mach-O minima. It writes app-only/full copy-to-card ZIPs, source companions, notices,
+   read-only x86 dispatcher. It verifies Linux static linkage and Monterey Mach-O minima. It writes one copy-to-card user ZIP, source companions, notices,
    dependency inventory and SHA256SUMS. Reusing an output directory is refused.
-5. Extract and test these ZIPs with `BF_RELEASE_PACKAGE` set to the full ZIP's App/BetterFavoritesTest/computer
+5. Extract and test these ZIPs with `BF_RELEASE_PACKAGE` set to the user ZIP's App/BetterFavorites/computer
    directory and `BF_FIXTURE_REPO` to the prepared audited private fixture checkout.
 
 ZIP timestamps/order and source compression timestamps are pinned to source commit.
@@ -62,7 +62,7 @@ Normal release packaging still requires a clean pinned checkout. An explicit
 `--review-snapshot` prepares uncommitted private review artifacts with base commit
 and exact source SHA inventory; its source companion contains those actual files.
 This does not pretend to be a new committed checkpoint. Default candidate revision
-is rc.3; BETTER_FAVORITES_RELEASE_VERSION can explicitly select another build ID.
+is rc.4; BETTER_FAVORITES_RELEASE_VERSION can explicitly select another build ID.
 
 `tools/build-windows7-test.py --toolchain <isolated official Go1.20.14> --output
 <fresh-directory>` copies installer Go sources into a temporary test-only module

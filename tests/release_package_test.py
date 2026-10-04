@@ -23,23 +23,22 @@ def main():
  for line in (release/'SHA256SUMS').read_text().splitlines():digest,rel=line.split('  ',1);assert sha(release/rel)==digest,rel
  host={'Darwin':'darwin','Linux':'linux','Windows':'windows'}[platform.system()];arch='arm64' if platform.machine().lower() in ('arm64','aarch64') else 'amd64'
  with tempfile.TemporaryDirectory(prefix='bf-release-zip-test-') as td:
-  temp=Path(td).resolve();package=temp/'package';base=temp/'app-only';extract(next(release.glob('better-favorites-*-installer.zip')),package);extract(next(release.glob('better-favorites-*-app-only.zip')),base)
+  temp=Path(td).resolve();base=temp/'package';extract(next(release.glob('better-favorites-*.zip')),base)
+  package=base/'App/BetterFavorites/computer'
   tool=package/('better-favorites-installer-'+host+'-'+arch+('.exe' if host=='windows' else ''));assert tool.is_file()
-  # Unix actual ZIP roundtrips execute the public entry script as well as its backend.
-  entry=package/('Install-macOS.command' if host=='darwin' else 'Install-Linux.sh') if host!='windows' else tool
-  prefix=['sh',str(entry)] if host!='windows' else [str(entry)]
-  card=temp/'card';app=card/'App/BetterFavoritesTest';app.mkdir(parents=True)
+  prefix=[str(tool)]
+  card=temp/'card';app=card/'App/BetterFavorites';app.mkdir(parents=True)
   for folder in ('.tmp_update/bin','.tmp_update/config','.tmp_update/script','.tmp_update/onionVersion','Roms','Saves'): (card/folder).mkdir(parents=True,exist_ok=True)
   (card/'.tmp_update/onionVersion/version.txt').write_text('v4.3.1-1\n')
   h=json.loads((package/'payload/integration/mainui-home/package.json').read_text());r=json.loads((package/'payload/integration/onion-return/hashes.json').read_text())
   for name in h['originals']:shutil.copy2(fixtures/'.tmp_update/bin'/name,card/'.tmp_update/bin'/name)
   shutil.copy2(fixtures/'.tmp_update/config/better-favorites-return-backup/runtime.sh',card/'.tmp_update/runtime.sh')
   protected={}
-  for rel in ('Roms/favourite.json','Roms/recentlist.json','Roms/recentlist-hidden.json','Saves/keep.sav','App/BetterFavoritesTest/settings.conf','App/BetterFavoritesTest/home-entry.conf','App/BetterFavoritesTest/browser-preferences.conf','App/BetterFavoritesTest/browser-state'):
+  for rel in ('Roms/favourite.json','Roms/recentlist.json','Roms/recentlist-hidden.json','Saves/keep.sav','App/BetterFavorites/settings.conf','App/BetterFavorites/home-entry.conf','App/BetterFavorites/browser-preferences.conf','App/BetterFavorites/browser-state'):
    path=card/rel;path.write_bytes(('personal:'+rel).encode());protected[rel]=path.read_bytes()
-  for source in (base/'App/BetterFavoritesTest').rglob('*'):
+  for source in (base/'App/BetterFavorites').rglob('*'):
    if source.is_file():
-    destination=app/source.relative_to(base/'App/BetterFavoritesTest');destination.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(source,destination)
+    destination=app/source.relative_to(base/'App/BetterFavorites');destination.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(source,destination)
   for rel,data in protected.items():assert (card/rel).read_bytes()==data
   arm=(app/'better-favorites').read_bytes();assert arm[:7]==b'\x7fELF\x01\x01\x01' and arm[18:20]==b'\x28\x00'
   if host!='windows':
@@ -72,7 +71,7 @@ def main():
   run('restore',['--recovery',again]);run('restore',['--recovery',again])
   # Replace artificial personal fixtures with app-owned formats for complete removal.
   for name,magic in {'settings.conf':'BetterFavoritesSettings1','home-entry.conf':'BetterFavoritesHome1','browser-preferences.conf':'BetterFavoritesBrowserPreferences1','browser-state':'BetterFavoritesBrowserState1'}.items():
-   data=(magic+'\n0\n').encode();(app/name).write_bytes(data);protected['App/BetterFavoritesTest/'+name]=data
+   data=(magic+'\n0\n').encode();(app/name).write_bytes(data);protected['App/BetterFavorites/'+name]=data
   removed_app=True
   run('uninstall',['--recovery',again,'--archive',temp/'uninstall-archive']);assert not app.exists()
   for rel,data in protected.items():
@@ -80,5 +79,5 @@ def main():
   assert (temp/'uninstall-archive/recovery/recovery.json').exists()
   run('install',['--home','--return','--recovery',temp/'post-complete-reinstall'])
   target=card/'.tmp_update/bin'/next(iter(h['originals']));target.write_bytes(b'unknown');run('install',['--home','--return','--recovery',temp/'refused'],False);assert target.read_bytes()==b'unknown';assert not (temp/'refused').exists()
-  print('Actual ZIPs/native '+host+' executable: app-only, install/update, protected state, diagnostics, integrations-only/stock/reinstall, complete uninstall/host archive/reinstall, repeat/interrupted restore, unknown/foreign refusal: PASS')
+  print('Actual single ZIP/native '+host+' executable: install/update, protected state, diagnostics, integrations-only/stock/reinstall, complete uninstall/host archive/reinstall, repeat/interrupted restore, unknown/foreign refusal: PASS')
 if __name__=='__main__':main()

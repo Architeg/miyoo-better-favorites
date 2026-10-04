@@ -199,7 +199,7 @@ bool validAppCommand(const std::string& command)
     // This is the app command observed on this card. Only trailing shell
     // whitespace varies with runtime command-file generation.
     static const std::string expected =
-        "cd /mnt/SDCARD/App/BetterFavoritesTest; chmod a+x ./launch.sh; "
+        "cd /mnt/SDCARD/App/BetterFavorites; chmod a+x ./launch.sh; "
         "LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so   ./launch.sh";
     if (!startsWith(command, expected)) {
         return false;
@@ -777,7 +777,7 @@ bool publishOnionLaunchCommand(
     AppSettings appSettings;
     const char* settingsEnvironment = std::getenv("BETTER_FAVORITES_SETTINGS");
     const std::string settingsPath = settingsEnvironment && *settingsEnvironment
-        ? settingsEnvironment : sdRoot + "/App/BetterFavoritesTest/settings.conf";
+        ? settingsEnvironment : sdRoot + "/App/BetterFavorites/settings.conf";
     std::string settingsError;
     loadAppSettings(settingsPath, appSettings, settingsError);
     if (!settingsError.empty()) std::cerr << settingsError << '\n';
@@ -1007,7 +1007,7 @@ bool publishOnionSwitcherRequest(const std::string& requestDir,
     const char* settingsEnv = std::getenv("BETTER_FAVORITES_SETTINGS");
     std::string settingsError;
     loadAppSettings(settingsEnv && *settingsEnv ? settingsEnv :
-        sdRoot + "/App/BetterFavoritesTest/settings.conf", settings, settingsError);
+        sdRoot + "/App/BetterFavorites/settings.conf", settings, settingsError);
     if (!settingsError.empty()) std::cerr << settingsError << '\n';
     Replacement ticket, generation, restoreApp;
     if (settings.automaticReturn) {
@@ -1131,7 +1131,7 @@ bool requestOnionSwitcher(std::string& error) {
     }
     AppSettings settings; std::string settingError;
     const char* env = std::getenv("BETTER_FAVORITES_SETTINGS");
-    loadAppSettings(env && *env ? env : "/mnt/SDCARD/App/BetterFavoritesTest/settings.conf", settings, settingError);
+    loadAppSettings(env && *env ? env : "/mnt/SDCARD/App/BetterFavorites/settings.conf", settings, settingError);
     const char* capability = std::getenv("BETTER_FAVORITES_SWITCHER_HANDOFF");
     if (settings.automaticReturn && (!capability || std::string(capability) != "1")) {
         error = "Automatic return requires the MENU-capable runtime helper."; return false;

@@ -117,7 +117,7 @@ and the [dependency audit](docs/release/dependency-audit.md).
 | Location | Responsibility |
 | --- | --- |
 | `src/`, `include/` | Favorites parsing/model, navigation, theme/rendering/audio, menus, persistence and launch requests |
-| `App/BetterFavoritesTest/` | Onion app config, icon and outer handoff launcher |
+| `App/BetterFavorites/` | Onion app config, icon and outer handoff launcher |
 | `integration/onion-return/` | Optional runtime/session return hooks |
 | `integration/mainui-home/` | Optional exact-binary Home Favorites adapter and catalogue |
 | `tools/release-installer/`, `tools/host-dispatch/` | Installation/restoration/full removal and Windows host selection |

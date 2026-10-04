@@ -1,11 +1,11 @@
 <div align="center">
-  <img src="App/BetterFavoritesTest/icon.png" alt="Better Favorites icon" width="74" height="74">
+  <img src="App/BetterFavorites/icon.png" alt="Better Favorites icon" width="74" height="74">
   <h1>Better Favorites</h1>
   <p><em>Your Onion favorites, easier to browse.</em></p>
 </div>
 
 <p align="center">
-  <a href="docs/release/rc.3.md"><img alt="Release candidate" src="https://img.shields.io/badge/status-RC3%20candidate-f59e0b"></a>
+  <a href="docs/release/rc.4.md"><img alt="Release candidate" src="https://img.shields.io/badge/status-RC4%20candidate-f59e0b"></a>
   <a href="docs/compatibility.md"><img alt="Tested on Onion v4.3.1-1" src="https://img.shields.io/badge/tested%20Onion-v4.3.1--1-7c5cbf"></a>
   <a href="LICENSE"><img alt="GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-2563eb"></a>
 </p>
@@ -25,7 +25,7 @@ A growing favorites list is easier to browse with console groups, readable title
 
 The native C++/SDL2 app reads Onion's `Roms/favourite.json`. Onion still handles game launching, cores, saves, recent history and GameSwitcher.
 
-> **Release status:** RC3 follows the committed/tagged RC2 checkpoint; no public release is available yet. Mini Plus hardware tests have passed, but dependency/source-license checks remain open before binary publication. [Current status →](docs/release/rc.3.md)
+> **Release status:** RC4 is a local final-review candidate. No public binary asset is available yet. Earlier hardware acceptance remains recorded; the renamed package needs its own install/migration test. [Current status →](docs/release/rc.4.md)
 
 <a id="features"></a>
 ## ✨ Features
@@ -70,11 +70,11 @@ Physical Intel/Monterey, other Windows versions/architectures, Linux SD readers 
 <a id="install"></a>
 ## 📦 Install
 
-Download the **full package** when available. No public binary download is available yet; this candidate is awaiting its final package test and the specific [dependency checks](docs/release/dependency-audit.md).
+Use **`better-favorites-<version>.zip`**, the one ready-to-install package containing the app and computer tools. No public download link is advertised before its asset exists.
 
-1. Download and extract the **full ZIP** on your computer.
+1. Download and extract the ready-to-install ZIP on your computer.
 2. **Power off** the Miyoo and connect its SD card.
-3. Copy the supplied **App/BetterFavoritesTest** folder into the card's **App** folder.
+3. Copy the supplied **App/BetterFavorites** folder into the card's **App** folder.
 4. Inside that copied folder, open **Install-Windows.cmd**, **Install-macOS.command**, or **Install-Linux.desktop** for your computer.
 5. Choose **Install / Update**, confirm the Miyoo is off, and wait for success.
 6. Safely eject, insert the card and boot.
@@ -83,16 +83,11 @@ The tool identifies the card automatically and prepares both supported integrati
 
 **Updating?** Merge the new folder's contents into the existing folder. Replace supplied files, but keep preferences/state; do not delete or replace the entire existing app folder.
 
-**GitHub “Source code” archives are for developers**, not ready-to-install apps. The separate **app-only ZIP** supplies the browser without computer tools or system patches.
+**GitHub “Source code” archives are for developers**, not ready-to-install apps. Dependency/source companions are attribution and development material, not alternative installers.
 
-<details>
-<summary><strong>Prefer drag and drop?</strong></summary>
+### First opening on Mac or Windows
 
-Extract the **app-only ZIP** and copy `App/BetterFavoritesTest` into the card's `App` folder while the Miyoo is off. Eject, boot and open **Apps → Better Favorites**.
-
-This installs the browser without patches. The internal folder name is retained for compatibility. Updating an existing folder requires merging files to preserve preferences. [App-only guide →](docs/install.md#app-only-drag-and-drop)
-
-</details>
+These tools are unsigned/not notarized. On Mac, approve the launcher file if requested; the separate **BetterFavorites-Installer** may also need file-specific **Open Anyway**. The terminal retains its verified path and offers retry after approval. Windows reputation warnings may offer **More info → Run anyway**; this option is not present for every security policy. Stop for malware/damaged-file warnings. [Platform-specific opening guide →](docs/security-opening.md)
 
 <a id="first-launch"></a>
 ## 🚀 First launch
@@ -144,7 +139,7 @@ Press **SELECT → Remove from Favorites**. Cancel is selected first; choose wit
 <a id="uninstall"></a>
 ## 🧹 Complete uninstall
 
-Power off and connect the card. Open the same computer launcher in **App/BetterFavoritesTest** and choose **Uninstall completely**.
+Power off and connect the card. Open the same computer launcher in **App/BetterFavorites** and choose **Uninstall completely**.
 
 The tool restores and verifies the original system files, then removes Better Favorites, its preferences, logs and owned installation files. Games, saves, artwork, favorites, recent history, themes and unrelated files remain. A verified copy of recovery is kept on that computer.
 

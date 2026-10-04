@@ -73,5 +73,5 @@
     "sha256": "027db0ed00700063f4af51afafd7598672e3536d21f4af0fef4c419a8ed1440c",
     "inspection": "read-only mounted card, not new hardware test"
   },
-  "publication_limit": "SwiftShader prebuilt third-party attribution inventory not supplied by upstream; full available notice set is included, but its mapping to the actual EGL/GLES prebuilt is unverified."
+  "publication_limit": "Known source-supported SwiftShader attribution mapped; LLVM root licenses and Bison header supplied. Exact prebuilt LLVM revision/link inventory remains unverified; no further specific missing notice identified. See swiftshader-attribution.md."
 }

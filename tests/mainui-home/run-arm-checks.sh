@@ -20,10 +20,10 @@ arm-linux-gnueabihf-g++ -std=c++17 -O0 -marm -Wall -Wextra -Werror \
   -Wl,-Ttext-segment=0x400000,--export-dynamic \
   "$root/tests/mainui-home/arm_harness.cpp" "$root/tests/mainui-home/raw_syscall.S" \
   -ldl -o "$out/arm-harness"
-mkdir -p /mnt/SDCARD/App/BetterFavoritesTest /mnt/SDCARD/miyoo/app
+mkdir -p /mnt/SDCARD/App/BetterFavorites /mnt/SDCARD/miyoo/app
 for variant in MainUI-283-clean MainUI-283-expert MainUI-354-clean MainUI-354-expert; do
-  cp "$out/arm-harness" /mnt/SDCARD/App/BetterFavoritesTest/better-favorites
-  touch /mnt/SDCARD/App/BetterFavoritesTest/launch.sh
+  cp "$out/arm-harness" /mnt/SDCARD/App/BetterFavorites/better-favorites
+  touch /mnt/SDCARD/App/BetterFavorites/launch.sh
   address=$(python3 -c 'import json,sys; print(hex(json.load(open(sys.argv[1]))["symbols"]["bf_syscall3"]))' "$out/$variant/byte-map.json")
   (cd /mnt/SDCARD/miyoo/app
    BF_MAINUI_HOME_TEST_ISOLATED=1 qemu-arm -L /opt/miyoomini-toolchain/arm-linux-gnueabihf/sysroot \

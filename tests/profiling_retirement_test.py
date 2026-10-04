@@ -11,7 +11,7 @@ with tempfile.TemporaryDirectory(prefix='better-favorites-retirement.') as folde
     module.subprocess.run=lambda args,**kwargs: original_run(['true'] if args==['sync'] else args,**kwargs)
     def fixture(name):
         card=root/name;app=card/'App/BetterFavoritesTest';app.mkdir(parents=True)
-        normal=(repo/'App/BetterFavoritesTest/launch.sh').read_bytes()
+        normal=(repo/'App/BetterFavorites/launch.sh').read_bytes()
         (app/'launch.sh').write_bytes(b'#!/bin/sh\n# diagnostic fixture\nexit 0\n')
         (app/'better-favorites').write_bytes(b'cache fixture');(app/'better-favorites').chmod(0o755)
         for n in ['profile-device-launch.sh','profile-memory-session.sh','sample-device-memory.sh']:(app/n).write_bytes((repo/'tools'/n).read_bytes())
@@ -37,7 +37,7 @@ with tempfile.TemporaryDirectory(prefix='better-favorites-retirement.') as folde
     card,app=fixture('success');archive=root/'verified-archive'
     originals={p.relative_to(app):p.read_bytes() for p in app.rglob('*') if p.is_file()}
     result=module.retire(card,archive)
-    assert (app/'launch.sh').read_bytes()==(repo/'App/BetterFavoritesTest/launch.sh').read_bytes()
+    assert (app/'launch.sh').read_bytes()==(repo/'App/BetterFavorites/launch.sh').read_bytes()
     assert (app/'better-favorites').read_bytes()==originals[Path('better-favorites')]
     assert (app/'settings.conf').read_text()=='saved preference' and (app/'browser-state').read_text()=='saved state'
     for name in result['removed']:assert (archive/name).read_bytes()==originals[Path(name)] and not (app/name).exists()

@@ -45,7 +45,7 @@ with tempfile.TemporaryDirectory(prefix='better-favorites-installer-test-') as b
     root, (runtime, helper, backup) = fixture(base / 'normal')
     manager.manage(root, 'install')
     assert not (root / '.tmp_update/config/.betterFavoritesReturn').exists()
-    assert not (root / 'App/BetterFavoritesTest/settings.conf').exists()
+    assert not (root / 'App/BetterFavorites/settings.conf').exists()
     assert (backup / 'runtime.sh').read_bytes() == original
     assert runtime.stat().st_mode & 0o111
     helper.write_bytes(b'unrelated helper change')
@@ -73,7 +73,7 @@ with tempfile.TemporaryDirectory(prefix='better-favorites-installer-test-') as b
 
     # Installation and removal never activate/deactivate or rewrite a preference.
     root3, (rt3, helper3, backup3) = fixture(base / 'existing-preference')
-    preference = root3 / 'App/BetterFavoritesTest/settings.conf'
+    preference = root3 / 'App/BetterFavorites/settings.conf'
     preference.parent.mkdir(parents=True)
     enabled = b'BetterFavoritesSettings1\n1\n' + b'a' * 32 + b'\n'
     preference.write_bytes(enabled)
@@ -108,6 +108,6 @@ with tempfile.TemporaryDirectory(prefix='better-favorites-installer-test-') as b
         assert runtime.read_bytes() == (b'foreign runtime replacement' if problem == 'concurrent-change' else before)
         if problem == 'existing-helper': assert helper.read_bytes() == b'unrelated helper'
         else: assert not helper.exists()
-        assert not (root / 'App/BetterFavoritesTest/settings.conf').exists()
+        assert not (root / 'App/BetterFavorites/settings.conf').exists()
         unchanged_history(root)
 print('Installer version/hash gating, verified backup, default-off settings separation, rollback and foreign-change preservation: PASS')

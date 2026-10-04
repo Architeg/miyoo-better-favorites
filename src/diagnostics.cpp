@@ -7,7 +7,7 @@
 #include <unistd.h>
 namespace diagnostics {
 namespace {
-std::string path(){const char* p=std::getenv("BETTER_FAVORITES_LOG");return p&&*p?p:"/mnt/SDCARD/App/BetterFavoritesTest/better-favorites.log";}
+std::string path(){const char* p=std::getenv("BETTER_FAVORITES_LOG");return p&&*p?p:"/mnt/SDCARD/App/BetterFavorites/better-favorites.log";}
 bool regular(int fd,struct stat& s){return fd>=0&&fstat(fd,&s)==0&&S_ISREG(s.st_mode);}
 }
 void event(const std::string& message){

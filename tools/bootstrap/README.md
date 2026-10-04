@@ -1,14 +1,14 @@
 # Download-and-run bootstrap preparation
 
 This is **separate from the working offline installer**. No public bootstrap URL
-is advertised: no eligible release/assets exist yet, licensing gates remain open,
+is advertised: no eligible release/assets exist yet, the renamed package needs acceptance,
 and native Windows online execution/TLS has not been qualified.
 
 The Go downloader selects a published explicit tag or the latest stable release,
-requires GitHub release immutability plus an annotated tag, resolves its commit, and verifies the installer ZIP
+requires GitHub release immutability plus an annotated tag, resolves its commit, and verifies the one user ZIP
 against SHA256SUMS from that same release. It checks safe ZIP members, expanded-size
 limits, all package checksums and package.json's commit, then checks that the tag
-has not moved. Only then does it invoke the existing host dispatcher/entry script.
+has not moved. Only then does it invoke the existing host dispatcher/entry script inside `App/BetterFavorites/computer`. This is the advanced installer interface, not a second package or new card writer.
 It implements **no SD-card restoration, patch or removal logic**.
 
 Downloads and matching recovery stay under `~/BetterFavorites-Downloads` by default;

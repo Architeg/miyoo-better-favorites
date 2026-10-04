@@ -22,8 +22,8 @@
 #include <stdexcept>
 
 static const char* pending="/tmp/cmd_to_run.sh";
-static const char* pref="/mnt/SDCARD/App/BetterFavoritesTest/home-entry.conf";
-static const char* config="/mnt/SDCARD/App/BetterFavoritesTest/config.json";
+static const char* pref="/mnt/SDCARD/App/BetterFavorites/home-entry.conf";
+static const char* config="/mnt/SDCARD/App/BetterFavorites/config.json";
 static int failure=0, recent_calls=0, audiofix=1, cwd_mode=0, allocations=0, frees=0;
 static long stage_fd=-1;
 static bool tracking=false, throw_recent=false;
@@ -80,7 +80,7 @@ extern "C" char* fake_getcwd(char* out,size_t size) {
 extern "C" int fake_shm(void*,int index) { assert(index==13); return audiofix; }
 extern "C" void fake_recent(void*,const char* label,const char* launch,void*,int a,int type,int enabled) {
     assert(!strcmp(label,"Better Favorites Test"));
-    assert(!strcmp(launch,"/mnt/SDCARD/App/BetterFavoritesTest/launch.sh"));
+    assert(!strcmp(launch,"/mnt/SDCARD/App/BetterFavorites/launch.sh"));
     assert(a==0 && type==3 && enabled==1);
     assert(access(pending,F_OK)==0); ++recent_calls;
     if (throw_recent) throw std::bad_alloc();
@@ -186,7 +186,7 @@ int main(int argc,char** argv) {
     printf("PASS native dispatch, cleanup, result=3, Home stack and native state serialization\n");
     reset(); rename(pref,"/tmp/saved-pref"); symlink("/tmp/saved-pref",pref); clean_failure("symlink preference"); unlink(pref); rename("/tmp/saved-pref",pref);
     // No writer ever opens these FIFOs. A blocking open would hit alarm(2).
-    for(const char* path : {pref,config,"/mnt/SDCARD/App/BetterFavoritesTest/better-favorites","/mnt/SDCARD/App/BetterFavoritesTest/launch.sh"}) {
+    for(const char* path : {pref,config,"/mnt/SDCARD/App/BetterFavorites/better-favorites","/mnt/SDCARD/App/BetterFavorites/launch.sh"}) {
         reset(); assert(rename(path,"/tmp/fifo-original")==0); assert(mkfifo(path,0600)==0);
         alarm(2);clean_failure("FIFO nonblocking regular-file refusal");alarm(0);
         assert(unlink(path)==0);assert(rename("/tmp/fifo-original",path)==0);
@@ -197,10 +197,10 @@ int main(int argc,char** argv) {
     reset(); write_file(config,"{\"launch\":\"launch.sh\",}"); clean_failure("malformed app JSON");
     reset(); write_file(config,"{\"launch\":\"other.sh\"}"); clean_failure("unavailable app config");
     reset(); write_file(config,"{\"launch\":\"launch.sh\",\"launch\":\"launch.sh\"}"); clean_failure("duplicate config key");
-    reset(); rename("/mnt/SDCARD/App/BetterFavoritesTest/launch.sh","/tmp/saved-launch.sh"); clean_failure("missing launcher"); rename("/tmp/saved-launch.sh","/mnt/SDCARD/App/BetterFavoritesTest/launch.sh");
-    reset(); rename("/mnt/SDCARD/App/BetterFavoritesTest/better-favorites","/tmp/saved-binary"); clean_failure("missing binary"); rename("/tmp/saved-binary","/mnt/SDCARD/App/BetterFavoritesTest/better-favorites");
-    reset(); { auto b=read_file("/mnt/SDCARD/App/BetterFavoritesTest/better-favorites"); write_file("/mnt/SDCARD/App/BetterFavoritesTest/better-favorites","corrupt ELF"); clean_failure("corrupt binary header"); write_file("/mnt/SDCARD/App/BetterFavoritesTest/better-favorites",b); }
-    reset(); chmod("/mnt/SDCARD/App/BetterFavoritesTest/better-favorites",0600); clean_failure("non executable binary"); chmod("/mnt/SDCARD/App/BetterFavoritesTest/better-favorites",0700);
+    reset(); rename("/mnt/SDCARD/App/BetterFavorites/launch.sh","/tmp/saved-launch.sh"); clean_failure("missing launcher"); rename("/tmp/saved-launch.sh","/mnt/SDCARD/App/BetterFavorites/launch.sh");
+    reset(); rename("/mnt/SDCARD/App/BetterFavorites/better-favorites","/tmp/saved-binary"); clean_failure("missing binary"); rename("/tmp/saved-binary","/mnt/SDCARD/App/BetterFavorites/better-favorites");
+    reset(); { auto b=read_file("/mnt/SDCARD/App/BetterFavorites/better-favorites"); write_file("/mnt/SDCARD/App/BetterFavorites/better-favorites","corrupt ELF"); clean_failure("corrupt binary header"); write_file("/mnt/SDCARD/App/BetterFavorites/better-favorites",b); }
+    reset(); chmod("/mnt/SDCARD/App/BetterFavorites/better-favorites",0600); clean_failure("non executable binary"); chmod("/mnt/SDCARD/App/BetterFavorites/better-favorites",0700);
     reset(); write_file("/tmp/.offOrder","1"); clean_failure("shutdown precedence");
     reset(); parent[2]=-2; clean_failure("non Home");
     reset(); parent[3]=0; clean_failure("wrong Home grid");
@@ -221,15 +221,15 @@ int main(int argc,char** argv) {
     reset(); {
         struct NativeConfig { std::string name,unused[2],launch; int type; uint32_t rest[7]{}; } cfg;
         static_assert(sizeof(NativeConfig)==128,"native config ABI");
-        cfg.name="Better Favorites Test"; cfg.launch="/mnt/SDCARD/App/BetterFavoritesTest/launch.sh"; cfg.type=3;
+        cfg.name="Better Favorites Test"; cfg.launch="/mnt/SDCARD/App/BetterFavorites/launch.sh"; cfg.type=3;
         uint32_t action[4]{};
         ((void(*)(void*,void*,int,int))0x3984c)(action,&cfg,1,3);
         assert(((int(*)(void*,unsigned))0x18c54)(action,0)==3);
         ((void(*)(void*))0x398b4)(action);
         assert(recent_calls==1); puts("PASS ordinary native AppAction gate isolation");
     }
-    const char* marker="/mnt/SDCARD/App/BetterFavoritesTest/home-diagnostics.conf";
-    const char* log="/mnt/SDCARD/App/BetterFavoritesTest/home-diagnostics.log";
+    const char* marker="/mnt/SDCARD/App/BetterFavorites/home-diagnostics.conf";
+    const char* log="/mnt/SDCARD/App/BetterFavorites/home-diagnostics.log";
     write_file(marker,"BetterFavoritesHomeDiagnostics1\n1\n");unlink(log);
     reset();assert(abi_startup()==1);assert(read_file(log).find("event=mainui-startup")!=std::string::npos);
     assert(read_file(log).find("variant=MainUI-")!=std::string::npos);

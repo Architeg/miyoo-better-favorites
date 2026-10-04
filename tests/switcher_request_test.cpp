@@ -27,7 +27,7 @@ int main() {
     assert(mkdir((root+"/Roms").c_str(),0700)==0);
     write(root+"/.tmp_update/bin/gameSwitcher","#!/bin/sh\nexit 0\n");
     assert(chmod((root+"/.tmp_update/bin/gameSwitcher").c_str(),0700)==0);
-    const std::string command="cd /mnt/SDCARD/App/BetterFavoritesTest; chmod a+x ./launch.sh; LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so   ./launch.sh\n";
+    const std::string command="cd /mnt/SDCARD/App/BetterFavorites; chmod a+x ./launch.sh; LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so   ./launch.sh\n";
     active=root+"/.tmp_update/cmd_to_run.sh";flag=root+"/.tmp_update/.runGameSwitcher";
     pending=root+"/pending";shutdown=root+"/shutdown";
     const std::string quick=root+"/quick_switch",settings=root+"/settings.conf";

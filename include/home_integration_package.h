@@ -2,10 +2,10 @@
 #pragma once
 struct HomePackageBinary { const char* name; const char* hash; };
 static const HomePackageBinary homePackageBinaries[]={
-    {"MainUI-283-clean","a8a9771d02fbc7d13d7be2edf6cebe0d7b806c5b2a25256753bd8ed16f02b08a"},
-    {"MainUI-283-expert","e05e855c94a9e7bea702e552672297624b42b7e338df57c0b8bdd240a7978d12"},
-    {"MainUI-354-clean","4a96ca03acd4f9a4b1ffd23bcb1586d0ec509b71b3006e5322bd717922e830f4"},
-    {"MainUI-354-expert","fb094eb2300562642b7f43436e441b9233694f5263f870b974086e88e3db8c75"},
+    {"MainUI-283-clean","cf3ecb2b0f8e3d1381aab128d61ef9fd5c1f3f874b0c81f4d2efbefc392aa979"},
+    {"MainUI-283-expert","9ec75ea47eef114edf3582a452e4562034ed54d6417310d8e2d653a4ceec461f"},
+    {"MainUI-354-clean","8746508c500c27c9d8ea07b193f17e9be99548e51533e4df87a64bbbb1a9bc1d"},
+    {"MainUI-354-expert","c67c59a881c3b248b6b9b5c0ce0011bcbf4da57a34e8068b8e45d60422bc0ff0"},
 };
 static const HomePackageBinary homePackageOriginals[]={
     {"MainUI-283-clean","6b01276a6292fd7061e0b2576322a52ada65b755562f97bf7656b174d475866f"},

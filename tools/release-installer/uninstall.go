@@ -66,7 +66,7 @@ func loadRecovery(path string) (Recovery, error) {
 	}
 	seen := map[string]bool{}
 	for _, s := range r.Files {
-		if !safeRel(s.Path) || seen[s.Path] || s.Mode > 0777 || (!s.Integration && (!strings.HasPrefix(s.Path, app) || (!allowedAppFile(strings.TrimPrefix(s.Path, app)) && !allowedTransportPath(strings.TrimPrefix(s.Path, app))))) || (s.Integration && !allowedRestorePath(s.Path)) {
+		if !safeRel(s.Path) || seen[s.Path] || s.Mode > 0777 || (!s.Integration && !allowedRecoveryApp(s.Path)) || (s.Integration && !allowedRestorePath(s.Path)) {
 			return r, fmt.Errorf("unsafe recovery entry: %s", s.Path)
 		}
 		seen[s.Path] = true
@@ -235,6 +235,12 @@ func cleanupPlan(root, recovery, dir string) ([]change, error) {
 		return nil, e
 	}
 	add(appFiles)
+	legacy, err := legacyCleanup(root, recovery)
+	if err != nil {
+		return nil, err
+	}
+	add(legacy)
+
 	// Only recorded integration originals/journals are eligible, not arbitrary files
 	// sharing a prefix. Validate every file in each owned directory.
 	dirs := map[string]bool{}
@@ -253,11 +259,7 @@ func cleanupPlan(root, recovery, dir string) ([]change, error) {
 		if b == nil {
 			continue
 		}
-		expected, e := read(recovery, "after/"+p)
-		if e != nil {
-			return nil, e
-		}
-		if digest(b) != s.After && !((p == homeManifest || p == returnBackup+"manifest.json") && ownJournal(b, expected)) {
+		if !cleanupOwned(root, recovery, s, b) {
 			return nil, fmt.Errorf("modified integration file preserved: %s", p)
 		}
 		path, _ := join(root, p)
@@ -290,7 +292,8 @@ func cleanupPlan(root, recovery, dir string) ([]change, error) {
 			Original map[string]string `json:"original"`
 			Patched  map[string]string `json:"patched"`
 		}
-		if json.Unmarshal(b, &m) != nil || m.Version != home.Version || !safeRel(m.Backup) || len(strings.Split(m.Backup, "/")) != 3 || !strings.HasPrefix(m.Backup, system+"config/better-favorites-home-backup-") || !bytes.Equal(encode(m.Original), encode(home.Original)) || !bytes.Equal(encode(m.Patched), encode(home.Patched)) {
+		legacyHome, legacyErr := legacyHomeSpec(dir)
+		if json.Unmarshal(b, &m) != nil || (m.Version != home.Version && (legacyErr != nil || m.Version != legacyHome.Version)) || !safeRel(m.Backup) || len(strings.Split(m.Backup, "/")) != 3 || !strings.HasPrefix(m.Backup, system+"config/better-favorites-home-backup-") || !bytes.Equal(encode(m.Original), encode(home.Original)) || (!bytes.Equal(encode(m.Patched), encode(home.Patched)) && (legacyErr != nil || !bytes.Equal(encode(m.Patched), encode(legacyHome.Patched)))) {
 			return nil, fmt.Errorf("invalid original-backup ownership")
 		}
 		dirs[m.Backup] = true
@@ -327,11 +330,7 @@ func cleanupPlan(root, recovery, dir string) ([]change, error) {
 			if !ok {
 				return fmt.Errorf("unknown backup file preserved: %s", p)
 			}
-			installed, e := read(recovery, "after/"+p)
-			if e != nil {
-				return e
-			}
-			if digest(b) != s.After && !ownJournal(b, installed) {
+			if !cleanupOwned(root, recovery, s, b) {
 				return fmt.Errorf("modified backup preserved: %s", p)
 			}
 			return nil
@@ -631,9 +630,10 @@ func completeUninstall(root, recovery, dir, host string, hook func(string, strin
 	// Remove empty owned directories only. No RemoveAll; a newly inserted file is preserved.
 	dirs := map[string]bool{}
 	dirs[strings.TrimSuffix(app, "/")] = true
+	dirs[strings.TrimSuffix(legacyApp, "/")] = true
 	for _, c := range artifacts {
 		p := filepath.ToSlash(filepath.Dir(c.Path))
-		for strings.HasPrefix(p, strings.TrimSuffix(app, "/")) || strings.HasPrefix(p, system+"config/better-favorites-") {
+		for strings.HasPrefix(p, strings.TrimSuffix(app, "/")) || strings.HasPrefix(p, strings.TrimSuffix(legacyApp, "/")) || strings.HasPrefix(p, system+"config/better-favorites-") {
 			dirs[p] = true
 			p = filepath.ToSlash(filepath.Dir(p))
 		}

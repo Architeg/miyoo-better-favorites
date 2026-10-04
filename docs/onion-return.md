@@ -29,7 +29,7 @@ the feature. An already-enabled preference stays enabled after installation.
   browser-state serialization and restoration; launcher sets its file location.
 
 The runtime creates a mode-0700 `/tmp/better-favorites-return.XXXXXX` directory
-for each recognized BetterFavoritesTest invocation. After binary exit 20 and SDL/
+for each recognized BetterFavorites invocation. After binary exit 20 and SDL/
  audio cleanup, the existing handoff helper publishes an exact copy of the game
 command as `request.sh` and the settings generation as `generation` in that
 directory, before setting quick_switch. Failure
@@ -56,7 +56,7 @@ all open menu pages without opening GameSwitcher. Integration availability is sh
 the preference and requires the live private runtime context, not just a helper
 file on disk or an ON preference. Installed but not active in this invocation
 shows unavailable. Browsing layout/navigation and sound remain unchanged.
-`App/BetterFavoritesTest/settings.conf` is an app-owned, versioned 60-byte record
+`App/BetterFavorites/settings.conf` is an app-owned, versioned 60-byte record
 with an on/off value and a random 32-hex generation. Missing/invalid settings
 mean off. Successful changes use a destination-directory temporary file, fsync,
 and atomic replacement; failure logs an error and keeps the old UI preference.
@@ -215,7 +215,7 @@ c++ -std=c++17 -Wall -Wextra -DBETTER_FAVORITES_HANDOFF_TESTING -Iinclude tests/
 python3 tests/runtime_return_test.py
 TMPDIR=/tmp python3 tests/runtime_return_test.py
 python3 tests/runtime_installer_test.py --reference /Volumes/MIYOO/.tmp_update/config/better-favorites-return-backup/runtime.sh
-sh -n App/BetterFavoritesTest/launch.sh
+sh -n App/BetterFavorites/launch.sh
 sh -n integration/onion-return/better_favorites_return.sh
 ```
 

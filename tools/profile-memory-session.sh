@@ -2,7 +2,7 @@
 # Finite observer for a non-Wi-Fi device. Run separately from startup timing.
 # Start from Terminal with nohup; exits after three snapshots, no service/daemon.
 set -u
-app=${BETTER_FAVORITES_APP_DIR:-/mnt/SDCARD/App/BetterFavoritesTest}
+app=${BETTER_FAVORITES_APP_DIR:-/mnt/SDCARD/App/BetterFavorites}
 proc=${BETTER_FAVORITES_PROC_ROOT:-/proc}
 session=${1:?Fresh session ID required}
 condition=${2:?idle, exercised, game-off or game-on required}

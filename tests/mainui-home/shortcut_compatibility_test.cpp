@@ -14,7 +14,7 @@ int main(){
  assert(mkdir((root+"/.tmp_update").c_str(),0700)==0);assert(mkdir((root+"/Roms").c_str(),0700)==0);
  const std::string active=root+"/.tmp_update/cmd_to_run.sh",quick=root+"/quick",pending=root+"/pending",shutdown=root+"/shutdown";
  // Exact set_cmd_app output in tagged Onion v4.3.1-1 apps.h for this app.
- const std::string command="cd /mnt/SDCARD/App/BetterFavoritesTest; chmod a+x ./launch.sh; LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so ./launch.sh";
+ const std::string command="cd /mnt/SDCARD/App/BetterFavorites; chmod a+x ./launch.sh; LD_PRELOAD=/mnt/SDCARD/miyoo/app/../lib/libpadsp.so ./launch.sh";
  std::string error;write(active,command);write(req+"/app-command.sh",command);
  assert(stageOnionLaunchCommand("game fixture\n","{\"type\":5}\n",req,error));
  assert(!publishOnionLaunchCommand(req,active,quick,root,error));

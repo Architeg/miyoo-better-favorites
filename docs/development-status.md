@@ -1,3 +1,7 @@
+## RC4 preparation
+
+Renamed canonical app to `App/BetterFavorites`, retained legacy recovery compatibility, and prepared one user ZIP. User reports Mac/Windows double-click routes exercised and the app runs on Miyoo; screenshots show the Mac secondary executable was blocked before the menu. These reports do not qualify RC4 migration, uninstall/reinstall or its new helper approval flow. Previous version/hash acceptance remains below. See [RC4 review](release/rc.4.md).
+
 # Development status
 
 Updated 2026-10-04. [Authoritative roadmap](roadmap.md); update both documents when

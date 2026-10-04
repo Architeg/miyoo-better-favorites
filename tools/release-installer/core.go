@@ -479,6 +479,25 @@ func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package,
 			return nil, pkg, e
 		}
 	}
+	// A support/app-only update must not discard the recovery ownership of
+	// already installed integrations. The ordinary full update keeps both.
+	if !homeOn || !returnOn {
+		if old, e := activeRecovery(root); e == nil {
+			prior, e := loadRecovery(old)
+			if e != nil {
+				return nil, pkg, e
+			}
+			for _, v := range prior.Files {
+				homeFile := strings.HasPrefix(v.Path, system+"bin/") || v.Path == homeManifest || v.Path == app+"home-integration.conf" || strings.Contains(v.Path, "better-favorites-home-backup-")
+				returnFile := v.Path == system+"runtime.sh" || v.Path == system+"script/better_favorites_return.sh" || strings.HasPrefix(v.Path, returnBackup)
+				if v.Integration && ((!homeOn && homeFile) || (!returnOn && returnFile)) {
+					return nil, pkg, fmt.Errorf("existing integration recovery must be retained: use the full update or complete uninstall before app-only installation")
+				}
+			}
+		} else if !errors.Is(e, os.ErrNotExist) {
+			return nil, pkg, e
+		}
+	}
 	if e = validateAppInput(root, dir, pkg); e != nil {
 		return nil, pkg, e
 	}

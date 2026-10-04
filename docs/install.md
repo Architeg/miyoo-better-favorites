@@ -26,7 +26,7 @@ No public download link is advertised until the asset exists. RC3 is a new candi
 5. The launcher opens a terminal automatically. Choose **Install / Update**, confirm the displayed card and that the Miyoo is powered off.
 6. Wait for verified success, safely eject, insert the card and boot.
 
-You do not enter a card path or select integrations. Both supported integrations are installed; their app switches remain **OFF** on a fresh install. Updates preserve switches, preferences and browser position. Unsupported Onion versions offer app-only installation explicitly. Corruption, modified audited files and transaction failures stop with an error; they do not silently become app-only success.
+You do not enter a card path or select integrations. Both supported integrations are installed; their app switches remain **OFF** on a fresh install. Updates preserve switches, preferences and browser position. Unsupported Onion versions offer app-only installation explicitly. An app-only installer update cannot discard an existing integration’s recovery: complete uninstall first, or use the supported full update. Manual app-only copying does not replace that recovery. Corruption, modified audited files and transaction failures stop with an error; they do not silently become app-only success.
 
 Portable verified recovery lives in the card's hidden `.tmp_update/config` directory, outside the app. Keep it. Optional computer copies are additional protection, not an uninstall dependency. Installation and restoration take effect after reboot.
 

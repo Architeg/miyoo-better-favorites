@@ -222,3 +222,23 @@ func TestUnrelatedValidRecoveryPreserved(t *testing.T) {
 		t.Fatal("unrelated recovery altered", e)
 	}
 }
+
+func TestAppOnlyCannotDiscardInstalledRecovery(t *testing.T) {
+	root, dir, _ := completeFixture(t)
+	before, _ := read(root, installationIndex)
+	runtimeBefore, _ := read(root, system+"runtime.sh")
+	for _, flags := range [][2]bool{{false, false}, {false, true}, {true, false}} {
+		if e := install(root, dir, filepath.Join(t.TempDir(), "refused"), flags[0], flags[1], nil); e == nil {
+			t.Fatal("installed recovery discarded", flags)
+		}
+		after, _ := read(root, installationIndex)
+		runtimeAfter, _ := read(root, system+"runtime.sh")
+		if !bytes.Equal(before, after) || !bytes.Equal(runtimeBefore, runtimeAfter) {
+			t.Fatal("refused update mutated card")
+		}
+	}
+	recovery, _ := activeRecovery(root)
+	if e := completeUninstall(root, recovery, dir, filepath.Join(t.TempDir(), "archive"), nil); e != nil {
+		t.Fatal(e)
+	}
+}

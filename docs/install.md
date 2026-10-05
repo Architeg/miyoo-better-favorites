@@ -65,7 +65,14 @@ Run these in the copied app folder if a support person asks you to. Normal insta
 
 Use `export-diagnostics` instead of `install` to export logs on the computer. Fully specified `--sd-root`, `--powered-off`, `--package`, `--recovery` and `--archive` backend interfaces remain for automation. `remove-integrations` is an advanced operation, not the default uninstall.
 
-The experimental download bootstrap is separate and is not needed by this offline package.
+## Alternative: Terminal download on Mac or Linux
+
+Prefer one command, or having trouble with the Mac first-open approvals? The
+[Terminal download route](online-install.md) downloads and verifies the same ZIP,
+detects the card, and opens the existing Install / Uninstall / Export diagnostics
+menu. No manual extraction or copying is needed. It retains the same portable
+recovery and does not disable security settings. The public command needs a public
+repository/release; private RC testing uses the documented authenticated route.
 
 ## Metadata created by Mac copying
 

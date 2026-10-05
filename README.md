@@ -96,6 +96,26 @@ The tool identifies the card automatically and prepares both supported integrati
 
 These tools are unsigned/not notarized. On Mac, approve the launcher file if requested; the separate **BetterFavorites-Installer** may also need file-specific **Open Anyway**. The terminal retains its verified path and offers retry after approval. Windows reputation warnings may offer **More info → Run anyway**; this option is not present for every security policy. Stop for malware/damaged-file warnings. Read the bundled **Mac-first-open.html** before opening a blocked file. [Offline guide](packaging/Mac-first-open.html) · [Platform-specific opening guide →](docs/security-opening.md)
 
+### Alternative: one Terminal command on Mac or Linux
+
+If you prefer a command, or the Mac first-open approvals are getting in the way,
+this route downloads and verifies the **same ZIP**, detects your connected card,
+and opens the usual Install / Uninstall / Export diagnostics menu. Power off the
+Miyoo and connect its card first.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Architeg/miyoo-better-favorites/main/scripts/install-online.sh | bash
+```
+
+**Private RC note:** this public command works once the repository/release is
+public. For testing now, use the [authenticated GitHub route](docs/online-install.md#private-prerelease-testing).
+
+Supports Intel/Apple Silicon Macs and Linux x64/ARM64. The downloader currently
+selects RC7 explicitly. It may avoid browser-quarantine approval prompts, but
+it does not sign the tools or disable security checks. Installation, updates,
+preferences and portable recovery use the existing installer unchanged.
+[Full steps and uninstall command →](docs/online-install.md)
+
 <a id="first-launch"></a>
 ## 🚀 First launch
 
@@ -183,3 +203,4 @@ Review before sharing: errors may contain game filenames, theme paths and prefer
 Thanks to [OnionUI](https://github.com/OnionUI/Onion), the [SDL/Miyoo fork contributors](https://github.com/Rparadise-Team/sdl2_miyoo_new), and the upstream library authors.
 
 Project sources are **[GPL-3.0-or-later](LICENSE)**. Dependencies retain their own licenses. [Third-party notices and provenance →](THIRD_PARTY_NOTICES.md)
+

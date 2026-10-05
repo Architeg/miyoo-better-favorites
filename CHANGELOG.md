@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Add an optional Mac/Linux Terminal downloader for the same full RC7 ZIP, with SHA-256/archive checks, card detection and the existing Install / Uninstall / Export diagnostics menu.
+- Keep all installation, restoration and portable recovery logic in the existing packaged backend; no new bootstrap executable or Windows entry changes.
+- Document public versus authenticated private downloads and the browser-quarantine difference. Host fixtures pass; physical Mac/public-download qualification remains pending.
+
 ## 1.0.0-rc.7
 
 - Normalize generated Home receipt recovery state and verify receipt absence on complete uninstall; reconcile obsolete receipts only with verified recovery and stock system identities.

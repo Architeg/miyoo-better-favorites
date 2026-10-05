@@ -1,5 +1,13 @@
 # Download-and-run bootstrap preparation
 
+**Historical prototype:** the current Mac/Linux download entry is
+[`scripts/install-online.sh`](../../scripts/install-online.sh), documented in
+the [Terminal installation guide](../../docs/online-install.md). It supports the
+current full ZIP and calls its existing installer without any new bootstrap
+executable. The Go/PowerShell preparation below is not the user-facing route;
+Windows keeps its accepted offline PowerShell selector. No prototype binaries
+need to be added to RC7.
+
 This is **separate from the working offline installer**. No public bootstrap URL
 is advertised: no eligible release/assets exist yet, the renamed package needs acceptance,
 and native Windows online execution/TLS has not been qualified.

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 )
 
@@ -341,5 +342,23 @@ func TestEmptyConflictAndLowSpace(t *testing.T) {
 	b, _ = read(r, "old")
 	if string(b) != "old" {
 		t.Fatal("replacement before all staging")
+	}
+}
+
+func TestRC7PackageVersion(t *testing.T) {
+	for _, version := range []string{"1.0.0-rc.6", "1.0.0-rc.7", "1.0.0-rc.8", "1.0.0"} {
+		dir := root(t)
+		mustWrite(t, dir, "package.json", encode(Package{Format: 1, Version: version, Commit: strings.Repeat("a", 40)}))
+		h := HomeSpec{Version: "M6Home2", Original: map[string]string{}, Patched: map[string]string{}}
+		for _, name := range names {
+			h.Original[name] = strings.Repeat("a", 64)
+			h.Patched[name] = strings.Repeat("b", 64)
+		}
+		mustWrite(t, dir, "payload/integration/mainui-home/package.json", encode(h))
+		mustWrite(t, dir, "payload/integration/onion-return/hashes.json", encode(ReturnSpec{Version: "v4.3.1-1"}))
+		_, _, _, err := loadPackage(dir)
+		if (err == nil) != (version == "1.0.0-rc.6" || version == "1.0.0-rc.7") {
+			t.Fatalf("version %s: %v", version, err)
+		}
 	}
 }

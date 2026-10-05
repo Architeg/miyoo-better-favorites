@@ -443,7 +443,7 @@ func loadPackage(dir string) (Package, HomeSpec, ReturnSpec, error) {
 	if e = json.Unmarshal(d, &pkg); e != nil {
 		return pkg, home, ret, e
 	}
-	if pkg.Format != 1 || (pkg.Version != "1.0.0-rc.1" && pkg.Version != "1.0.0-rc.2" && pkg.Version != "1.0.0-rc.3" && pkg.Version != "1.0.0-rc.4" && pkg.Version != "1.0.0-rc.5" && pkg.Version != "1.0.0-rc.6") || len(pkg.Commit) != 40 {
+	if pkg.Format != 1 || (pkg.Version != "1.0.0-rc.1" && pkg.Version != "1.0.0-rc.2" && pkg.Version != "1.0.0-rc.3" && pkg.Version != "1.0.0-rc.4" && pkg.Version != "1.0.0-rc.5" && pkg.Version != "1.0.0-rc.6" && pkg.Version != "1.0.0-rc.7") || len(pkg.Commit) != 40 {
 		return pkg, home, ret, fmt.Errorf("unsupported package")
 	}
 	seen := map[string]bool{}

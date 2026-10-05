@@ -45,7 +45,7 @@ As your favorites grow, games from different consoles get mixed together. Long n
 Better Favorites turns that list into a browser built around how you use your Miyoo:
 
 - **Find your game without scrolling through a mixed list.** <br>
-  Favorites are grouped by system. Jump between consoles with ← / → and move a page at a time with L1/R1. Prefer a single list? Turn grouping off.
+  Favorites are grouped by system. Jump between consoles with `← / →` and move a page at a time with `L1/R1`. Prefer a single list? Turn grouping off.
 
 - **No more guessing a cut-off title.** <br>
   Long selected titles scroll automatically, so you can tell similar names and versions apart.
@@ -54,7 +54,7 @@ Better Favorites turns that list into a browser built around how you use your Mi
   Hide leading numbers and sort alphabetically by title. Your ROM filenames and saved favorites stay unchanged.
 
 - **Pick up exactly where you left off.** <br>
-  Your selection and scroll position are remembered. With Automatic return enabled, B/START in GameSwitcher brings you back - even after switching games.
+  Your selection and scroll position are remembered. With Automatic return enabled, `B/START` in GameSwitcher brings you back - even after switching games.
 
 - **Open it just like stock Favorites.** <br>
   Enable Replace stock Favorites once, then open Better Favorites directly from the familiar Home Favorites tile. No detour through Apps.
@@ -73,14 +73,14 @@ Better Favorites turns that list into a browser built around how you use your Mi
 
 | Feature | What you get |
 | --- | --- |
-| 🗂️ Console groups | Browse by system or use a flat list |
-| 📝 Readable titles | Hide numeric prefixes, choose sorting and scroll long selected titles |
-| 🎨 Theme-aware UI | Active-theme fonts, colors and resources, with missing-resource fallbacks |
-| 🎮 Quick navigation | Console jumps, shoulder paging and remembered selection/scroll |
-| 🔀 GameSwitcher | Open Onion's GameSwitcher directly with MENU |
-| 🏠 Optional Home access | Open the app through the existing Favorites tile |
-| ↩️ Optional return | Return to Better Favorites with B/START after using GameSwitcher |
-| 🗑️ Favorite removal | Remove the entry while keeping the game, artwork and saves |
+| Console groups | Browse by system or use a flat list |
+| Readable titles | Hide numeric prefixes, choose sorting and scroll long selected titles |
+| Theme-aware UI | Active-theme fonts, colors and resources, with missing-resource fallbacks |
+| Quick navigation | Console jumps, shoulder paging and remembered selection/scroll |
+| GameSwitcher | Open Onion's GameSwitcher directly with MENU |
+| Optional Home access | Open the app through the existing Favorites tile |
+| Optional return | Return to Better Favorites with B/START after using GameSwitcher |
+| Favorite removal | Remove the entry while keeping the game, artwork and saves |
 
 Installation, recovery and diagnostic export work offline with the supplied package. No Miyoo Terminal commands are needed.
 
@@ -120,7 +120,7 @@ Scripts select the computer-side executable; every computer installs the **same 
 |  Mac | **Install-macOS.command** |
 | 🐧 Linux | **Install-Linux.desktop** — choose Allow launching if asked |
 
-4. Choose **[1] Install / Update** and confirm the card and powered-off Miyoo.
+4. Choose `[1] Install / Update` and confirm the card and powered-off Miyoo.
 5. Wait for **Install verified**, safely eject the card, insert it to your Miyoo and boot.
 
 > [!TIP]
@@ -152,7 +152,12 @@ Use the same launcher or Terminal command for `[2] Uninstall completely` or `[3]
 <a id="first-launch"></a>
 ## 🚀 First launch
 
-Open **Apps → Better Favorites**, then press **Y** for Settings.
+Boot your Miyoo. Open **Apps → Better Favorites**, then press `Y` or `Select` for Settings.
+
+<p align="center">
+  <img src="banner.jpg" alt="Banner image" width="840"/>
+  <em>An alternative Favorites app for Miyoo Mini and Mini Plus running Onion OS.</em>
+</p>
 
 - **Replace stock Favorites:** ON opens this app from the Home Favorites tile; OFF opens stock Favorites.
 - **Automatic return:** ON brings you back to Better Favorites with B/START in GameSwitcher, including after switching games. OFF uses Onion's normal main-menu return.

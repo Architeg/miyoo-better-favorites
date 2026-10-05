@@ -1,5 +1,7 @@
 # M4 audit and confirmed gaps
 
+> **Historical engineering evidence.** This page records development decisions and tests at the time. Use the [current installation guide](install.md) and [recovery guide](recovery.md) for released packages.
+
 Status: **M4 complete.** The user accepted the deployed combined M4 on
 2026-10-03: “everything works.” Tested ARM binary: 347932 bytes, SHA-256
 `aa486abad4e3272f86605945109bf0a0f76159ab373f87c1e57c38abd034b328`. This acceptance includes approved L1/R1 paging

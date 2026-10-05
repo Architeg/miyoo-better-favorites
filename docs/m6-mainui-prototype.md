@@ -1,5 +1,7 @@
 # M6: exact-binary Home Favorites redirect evidence
 
+> **Historical engineering evidence.** This page records development decisions and tests at the time. Use the [current installation guide](install.md) and [recovery guide](recovery.md) for released packages.
+
 2026-10-03, based on `main` HEAD `6f846ce32f6ee8f773b59dfae8cc4d2c0cf56907`.
 **Local/uncommitted; deployed implementation user hardware-accepted on Mini Plus
 v4.3.1-1.** See [tested hashes and log coverage](m6-acceptance.md). Diagnostic logs

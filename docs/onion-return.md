@@ -1,4 +1,6 @@
 > Release candidate update: runtime hook/ownership behavior is unchanged. The
+
+> **Historical engineering evidence.** This page records development decisions and tests at the time. Use the [current installation guide](install.md) and [recovery guide](recovery.md) for released packages.
 > candidate helper gates detailed trace behind the independent diagnostics marker
 > and caps new writes at128KiB. The accepted installed helper is preserved; the
 > native release installer can upgrade only its exact known hash and matching

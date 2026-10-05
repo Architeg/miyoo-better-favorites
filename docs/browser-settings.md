@@ -1,5 +1,7 @@
 # Persistent browser Settings
 
+> **Historical engineering evidence.** This page records development decisions and tests at the time. Use the [current installation guide](install.md) and [recovery guide](recovery.md) for released packages.
+
 Status: the user confirms browser Settings functionality/presentation and M3
 passed hardware testing. The last centered-modal/larger-description/reduced-padding
 adjustments were present in that M3 build. The two new bold-white About headings

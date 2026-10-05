@@ -1,5 +1,7 @@
 # Menu presentation review
 
+> **Historical engineering evidence.** This page records development decisions and tests at the time. Use the [current installation guide](install.md) and [recovery guide](recovery.md) for released packages.
+
 Local presentation refactor, 2026-10-02. The user reports hardware-confirmed
 navigation, removal, launch/return, persistence and audio in the deployed binary.
 This refactor is not deployed or committed.

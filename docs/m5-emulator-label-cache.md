@@ -1,5 +1,7 @@
 # M5: per-parse emulator-label cache (local review)
 
+> **Historical engineering evidence.** This page records development decisions and tests at the time. Use the [current installation guide](install.md) and [recovery guide](recovery.md) for released packages.
+
 ## Scope and evidence
 
 Only `FavoritesParser::loadFavoritesFromText` changes in production. A local map

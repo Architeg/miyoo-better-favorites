@@ -90,3 +90,18 @@ The detailed [dependency/source/notice audit](dependency-audit.md) separates kno
 source versions from unidentified prebuilt correspondence. Contributor compilation
 and ordinary tests do not require a private card/firmware fixture.
 
+
+## Documentation-only RC7 refresh
+
+`tools/refresh-release-docs.py` refreshes the one install ZIP from a downloaded,
+checksum-verified baseline and a clean documentation checkout. It does not rebuild
+any executable or integration. Both source inventories and source companions retain
+the exact binary source; `DOCUMENTATION-INVENTORY.json` separately records the newer
+documentation commit and packaged document hashes. Transport and archive checksum
+inventories are regenerated. The final ZIP hash is recorded only in external
+`SHA256SUMS` and the published/committed release notes, never inside the ZIP.
+
+Use a fresh output directory. Keep previous archives. Verify all non-document
+members against the baseline and run `tests/package_integrity_test.py` and the
+isolated packaged install/uninstall test before replacing assets. Keep the RC7 tag
+fixed; changing its bundled guides does not establish new device acceptance.

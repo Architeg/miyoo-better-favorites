@@ -1,5 +1,7 @@
 # M3: selected browser-title scrolling
 
+> **Historical engineering evidence.** This page records development decisions and tests at the time. Use the [current installation guide](install.md) and [recovery guide](recovery.md) for released packages.
+
 Status: M3 is user-confirmed on hardware (2026-10-03): “everything works
 correctly.” Accepted binary SHA-256:
 `12545265ff8508bf6767b1ef3057854d54d513f6610f602490e3c0dcb7f1ce2d`.

@@ -1,5 +1,7 @@
 # SELECT actions, full-screen Settings and favorite removal
 
+> **Historical engineering evidence.** This page records development decisions and tests at the time. Use the [current installation guide](install.md) and [recovery guide](recovery.md) for released packages.
+
 Based on hardware-verified MENU checkpoint
 `2f7571d03055c0c11de69625c98ff9d05788f031`. Navigation/removal and preceding
 presentation are user-confirmed on device across themes. Browser Settings are also

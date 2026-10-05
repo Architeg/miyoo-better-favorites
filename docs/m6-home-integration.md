@@ -1,4 +1,6 @@
 > Release route: the packaged native Go tool now provides Install, Uninstall,
+
+> **Historical engineering evidence.** This page records development decisions and tests at the time. Use the [current installation guide](install.md) and [recovery guide](recovery.md) for released packages.
 > Restore and Export diagnostics. See [quick start](install.md) and [recovery](uninstall.md).
 > Historical development route: current release installation uses the native host
 > tools. [Windows normal-flow acceptance](release/windows-acceptance.md) does not

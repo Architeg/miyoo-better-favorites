@@ -28,7 +28,7 @@ compatibility. There is no separate Home tile or global shortcut in this release
 | Target | Requirements | Recorded execution/acceptance |
 | --- | --- | --- |
 | Windows 7/8/8.1 x86/x64 | Legacy Go1.20.14 binaries; SSE2 for x86; local writable card drive | Windows 7 SP1 x64 user passed install/use/uninstall/stock device boot |
-| Windows 10 through current releases, x86/x64 and modern ARM64 | Modern executables; native version/architecture dispatch; ARM64 needs x86 bootstrap emulation | Windows 10 x64 user passed the same flow; exact build/tool hash not supplied |
+| Windows 10 through current releases, x86/x64 and modern ARM64 | Modern executables; OS-provided Windows PowerShell/WMI selection; ARM64 uses its native installer | Windows 10 x64 user passed the same flow; exact build/tool hash not supplied |
 | macOS Monterey onward, Intel/Apple Silicon | OS-provided shell/tools/libraries; native executable selection including Rosetta | RC1 MacBook Air M1 / Ventura13.7.8 checks; RC6 M1/Ventura install/uninstall/app use user-confirmed; later Intel installation succeeded after manual stale-receipt removal; RC7 correction pending |
 | Linux x64 | Kernel3.2+, POSIX sh/uname, writable mount; static executable | Docker package/installer fixtures only |
 | Linux ARM64 | Little-endian ARMv8.0, kernel3.7+, otherwise same | Docker/simulated architecture checks; physical reader qualification pending |

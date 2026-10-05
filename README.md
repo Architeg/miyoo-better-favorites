@@ -150,11 +150,12 @@ Use the same launcher or Terminal command for `[2] Uninstall completely` or `[3]
 <a id="first-launch"></a>
 ## First launch
 
-<p align="center">
-  <img src="assets/game-list.jpg" alt="Main screen" width="380"/>
-&nbsp;
-  <img src="assets/settings.jpg" alt="Settings screen" width="380"/>
-</p>
+<table>
+  <tr>
+    <td><img src="assets/game-list.jpg" alt="Main screen" width="380"/></td>
+    <td><img src="assets/settings.jpg" alt="Settings screen" width="380"/></td>
+  </tr>
+</table>
 
 Boot your Miyoo. Open **Apps → Better Favorites**, then press `Y` or `Select` for Settings.
 

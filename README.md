@@ -104,13 +104,15 @@ Scripts select the computer-side executable; every computer installs the **same 
 <a id="install"></a>
 ## Install
 
-**Power off the Miyoo and connect its SD card to your computer.**
+> [!NOTE]
+> **What the installer does:** Installs the app files and applies the supported Home Favorites and Automatic return patches, keeping verified backups of the original system files. Both features start OFF and can be enabled in Settings. Your games, saves, themes and favorites are left untouched. **Complete uninstall** restores the original system files and removes Better Favorites and its own settings and logs.
 
-### ● Option 1 - One-click installer · Windows / Mac / Linux
+### • Option 1 - One-click installer · Windows / Mac / Linux
 
-1. **[Download the install ZIP](https://github.com/Architeg/miyoo-better-favorites/releases/download/v1.0.0-rc.7/better-favorites-1.0.0-rc.7.zip)** and extract it.
-2. Inside the extracted folder, open **App** and copy the **BetterFavorites** folder into the **App** folder on your SD card.
-3. Open **App → BetterFavorites** on your SD card and double-click the installer for your computer:
+1. Power off the Miyoo and connect its SD card to your computer
+2. **[Download the install ZIP](https://github.com/Architeg/miyoo-better-favorites/releases/download/v1.0.0-rc.7/better-favorites-1.0.0-rc.7.zip)** and extract it.
+3. Inside the extracted folder, open **App** and copy the **BetterFavorites** folder into the **App** folder on your SD card.
+4. Open **App → BetterFavorites** on your SD card and double-click the installer for your computer:
 
 | Computer | File to open |
 | --- | --- |
@@ -130,21 +132,20 @@ For an unsigned-developer warning, choose **Open Anyway** in **System Settings �
 
 Read [Opening help →](docs/security-opening.md) to learn how to troubleshoot installation warnings.
 
-### ● Option 2 - One Terminal command · Mac / Linux
+### • Option 2 - One Terminal command · Mac / Linux
 
-On Mac/Linux open your terminal. Paste:
+1. Power off the Miyoo and connect its SD card to your computer
+2. On Mac/Linux open your terminal. Paste:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Architeg/miyoo-better-favorites/main/scripts/install-online.sh | bash
 ```
 
-Installer will be dowloaded automatically. Confirm the detected card and choose **[1] Install / Update**. Wait for **Install verified**, safely eject the card, insert it and boot. Intel and Apple Silicon are selected automatically. [Full Terminal guide →](docs/online-install.md)
+Installer will be dowloaded automatically. Confirm the detected card and choose `[1] Install / Update`. Wait for **Install verified**, safely eject the card, insert it and boot your Miyoo. Intel and Apple Silicon are selected automatically. [Full Terminal guide →](docs/online-install.md)
 
 ### After installation
 
-Open **Apps → Better Favorites**. Both integrations are installed with their switches **OFF**; enable them in **Y → Settings**.
-
-Use the same launcher or Terminal command for **[2] Uninstall completely** or **[3] Export diagnostics**. Deleting the app folder alone does not undo patches.
+Use the same launcher or Terminal command for `[2] Uninstall completely` or `[3] Export diagnostics`. Deleting the app folder alone does not undo patches.
 
 **Updating?** [Follow the update steps](docs/install.md#update-without-losing-preferences) to keep your settings. GitHub’s **Source code** downloads are for developers, not installation.
 

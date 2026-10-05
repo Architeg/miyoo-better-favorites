@@ -39,11 +39,11 @@ Hardware tested on **Miyoo Mini Plus / Onion v4.3.1-1**. Designed for Mini and M
 Install ZIP SHA-256:
 
 ```text
-3509e7aff0dd343072e1d646eb1b7ab3af284507548ead412e2286c0d577b197
+bea79fa6bc98d3ed9ab26503502342ed4619976a063e31a6ca93b1a78c78a389
 ```
 
 Only **better-favorites-1.0.0-rc.7.zip** is an installer. `SHA256SUMS` verifies downloads; `SOURCE-INVENTORY.json` and the project/dependency source archives support licensing and development. They are not extra installation steps.
 
-Binary source commit: `462ebd0309ad329b8852e1791e1835327d117301`. The Terminal downloader and current guides are maintained on `main`; they reuse this package.
+Binary source commit: `462ebd0309ad329b8852e1791e1835327d117301`. Bundled guides refreshed from documentation commit `e576c3e2956cb8b1e57f4385df1b50ebcab665ae`. Executables, launchers, libraries and integration payloads are unchanged. Matching binary-source companions are retained; the documentation inventory records the newer guides separately. The Terminal downloader reuses this package.
 
 </details>

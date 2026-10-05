@@ -1,36 +1,26 @@
-# Complete uninstall
+# Uninstall Better Favorites completely
 
 [Install](install.md) · [Recovery](recovery.md)
 
-1. Power off the Miyoo and connect its card to any supported computer.
-2. Open the appropriate computer launcher inside `App/BetterFavorites`.
-3. Choose **Uninstall completely**, confirm the card and that the Miyoo is off.
+1. Power off the Miyoo and connect its SD card to a supported computer.
+2. Open the computer launcher in `App/BetterFavorites`, or use the [Mac/Linux Terminal command](online-install.md).
+3. Choose **[2] Uninstall completely** and confirm the card and powered-off Miyoo.
 4. Wait for verified success, safely eject and boot stock Onion.
 
-One operation validates portable recovery, restores and verifies original patched system files, archives a verified copy on this computer, and removes owned app/preferences/state/logs/computer tools/integration artifacts. Portable card recovery is removed last, after restoration and app cleanup. Shared directories and game data are retained.
+The tool restores and verifies this card's original patched system files, then removes Better Favorites, its settings, logs and owned installation files. Games, saves, artwork, themes, favorites, recent history, shortcuts and unrelated files remain.
 
-The computer archive is in `BetterFavorites-Recovery` under your home folder. It can contain app preferences/logs and recovery originals: keep it private. Recovery does not depend on your original computer, username or drive letter.
+**Deleting the app folder alone cannot undo system patches.** Switching a feature OFF also does not uninstall it.
 
-Do not delete the app as a substitute for uninstall. It cannot restore patched MainUI/runtime files.
+## Your recovery copy
 
-## If removal stops
+A verified archive is retained under `BetterFavorites-Recovery` in your computer's home folder. Keep it private: it can contain preferences, logs and original system files.
 
-The tool reports the unresolved path and returns failure. Unknown/modified files are preserved. Missing or corrupt originals are never guessed. Recovery remains available through restoration/app-cleanup failures; retry after resolving the reported problem. After an interruption that removed the launcher, copy the matching ready-to-install package contents back into the app folder and reopen it. Do not replace personal files.
+Portable recovery on the card allows uninstall from another supported computer. The card-side recovery is removed last, after restoration and cleanup verify successfully. Shared directories are not removed.
 
-[Recovery without MainUI or device Terminal](recovery.md).
+## If uninstall stops
 
-## Advanced operations
+The message identifies what could not be verified. Unknown changes are preserved and the operation reports failure, not complete removal. Keep recovery and logs; do not guess which files to delete.
 
-The entry scripts accept `uninstall` for complete removal and `remove-integrations` for restoring only integrations, retaining app/data. Explicit support flags remain available; this latter operation requires the validated recovery and powered-off card. Never select an ambiguous recovery by guessing.
+If an interruption removed the launcher, merge the matching install ZIP's files back into the app folder and retry. Preserve personal files and the hidden recovery directory. [Recovery without MainUI or Miyoo Terminal](recovery.md).
 
-Validated Mac metadata in owned app/recovery folders is included in the verified
-computer archive and removed with those folders, regardless of the uninstalling
-computer's OS. Unrelated hidden files, malformed/orphan sidecars and links remain
-protected: uninstall reports failure rather than complete removal. Shared folders
-and their Finder metadata are not cleaned. No whole-card metadata cleanup is used.
-
-Verified older backups in this installation's indexed recovery lineage are included in the archive and cleanup, even if omitted from the newest change journal. Names or timestamps alone never authenticate a backup. Mac metadata belonging to an authenticated, app-consumed welcome marker is retained as evidence until complete cleanup; malformed or unrelated metadata still stops removal. A failed uninstall remains incomplete until restoration and cleanup both verify.
-
-## Receipt ownership
-
-An installed Home receipt is generated state, not a stock file. Complete uninstall verifies its absence in both current and legacy app locations. A full reinstall can reconcile a stale receipt only with verified recovery and matching stock runtime/MainUI identities. Missing ownership evidence or foreign bytes are preserved and reported; there is no routine manual-deletion step. [RC7 evidence and limits](release/rc.7.md).
+For support only, `remove-integrations` restores integrations while retaining app/data. It is not the default uninstall. [Developer operations](integrations.md#computer-installer-interface).

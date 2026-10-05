@@ -18,7 +18,7 @@ runtime has its own BSD notice. Native user installation needs no Go/Python/WSL.
    ARM64/x64, plus explicit isolated Go1.20.14 for legacy Windows x86/x64. Windows selection
    uses the built-in PowerShell script, not a compiled dispatcher. It verifies Linux static linkage and Monterey Mach-O minima. It writes one copy-to-card user ZIP, source companions, notices,
    dependency inventory and SHA256SUMS. Reusing an output directory is refused.
-5. Extract and test these ZIPs with `BF_RELEASE_PACKAGE` set to the user ZIP's App/BetterFavorites/computer
+5. Extract and test the install ZIP with `BF_RELEASE_PACKAGE` set to the user ZIP's App/BetterFavorites/computer
    directory and `BF_FIXTURE_REPO` to the prepared audited private fixture checkout.
 
 ZIP timestamps/order and source compression timestamps are pinned to source commit.
@@ -70,11 +70,11 @@ is verified before use. Normal go.mod stays go 1.24 and normal tools use Go1.26.
 Supply BF_FIXTURE_REPO/BF_RELEASE_PACKAGE to include exact-package host tests.
 Native Windows7 SP1 x64 and Windows10 x64 normal-flow acceptance is user-confirmed;
 this Mac cannot execute Windows binaries itself. The export does not identify the
-exact later host dispatcher or ZIP. [Windows evidence](windows-acceptance.md).
+exact later host dispatcher or ZIP. [Windows evidence](../archive/release/windows-acceptance.md).
 
-## Host-dispatch review extension
+## Historical host-dispatch test archive
 
-See [target matrix/dispatch/evidence](host-dispatch.md). Production packaging requires
+See [target matrix/dispatch/evidence](host-dispatch.md). Production packaging creates one install ZIP and requires
 an explicit legacy toolchain path; it never silently downgrades normal go.mod or Go.
 Build a fresh review directory; preserve prior RC1/RC2 archives and inventories.
 Run `python3 tests/host_dispatch_test.py`, Go1.20.14 `go test ./...` in
@@ -84,7 +84,7 @@ probes/wrappers are not executed by simulated tests. No device writes are needed
 `python3 tools/package-windows7-test.py --release <fresh-release-dir> --output
 <fresh-path>/BetterFavorites-Windows7-Test.zip` creates the offline test archive and
 sidecar checksum; existing output is refused. Preserve the previous Desktop archive
-before replacing its path. Both packages have the exact same payload/package.json.
+before replacing its path. This developer-only test archive and the install ZIP use the same payload/package.json; it is not a second user download.
 
 The detailed [dependency/source/notice audit](dependency-audit.md) separates known
 source versions from unidentified prebuilt correspondence. Contributor compilation
@@ -95,7 +95,7 @@ and ordinary tests do not require a private card/firmware fixture.
 
 `tools/refresh-release-docs.py` refreshes the one install ZIP from a downloaded,
 checksum-verified baseline and a clean documentation checkout. It does not rebuild
-any executable or integration. Both source inventories and source companions retain
+any executable or integration. Source inventories and source companions retain
 the exact binary source; `DOCUMENTATION-INVENTORY.json` separately records the newer
 documentation commit and packaged document hashes. Transport and archive checksum
 inventories are regenerated. The final ZIP hash is recorded only in external
@@ -105,3 +105,12 @@ Use a fresh output directory. Keep previous archives. Verify all non-document
 members against the baseline and run `tests/package_integrity_test.py` and the
 isolated packaged install/uninstall test before replacing assets. Keep the RC7 tag
 fixed; changing its bundled guides does not establish new device acceptance.
+
+## Artwork and documentation paths
+
+The canonical artwork is `assets/icon.png`; packaging installs those exact bytes as
+`App/BetterFavorites/icon.png`. Branding and screenshots live under `assets/`.
+README is owner-maintained; report factual conflicts instead of silently editing it.
+The live RC7 description is authoritative for `notes-rc.7.md`. Synchronizing that file
+does not update the release page or bundled ZIP. Documentation/assets changes need
+a separately reviewed package refresh; never change its published checksum prematurely.

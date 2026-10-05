@@ -136,7 +136,7 @@ use `BF_RELEASE_PACKAGE`. Do not commit or redistribute those originals.
 
 The main ARM harness refuses mounted cards and runs only in an isolated Docker
 container. It requires generated exact-binary prototypes and QEMU; the complete
-procedure is in [development](docs/development.md) and [Home integration](docs/m6-home-integration.md).
+procedure is in [development](docs/development.md) and [Home integration](docs/archive/m6-home-integration.md).
 Do not run it on the device or treat emulation as acceptance.
 
 Release qualification tests the **actual package**: install, optional Home OFF/ON,

@@ -18,7 +18,7 @@ def main():
   assert computer+'HOST-SHA256SUMS' in names
   package=json.loads(z.read(computer+'package.json'))
   for f in package['files']:assert sha(z.read(computer+'payload/'+f['path']))==f['sha256'],f['path']
-  assert z.read(prefix+'icon.png')==(ROOT/'icon.png').read_bytes()
+  assert z.read(prefix+'icon.png')==(ROOT/'assets/icon.png').read_bytes()
   for n in ['settings.conf','browser-state','browser-preferences.conf','home-entry.conf','home-diagnostics.conf','better-favorites.log','welcome-pending']:assert prefix+n not in names,n
   arm=z.read(prefix+'better-favorites');assert arm[:7]==b'\x7fELF\x01\x01\x01' and arm[18:20]==b'\x28\x00'
   release=json.loads(z.read(prefix+'release.json'))

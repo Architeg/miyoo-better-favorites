@@ -50,7 +50,7 @@ def main():
  def payload(name,source,mode=0o644):
   data=source.read_bytes();write(stage,'payload/'+name,data);inventory.append(dict(path=name,sha256=sha(data),mode=mode));return data
  for n in ('config.json','launch.sh','icon.png'):
-  data=payload('App/BetterFavorites/'+n,(ROOT/'icon.png' if n=='icon.png' else ROOT/'App/BetterFavorites'/n),0o755 if n.endswith('.sh') else 0o644);write(base,'App/BetterFavorites/'+n,data)
+  data=payload('App/BetterFavorites/'+n,(ROOT/'assets/icon.png' if n=='icon.png' else ROOT/'App/BetterFavorites'/n),0o755 if n.endswith('.sh') else 0o644);write(base,'App/BetterFavorites/'+n,data)
  binary=(ROOT/'build/better-favorites').read_bytes()
  if binary[:7]!=b'\x7fELF\x01\x01\x01' or binary[18:20]!=b'\x28\x00':raise SystemExit('App is not ARM ELF32')
  # Host-only RC6 retains the exact RC5 app, with explicit independent provenance.

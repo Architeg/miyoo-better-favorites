@@ -74,15 +74,15 @@ ON Better Favorites with B Home/no-loop twice, Apps/X/Y and A/MENU/GameSwitcher/
 Automatic return passed. Actual tested app SHA-256:
 `d637643b0be987ab68a7bb9ba6869f09b6e1e58e2e7d0919088bbb1cd54f19dc`.
 The native log identifies 354-clean. All six deployed hashes, raw archive and
-missing log coverage are in [M6 acceptance](../m6-acceptance.md). Diagnostics were
+missing log coverage are in [M6 acceptance](m6-acceptance.md). Diagnostics were
 archived/byte-verified, disabled and synced; logs/backups/preferences remain.
 No new speed/RAM claim follows. The cache-containing build's normal browsing/game
 behavior is now user accepted, without a measured cache improvement.
 
 Later local changes provide concise Home wording, explicit availability and safe
 mixed-file recovery; their new UI/recovery has only host verification. See
-[installation, compatibility and offline recovery](../m6-home-integration.md).
-[Independent L1+Y investigation](../m6-shortcut-investigation.md) is separate: input
+[installation, compatibility and offline recovery](m6-home-integration.md).
+[Independent L1+Y investigation](m6-shortcut-investigation.md) is separate: input
 conflicts and incompatible stock keymon command remain blockers; no shortcut is
 installed, available or hardware-accepted. No shortcut instructions are exposed
 in production Help. M7 remains the next ordered roadmap milestone; shortcut work
@@ -100,13 +100,13 @@ smaps RSS 19,308 kB / median PSS 17,449 kB; runtime RSS 1,808 / PSS 357 kB.
 Gameplay memory, ON/OFF comparisons, post-scroll/menu memory and gameplay process
 absence measurements are **deferred**, not verified and not prerequisites for
 M6. No more profiling sessions, Terminal commands or device checks are requested.
-See [measurements, limits and verified retirement archive](../m5-profiling.md).
+See [measurements, limits and verified retirement archive](m5-profiling.md).
 
 The isolated per-parse emulator-label cache is host-verified: output/failure/reload
 checks pass and config reads fall 70 → 3 on the current corpus. ARM build and
 regressions pass. The reviewed cache binary is deployed, with device speedup unverified. Normal browsing/game behavior of the later
 M6 cache-containing build is now user accepted. Audio, font ownership,
-rendering and broader cleanup are unchanged. See [cache review](../m5-emulator-label-cache.md).
+rendering and broader cleanup are unchanged. See [cache review](m5-emulator-label-cache.md).
 
 Exact production launcher restored; profiling hooks/collectors/evidence/card
 rollback copies were archived and verified before removal. Cache binary retained,
@@ -117,10 +117,10 @@ now covers the actual deployed cache-containing bytes, without a speedup claim.
 
 M4 is complete, including approved L1/R1 pixel paging, non-repeated presses,
 selectable/no-wrap clamps, theme decode fallbacks and bounded artwork. See
-[acceptance, evidence and retained compatibility checklist](../m4-audit.md).
+[acceptance, evidence and retained compatibility checklist](m4-audit.md).
 
 M3 is hardware-accepted; its local timing policy remains explicit rather than a
-claim of stock MainUI equivalence. See [implementation and regression checklist](../browser-title-scrolling.md).
+claim of stock MainUI equivalence. See [implementation and regression checklist](browser-title-scrolling.md).
 Home Favorites replacement remains the primary delivery goal after the ordered
 core milestones. Optional artwork settings remain unresolved.
 
@@ -132,11 +132,11 @@ Version-specific authority: inspected Onion **v4.3.1-1**. Original runtime Git b
 Optional session-return integration is separate, default OFF and hash-gated; it
 is not Home tile integration. Installation does not enable the app preference.
 
-- [Return lifecycle, installation/rollback, source references and memory procedure](../onion-return.md)
-- [Removal transaction, Onion semantics and concurrency limits](../menu-removal.md)
-- [Theme/resource resolution, presentation and preview limitations](../menu-presentation.md)
-- [Browser Settings, persistence and device acceptance](../browser-settings.md)
-- [M3 title scrolling, source evidence, policy and device checks](../browser-title-scrolling.md)
+- [Return lifecycle, installation/rollback, source references and memory procedure](onion-return.md)
+- [Removal transaction, Onion semantics and concurrency limits](menu-removal.md)
+- [Theme/resource resolution, presentation and preview limitations](menu-presentation.md)
+- [Browser Settings, persistence and device acceptance](browser-settings.md)
+- [M3 title scrolling, source evidence, policy and device checks](browser-title-scrolling.md)
 - [Development environment and roadmap maintenance](../development.md)
 
 Builds, previews, logs, personal preferences/state, backups and temporary audit/

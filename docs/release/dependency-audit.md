@@ -39,6 +39,6 @@ SDL_ttf DT_NEEDED includes libbz2.so.1.0. Read-only inspection finds `miyoo/lib/
 
 ## Publication boundary
 
-Custom SDL correspondence, actual extension versions and missing root notices are resolved/narrowed as above. Do not retain a general requirement to byte-reproduce all permissively licensed prebuilts. The specific outstanding attribution mapping is SwiftShader's actual prebuilt component inventory, affecting both full and app-only ZIPs because both include EGL/GLES. Project source and new SDK-excluding source companions are separate artifacts. No binary release is published in this preparation pass; historical archives remain intact.
+Custom SDL correspondence, actual extension versions and missing root notices are resolved/narrowed as above. Do not retain a general requirement to byte-reproduce all permissively licensed prebuilts. The specific outstanding attribution mapping is SwiftShader's actual prebuilt component inventory, affecting the single install ZIP, which includes EGL/GLES. Project source and new SDK-excluding source companions are separate artifacts. The existing RC7 release retains these libraries and matching companions; historical archives remain intact.
 
 Apache's [redistribution conditions](https://www.apache.org/licenses/LICENSE-2.0) distinguish license/NOTICE preservation from exact build reproducibility. LGPL terms remain supplied in licenses/LICENSE and apply to the modified Miyoo backend.

@@ -1,6 +1,6 @@
 # Development roadmap
 
-Authoritative product and delivery roadmap, updated 2026-10-05.
+Authoritative product and delivery roadmap, updated 2026-10-06.
 The specifications below preserve the agreed scope and decisions. Use
 [current status](development-status.md) for delivery/acceptance and
 [historical preparation](archive/release-preparation-history.md) for dated records.
@@ -22,8 +22,7 @@ verification. Keep detailed milestone specifications here and concise status the
 The original primary goal is **Onion Home → Favorites → Better Favorites → Onion
 game launch**, using a stock-like native browser grouped by console. The current
 `Apps → BetterFavorites` entry remains available alongside the optional Home redirect.
-A direct Home shortcut is an alternative to investigate, not an agreed replacement
-for the normal Favorites tile requirement.
+Global shortcuts and a separate tile are deferred outside v1.0; Apps and the existing Home Favorites tile remain the implemented entry points.
 
 Better Favorites is a C++/SDL2 presentation and favorites wrapper. Onion's
 `/mnt/SDCARD/Roms/favourite.json` remains the source of truth and stock Add to
@@ -51,7 +50,7 @@ Layers:
 Onion retains emulator/core choices and overrides, save/resume, activity tracking,
 recent lists and GameSwitcher. Directly running emulator `launch.sh` from the SDL
 loop is not an equivalent lifecycle. See [architecture](architecture.md),
-[Onion return/handoff details](onion-return.md) and [removal safeguards](menu-removal.md).
+[Onion return/handoff details](archive/onion-return.md) and [removal safeguards](archive/menu-removal.md).
 
 ## 2. Non-negotiable rules
 
@@ -112,7 +111,7 @@ this does not imply exhaustive fault-injection or theme coverage.
 Final readability confirmation: supplied 2026-10-02 device photos show the deployed
 SELECT menu, removal modal, Settings, About and Help. This is screen-specific
 evidence, not an exhaustive theme/fault/lifecycle matrix. Photo identifiers are
-recorded in [status](development-status.md#current-delivery).
+recorded in the [historical status](archive/development-status-pre-release.md#verification-status).
 
 The supplied report and preceding device reports confirm the following major
 behaviors. This does not imply every failure case/device/theme/version was tested.
@@ -151,7 +150,7 @@ Theme/device identities and test logs are not complete enough for universal clai
 | Feature/change | Current evidence and missing evidence |
 | --- | --- |
 | Bold-white Automatic return headings | Included in accepted combined M4 binary; exhaustive theme matrix remains pending |
-| M4 shoulder paging/resource fallback | Combined deployed binary hardware-accepted 2026-10-03; exhaustive fault combinations remain host-only, see [audit](m4-audit.md) |
+| M4 shoulder paging/resource fallback | Combined deployed binary hardware-accepted 2026-10-03; exhaustive fault combinations remain host-only, see [audit](archive/m4-audit.md) |
 | Empty favorites browsing/menu availability | Implemented and fixture-covered; complete device empty-list matrix pending |
 | Removed remembered entry → nearby selection | Identity/ordinal fallback and tests; dedicated device edge-case check pending |
 | Corrupt/missing preference/state behavior | Host fixtures; device fault cases not exhaustively observed |
@@ -169,19 +168,17 @@ Theme/device identities and test logs are not complete enough for universal clai
 | Theme fallback coverage | Menu fallbacks exist; full-browser startup/fallback coverage incomplete |
 | Lightweight operation | Limited startup/idle measurements; host-verified per-parse label cache. Gameplay/OFF-ON evidence deferred; no device gain claimed |
 | Maintainability | Separate menu/model/state/removal/handoff modules; substantial browser logic in `main.cpp` |
-| Dependency preparation | `fetch-deps.sh` pins an SDL commit; full custom SDL/audio build provenance/reproduction incomplete |
-| Installation | Return integration manager works; production app installer/upgrade/uninstaller incomplete |
+| Dependency preparation | Pinned SDL and exact custom OSS SDL reproduction established; exact rebuilds of all other prebuilts remain incomplete |
+| Installation | Shared native install/update/complete uninstall and portable recovery implemented; broader native qualification remains pending |
 
-### Planned
+### Remaining work and deferred verification
 
-- M4 is hardware-complete; M5 measurement pass is closed with documented deferrals. M6 Home Favorites redirect is hardware-accepted and committed as `60b34b6` on Mini Plus MY354 / firmware 202306282128 / Onion v4.3.1-1; hardware revision unknown. Broader compatibility remains unverified.
-- Browser page-at-a-time navigation after button semantics are resolved.
-- Device follow-up for the final centering/text-size/padding adjustments; optional controls remain unresolved.
-- Measured startup/memory profiling and evidence-based optimization.
-- Normal Home Favorites tile entry is hardware-accepted on the tested card; independent L1+Y investigation is separate.
-- Explicit device/Onion/theme compatibility matrix and filename compatibility audit.
-- Remaining targeted cleanup, reproducible package, application install/upgrade/remove,
-  production documentation, license/notices and versioned release.
+- M1–M4 are implemented and have recorded normal device acceptance. Approved L1/R1 paging is complete; no new mapping is pending.
+- M5 is closed with gameplay memory, ON/OFF comparison and process-absence measurements explicitly deferred. No measured cache speedup is claimed.
+- M6 Home redirect is accepted on Mini Plus MY354 / firmware 202306282128 / Onion v4.3.1-1. Broader variants, faults and candidate-specific receipt/Settings fixes need their stated checks.
+- Community compatibility/filename/theme coverage and exact prebuilt reproduction remain tracked work.
+- Current repository branding/guides need a separate refresh of the published ZIP's bundled documents; installation and source/license distribution already exist.
+- Optional artwork/hints/remember-position controls and global shortcuts remain proposals/deferred, not promised v1.0 behavior.
 
 Deferred ideas and superseded decisions are recorded in section 7, not mixed into
 completed browser features or the ordered remaining milestones.
@@ -191,8 +188,8 @@ completed browser features or the ordered remaining milestones.
 `include/settings.h` defines app configuration. `src/app_settings.cpp` continues
 to persist only Automatic return/generation using the unchanged runtime protocol.
 `src/browser_preferences.cpp` separately persists grouping, prefixes and sorting;
-the five-row screen exposes four adjustable values plus About. A code field alone
-still does **not** imply a usable persistent option. See [browser Settings](browser-settings.md).
+the seven-row screen exposes five adjustable values, About automatic return and How to open Better Favorites. A code field alone
+still does **not** imply a usable persistent option. See [browser Settings](archive/browser-settings.md).
 
 | Area | Accepted requirement/default | Current implementation | Remaining Settings work / unresolved optional choice |
 | --- | --- | --- | --- |
@@ -265,7 +262,7 @@ and remaining navigation/artwork precede profiling and Home entry integration.
   Original label is literal-label sorting, not source order. Alternate ASCII-folded
   keys preserve UTF-8 bytes; tie handling is deterministic. Unicode collation remains
   unresolved. No invented defaults for optional hint/artwork/state controls. The
-  [device checklist](browser-settings.md#device-acceptance-checklist) records the
+  [device checklist](archive/browser-settings.md#device-acceptance-checklist) records the
   final readability follow-up. M2 is closed for functionality and preceding
   presentation; M3 begins separately at the user's request.
 
@@ -295,7 +292,7 @@ and remaining navigation/artwork precede profiling and Home entry integration.
   target for stripped binaries, so exact stock timing is unknown. Explicit local
   review policy: 1000ms delay, 30px/s, 1000ms end hold, snap to start and repeat with
   delay. Readability/speed remain subject to device feedback; optional Settings
-  controls/defaults remain unresolved. See [M3 evidence and checklist](browser-title-scrolling.md).
+  controls/defaults remain unresolved. See [M3 evidence and checklist](archive/browser-title-scrolling.md).
 
 ### M4 — Finish core navigation and artwork/fallback cases
 
@@ -309,7 +306,7 @@ and remaining navigation/artwork precede profiling and Home entry integration.
   selectable targets and no-wrap clamps. Repeats/menu shoulders are ignored.
   **M4 complete:** user hardware acceptance on 2026-10-03, tested binary SHA-256
   `aa486abad4e3272f86605945109bf0a0f76159ab373f87c1e57c38abd034b328`. Acceptance covers the deployed
-  build; exhaustive corrupt/missing-resource fault combinations remain host-only; see [requirement-by-requirement audit](m4-audit.md).
+  build; exhaustive corrupt/missing-resource fault combinations remain host-only; see [requirement-by-requirement audit](archive/m4-audit.md).
 - **Dependencies:** approved L1/R1 page controls; M2 grouped/flat settings and M3
   title behavior. Left/Right is already reserved for console jumps.
 - **Reuse/inspect:** selectable rows/viewport helpers, sticky divider treatment,
@@ -343,7 +340,7 @@ full performance certification or new hardware acceptance of the cache build.
   fallback and reload checks verify 70 → 3 config reads on this corpus. Regression
   suite/ARM build pass; cache binary deployed with production launcher and profiling
   disabled. **Device speedup remains unverified.** The original cache build was not tested; later M6 acceptance covers normal behavior of the actual cache-containing deployed bytes. See
-  [cache scope and checks](m5-emulator-label-cache.md).
+  [cache scope and checks](archive/m5-emulator-label-cache.md).
 - **Deferred evidence:** gameplay memory, ON/OFF comparison, post-scroll/menu memory
   and process-absence measurement. No more profiling sessions, Terminal commands
   or device checks requested for this pass. Preserve these gaps; do not infer RAM
@@ -351,7 +348,7 @@ full performance certification or new hardware acceptance of the cache build.
 - **Retained mechanisms:** default-off startup scopes, identity-validated RSS/PSS
   collectors, guarded activation/retirement tools, fixtures and raw evidence on
   host. No persistent observer, audio/font-ownership changes or speculative cleanup.
-  [Detailed results and archive](m5-profiling.md); [return memory limits](onion-return.md).
+  [Detailed results and archive](archive/m5-profiling.md); [return memory limits](archive/onion-return.md).
 - **Closure:** all temporary profiling-owned card files archived/byte-verified before
   removal; exact production launcher restored, cache binary kept, permanent return
   integration/data preserved. Existing user hardware acceptance remains distinct.
@@ -368,12 +365,12 @@ full performance certification or new hardware acceptance of the cache build.
   stages privately and publishes without replacing a competing pending command.
   Four exact ARM variants and existing handoff guards pass host fixtures. The user confirms all four hardware checks on Mini Plus / v4.3.1-1: OFF/ON,
   B Home/no-loop twice, Apps/X/Y, A/MENU/GameSwitcher/Automatic return. See
-  [actual hashes and evidence gaps](m6-acceptance.md). Diagnostics are archived and
+  [actual hashes and evidence gaps](archive/m6-acceptance.md). Diagnostics are archived and
   disabled. Other variants, devices, uninstall and fault cases remain unqualified.
   Separate default-OFF Settings preference,
   exact-hash installation status, reversible installer/uninstaller and optional
   bounded lifecycle diagnostics are implemented and host-tested locally.
-  Nonblocking descriptor opens and bounded ARM FIFO fixtures close the blocking-file gap. See [evidence and limits](m6-mainui-prototype.md).
+  Nonblocking descriptor opens and bounded ARM FIFO fixtures close the blocking-file gap. See [evidence and limits](archive/m6-mainui-prototype.md).
 - **Dependencies:** stable M2–M4 browser and closed M5 pass; audited exact binaries,
   reviewed ELF/ABI/concurrency design and verified backups/rollback before deployment.
 - **Reuse/inspect:** existing MainUI Favorites row, native AppAction and Home state
@@ -388,9 +385,9 @@ full performance certification or new hardware acceptance of the cache build.
   native ABI/replay/cleanup/result, command conflict and failure fixtures first;
   installer backup/publication/rollback and Settings dry runs pass; device Home/B/A/MENU/
   stock launch/reboot/disable/uninstall checks for each claimed device/version.
-- **Exclusions/decisions:** separate-tile implementation is dropped. Independent L1+Y is now a separately requested investigation; it must not
+- **Exclusions/decisions:** separate-tile implementation is dropped. Independent L1+Y is a historical investigation deferred beyond v1.0; it must not
   replace Apps, disable Home or alter ordinary X/Y. No shortcut implementation
-  is qualified; see [conflicts and command compatibility](m6-shortcut-investigation.md).
+  is qualified; see [conflicts and command compatibility](archive/m6-shortcut-investigation.md).
   Runtime-return installation does not prove Home integration. Unmodified external
   writers and stock runtime move remain documented concurrency limits. Final
   installer recovery and broader supported-version matrix remain host-only; post-acceptance wording awaits device verification; no broad
@@ -426,7 +423,7 @@ full performance certification or new hardware acceptance of the cache build.
 - **Intended behavior:** a clean checkout builds a documented package; user can install,
   upgrade and uninstall the app with optional integrations separately controlled.
 - **Current/missing:** Docker builds the prepared checkout; `fetch-deps.sh` pins SDL
-  source, but custom SDL/audio binary provenance and full reproduction are incomplete.
+  source. Exact custom OSS SDL reproduction is established; full reproduction of all other prebuilts remains incomplete.
   The build scripts and native Go installer produce one full ZIP. Install/uninstall, portable recovery, license/source companions and contributor docs are implemented. Broader native testing and exact prebuilt reproduction remain tracked work.
 - **Dependencies:** M6 integration design, M7 supported matrix, dependency/license
   decisions, version/layout/defaults and reproducible custom SDL2/audio procedure.
@@ -437,7 +434,7 @@ full performance certification or new hardware acceptance of the cache build.
   repeatable; pinned toolchain/source/binary provenance or deterministic custom build;
   package contains executable/launcher/required private libraries/defaults without
   personal data. App install/upgrade/uninstall preserves favorites/history/saves/
-  settings as agreed and restores integrations safely. README/build/architecture/
+  settings on update and restores integrations safely; complete uninstall archives then removes app-owned settings. README/build/architecture/
   install/uninstall/version/known-limitations docs and chosen license/notices complete.
 - **Host/device verification:** fresh-environment build/package inventory/ABI/dependency
   checks, hash/manifests, failure/foreign-change rollback fixtures, then device fresh
@@ -450,8 +447,7 @@ full performance certification or new hardware acceptance of the cache build.
 
 - **Intended behavior:** downloadable verified version with clear installation,
   support boundaries and release notes, instead of requiring this development checkout.
-- **Current/missing:** no release artifact is documented; this docs pass does not
-  independently verify the live GitHub release list. All production gates above remain.
+- **Current/missing:** RC7 and its single install ZIP/source companions are published. The separately maintained live release description is authoritative for release wording. Bundled docs lag current main; broader native qualification remains open.
 - **Dependencies:** M1–M8 acceptance, license/notices, package/version and supported matrix.
 - **Reuse/inspect:** repository tags/releases, reproducible package/manifests and proven
   install/rollback instructions; stock Onion workflows remain authoritative.
@@ -461,7 +457,7 @@ full performance certification or new hardware acceptance of the cache build.
 - **Host/device verification:** package provenance/content and clean-install checks;
   smoke-test the exact distributable on declared devices/versions, not a local substitute.
 - **Exclusions/decisions:** release numbering/distribution mechanics and support policy
-  are unfinalized. This milestone is not authorization to publish a release today.
+  are implemented for RC7. Broader support qualification remains open; documentation work is not authorization to change releases.
 
 ## 6. Verification, compatibility and known gaps
 
@@ -470,7 +466,7 @@ is `4e2194f1b47c6c13605846002b6be0b42c1384f9`, SHA-256
 `a8d77dcd316bc2a323b1e015aaf4b7682d2fed677af9cdadbc00e48881425d6e`.
 See [hash manifest](../integration/onion-return/hashes.json),
 [installer/rollback](../integration/onion-return/manage.py) and
-[versioned Onion references](onion-return.md). Do not generalize this hash gate to
+[versioned Onion references](archive/onion-return.md). Do not generalize this hash gate to
 other Onion versions. App/theme compatibility and runtime-hook compatibility are
 separate dimensions; Mini/Plus are targets, not a completed support matrix.
 
@@ -504,7 +500,7 @@ Evidence gaps and limitations to retain until resolved:
 - Home dispatch/ABI/ELF have exact-binary host/emulated evidence; real startup, Home
   restoration and no-loop return are user accepted on Mini Plus v4.3.1-1 only. Return helper
   availability does not imply Home integration, and preference ON does not imply installation.
-- Release candidate installer/package and GPL-3.0-or-later selection now exist; native Windows/device ZIP qualification and complete prebuilt provenance remain gates.
+- Release candidate installer/package and GPL-3.0-or-later selection now exist; broader native Windows/Linux/device ZIP qualification and complete prebuilt provenance remain tracked limits; recorded accepted combinations are listed in compatibility.
 
 Host gates include `tests/run-local-checks.sh`, `tests/runtime_installer_test.py`
 with the pinned runtime reference, shell syntax and Docker ARM compilation. SDL

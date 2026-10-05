@@ -1,68 +1,22 @@
-# Diagnostics and privacy
+# Export diagnostics
 
-## Export a report
+1. Power off the Miyoo and connect its SD card to your computer.
+2. Open the computer launcher in `App/BetterFavorites`, or use the [Mac/Linux Terminal command](online-install.md).
+3. Choose **[3] Export diagnostics**.
+4. The tool prints the new ZIP's location on your computer. Review it before sharing.
 
-Power off the Miyoo, connect its card and open the copied App/BetterFavorites folder.
-Open the same computer launcher as installation and choose **[3] Export diagnostics**. The card is identified automatically and the new archive location is printed.
+No Miyoo Terminal, network connection on the device or development tools are needed. Export does not change preferences or enable detailed tracing. Existing exports are kept.
 
-For support, run the following commands **inside the card’s `App/BetterFavorites` folder**:
+## What is included
 
-| Platform | Export |
-| --- | --- |
-| Windows | `.\Install-Windows.cmd export-diagnostics` |
-| macOS | `./Install-macOS.command export-diagnostics` |
-| Linux | `./Install-Linux.sh export-diagnostics` |
+The report contains bounded app/installer log tails, selected settings/status, version metadata, system/helper hashes and the active theme identifier. At most two installer log tails are included, each up to 128 KiB.
 
-The Windows7 test folder also supports `.\Install-Windows7.cmd export-diagnostics`.
-The copied launcher derives the card automatically. A fresh ZIP is written in your computer home folder;
-existing exports are not replaced. Export does not alter preferences or enable tracing.
-No Miyoo Terminal, Wi-Fi, SSH or developer tools are needed.
+**Review before uploading.** Game filenames, theme paths and preferences may be personal. ROMs, BIOS, saves, favorite/history contents, credentials and private recovery originals are not collected. Never upload a complete card image.
 
-## Contents and privacy
+Add known device/firmware details and the computer OS/version to your report. Include the tested ZIP checksum when possible. An offline report cannot prove a device boot, measure RAM or identify every host executable used.
 
-Exports include bounded app log tails, allowlisted app settings/status, version/source
-metadata, MainUI/runtime/helper hashes, active-theme identifier and missing evidence. At most two recent computer-side installer logs are included, each limited to its final 128 KiB; only timestamped installer log files are eligible, and links are refused.
-**Inspect the ZIP before sharing.** Error logs may include game filenames; preferences
-and theme paths can be personal. Favorites/history contents, ROMs, saves, credentials
-and serials are not collected. Do not upload private recovery originals or card images.
+## If a report is missing information
 
-Model/firmware/revision remain unknown when offline files cannot establish them.
-Supply known device details separately. Current exports do not capture the computer
-OS/build/architecture, host installer executable hash or tested ZIP checksum; include
-those in your test report. Offline inspection does not measure RAM or prove a reboot.
-[Windows evidence example](release/windows-acceptance.md).
+Share the exact error, what action you chose and the last completed step. Missing detailed logs are expected when tracing is OFF; they do not establish whether an interaction happened.
 
-## Basic logs
-
-`App/BetterFavorites/better-favorites.log` and `better-favorites.previous.log`
-each cap at 65,536 bytes (128KiB total). They rotate at launcher entry and record
-startup, errors, SDL/audio cleanup and handoff boundaries. No normal navigation or
-per-frame logger, watcher or resident gameplay helper is added.
-
-Logging is best-effort: full/unwritable/nonregular files do not change launch or
-fallback behavior. Links/FIFOs are refused. App-owned streams are bounded; loader
-failures before main may appear only as launcher exit status. Concurrent app
-invocations are unsupported. Preserve existing evidence before repeated tests.
-
-## Detailed tracing — support only
-
-Detailed Home/return tracing is OFF normally and independent of both feature
-switches. Only enable it when troubleshooting a lifecycle/redirect issue. With
-exclusive access to the powered-off card, use your same entry script with `trace-on`,
-then later `trace-off`. For example:
-
-```powershell
-.\Install-Windows.cmd trace-on
-.\Install-Windows.cmd export-diagnostics
-.\Install-Windows.cmd trace-off
-```
-
-macOS/Linux use their same scripts and actions. Disabling removes only the owned
-activation marker; collected logs/exports remain. Missing detailed logs when tracing
-is OFF are expected, not evidence that every interaction did or did not occur.
-
-New Home and return trace writes each cap at128KiB; existing oversized legacy logs
-are retained without growth and export reads bounded tails. Trace writes and the
-short-lived executable logging modes may affect startup timing; their cost is
-unmeasured. Do not infer performance improvements from earlier differently
-instrumented sessions. [Developer guide](development.md).
+Basic logs rotate current/previous sessions and are bounded. Detailed tracing stays OFF normally. Enable it only for a specific support request, then disable it. [Developer logging and commands](integrations.md#diagnostics).

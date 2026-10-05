@@ -1,6 +1,6 @@
 # Better Favorites
 
-**[Download the install ZIP](https://github.com/Architeg/miyoo-better-favorites/releases/download/v1.0.0-rc.7/better-favorites-1.0.0-rc.7.zip)** — one package for Windows, Mac and Linux. You do not need GitHub’s “Source code” downloads to install the app.
+**[Download the install ZIP](https://github.com/Architeg/miyoo-better-favorites/releases/download/v1.0.0-rc.7/better-favorites-1.0.0-rc.7.zip)** - one package for Windows, Mac and Linux. You do not need GitHub’s “Source code” downloads to install the app.
 
 ## ✨ Features
 
@@ -13,7 +13,6 @@
 
 - Corrected recovery-backed Home receipt handling across reinstall and complete uninstall.
 - Cached Settings verification so returning from explanation pages avoids repeated system-file checks.
-- Separate B/START badges in Automatic return descriptions.
 
 ## 📦 Install and remove
 

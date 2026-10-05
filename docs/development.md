@@ -78,7 +78,7 @@ returnON, GameSwitcher B/START consumes ownership before reopening the app;
 switching games retains it. A resumes. Ordinary MainUI return/direct game exit,
 restart/reboot/disable/generation change invalidate it; shutdown wins. No browser
 or helper stays alive during gameplay. Stock sessions remain unchanged. See
-[exact runtime source and lifecycle](onion-return.md).
+[current integration reference](integrations.md).
 
 ## Native Home integration
 
@@ -91,7 +91,7 @@ are unchanged. All shortcuts are deferred beyondv1.0.
 `integration/mainui-home/adapter.cpp` and `hooks.S` preserve calling convention,
 displaced instructions, allocation cleanup/results and native state saving. The
 exact-hash generator relocates PHDR/unwind metadata, uses separate RX permissions
-and existing RW BSS page capacity. [M6 prototype](m6-mainui-prototype.md) records
+and existing RW BSS page capacity. [historical M6 prototype](archive/m6-mainui-prototype.md) records
 byte maps; `tools/release-installer/elf.go` reproduces the same audited output hashes.
 Payload/mapped sizes are not measured RSS. Native Home diagnostic writes are
 optional/bounded and never authority for ownership.
@@ -117,12 +117,12 @@ REPLACE_EXISTING|WRITE_THROUGH, without COPY_ALLOWED. This is not a guarantee of
 FAT physical power-loss immunity. [Microsoft API behavior](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-movefileexw).
 Windows7 SP1 x64 and Windows10 x64 packaged install/uninstall and stock boot are
 user-confirmed; exact later dispatcher/tool hashes and other native targets remain
-unqualified. [Evidence limits](release/windows-acceptance.md). Exclusive offline
+unqualified. [Evidence limits](archive/release/windows-acceptance.md). Exclusive offline
 card access is required; separate rechecks are conflict detection, not CAS.
 
 Per-card recovery retains exact SD paths and checksums. Host/card copies work
 without MainUI, Terminal, Wi-Fi or SSH. Never delete the app before restoration or
-copy another card's originals. [Recovery](uninstall.md).
+copy another card's originals. [Recovery](recovery.md).
 
 ## Diagnostics and release
 
@@ -135,9 +135,9 @@ tracing. Filesystem/proc RAM evidence cannot be inferred from the mounted card.
 
 `scripts/build.sh` pins Docker toolchain digest and version/source literals;
 `tools/package-release.py` requires a clean commit, builds native host tools and
-creates app-only/installer ZIPs plus source/notices/checksums. Generated binaries,
+creates one install ZIP plus source/notices/checksums. Generated binaries,
 previews, logs, personal settings, backups and vendor fixtures stay out of Git.
-[Build/provenance](release/build.md), [rc.2 gates](release/rc.2.md),
+[Build/provenance](release/build.md), [current RC7 qualification](release/rc.7.md),
 [contributing/tests](../CONTRIBUTING.md). Candidate acceptance requires the exact
 ZIP, native host filesystem tests and hardware installation roundtrip; compilation
 or emulation alone is insufficient.

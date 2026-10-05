@@ -11,7 +11,7 @@
 <p align="center">
   <img alt="C++" src="https://img.shields.io/badge/C%2B%2B-00599C?logo=cplusplus&logoColor=white" />
   <a href="https://github.com/Architeg/miyoo-better-favorites/releases/tag/v1.0.0-rc.7"><img alt="Download Better Favorites" src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8FDownload-Better%20Favorites-2563eb"></a>
-  <a href="docs/compatibility.md"><img alt="Tested on Onion v4.3.1-1" src="https://img.shields.io/badge/tested%20Onion-v4.3.1--1-7c5cbf"></a>
+  <a href="docs/compatibility.md"><img alt="Tested on Onion v4.3.1-1" src="https://img.shields.io/badge/Required%20Onion-v4.3.1--1-7c5cbf"></a>
   <a href="LICENSE"><img alt="GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-2563eb"></a>
 <a href="https://github.com/Architeg/miyoo-better-favorites/stargazers">
   <img alt="GitHub stars" src="https://img.shields.io/github/stars/Architeg/miyoo-better-favorites?label=Stars&style=flat" />
@@ -99,56 +99,46 @@ Installation, recovery and diagnostic export work offline with the supplied pack
 
 Scripts select the computer-side executable; every computer installs the **same Miyoo files**. System patches accept only audited Onion files.
 
-<details>
-<summary><strong>Targets versus tested combinations</strong></summary>
-
-Mac M1/Ventura and Windows installation, complete uninstall and device use have
-recorded user tests. Earlier Windows tests include Windows 7 SP1 x64 and Windows
-10 x64. Intel Mac installation has been tested; a reported cross-computer receipt
-conflict has a host-tested correction that still needs a repeat device check.
-
-Linux has automated container tests; physical Linux testing is welcome. Other
-Onion versions, Mini devices and additional host configurations need community
-reports. [Full compatibility and evidence →](docs/compatibility.md)
-
-</details>
+[Full compatibility details →](docs/compatibility.md)
 
 <a id="install"></a>
-## 📦 Install
+## Install
 
 **Power off the Miyoo and connect its SD card to your computer.**
 
-### Option 1 — Download, copy, double-click · Windows / Mac / Linux
+### ● Option 1 - One-click installer · Windows / Mac / Linux
 
 1. **[Download the install ZIP](https://github.com/Architeg/miyoo-better-favorites/releases/download/v1.0.0-rc.7/better-favorites-1.0.0-rc.7.zip)** and extract it.
-2. Copy **App/BetterFavorites** into the SD card’s **App** folder.
-3. Open the copied **BetterFavorites** folder and launch the file for your computer:
+2. Inside the extracted folder, open **App** and copy the **BetterFavorites** folder into the **App** folder on your SD card.
+3. Open **App → BetterFavorites** on your SD card and double-click the installer for your computer:
 
 | Computer | File to open |
 | --- | --- |
-| 🪟 Windows | **Install-Windows.cmd** |
-| 🍎 Mac | **Install-macOS.command** |
+| ❖ Windows | **Install-Windows.cmd** |
+|  Mac | **Install-macOS.command** |
 | 🐧 Linux | **Install-Linux.desktop** — choose Allow launching if asked |
 
 4. Choose **[1] Install / Update** and confirm the card and powered-off Miyoo.
-5. Wait for **Install verified**, safely eject the card, insert it and boot.
+5. Wait for **Install verified**, safely eject the card, insert it to your Miyoo and boot.
 
 > [!TIP]
-> **On Mac, Option 2 below is recommended for a smoother start**, especially if the downloaded files are blocked. It downloads the same package automatically—no copying needed.
+> **On Mac, Option 2 below is recommended for a smoother start**, especially if the downloaded files are blocked. It downloads the same package automatically - no copying needed.
 
 #### If Mac asks for approval
 
-For an unsigned-developer warning, choose **Open Anyway** in **System Settings → Privacy & Security**. On Monterey, use **System Preferences → Security & Privacy → General**. The separate **BetterFavorites-Installer** may need approval too; follow the terminal instructions, then choose **R** to retry. Stop for malware or damaged-file warnings. [Opening help →](docs/security-opening.md)
+For an unsigned-developer warning, choose **Open Anyway** in **System Settings → Privacy & Security**. On Big Sur/Monterey, use **System Preferences → Security & Privacy → General**. The separate **BetterFavorites-Installer** may need approval too; follow the terminal instructions, then choose **R** to retry. Stop for malware or damaged-file warnings. 
 
-### Option 2 — One Terminal command · Mac / Linux
+Read [Opening help →](docs/security-opening.md) to learn how to troubleshoot installation warnings.
 
-On Mac, press **⌘ Space**, type **Terminal**, and press Enter. On Linux, open your terminal. Paste:
+### ● Option 2 - One Terminal command · Mac / Linux
+
+On Mac/Linux open your terminal. Paste:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Architeg/miyoo-better-favorites/main/scripts/install-online.sh | bash
 ```
 
-Confirm the detected card and choose **[1] Install / Update**. Wait for **Install verified**, safely eject the card, insert it and boot. Intel and Apple Silicon are selected automatically. [Full Terminal guide →](docs/online-install.md)
+Installer will be dowloaded automatically. Confirm the detected card and choose **[1] Install / Update**. Wait for **Install verified**, safely eject the card, insert it and boot. Intel and Apple Silicon are selected automatically. [Full Terminal guide →](docs/online-install.md)
 
 ### After installation
 

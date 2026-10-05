@@ -82,8 +82,6 @@ Better Favorites turns that list into a browser built around how you use your Mi
 | Optional return | Return to Better Favorites with B/START after using GameSwitcher |
 | Favorite removal | Remove the entry while keeping the game, artwork and saves |
 
-Installation, recovery and diagnostic export work offline with the supplied package. No Miyoo Terminal commands are needed.
-
 <a id="compatibility"></a>
 ## Compatibility
 
@@ -152,14 +150,16 @@ Use the same launcher or Terminal command for `[2] Uninstall completely` or `[3]
 <a id="first-launch"></a>
 ## First launch
 
+<p align="center">
+  <img src="assets/game-list.jpg" alt="Main screen" width="420"/>
+  &nbsp;&nbsp;
+  <img src="assets/settings.jpg" alt="Settings screen" width="420"/>
+</p>
+
 Boot your Miyoo. Open **Apps → Better Favorites**, then press `Y` or `Select` for Settings.
 
 - **Replace stock Favorites:** ON opens Better Favorites app from the Home Favorites tile; OFF opens stock Favorites.
 - **Automatic return:** ON brings you back to Better Favorites at your previous selection and scroll position when you press `B/START` in GameSwitcher, including after switching games. OFF uses Onion's normal main-menu return.
-
-<p align="left">
-  <img src="assets/settings.jpg" alt="Settings screen" width="380"/><br>
-</p>
 
 Both switches default **OFF**, and can be enabled separately in Settings. Automatic return applies when leaving GameSwitcher; Direct game exit ends the automatic-return session, so exiting a game directly returns to Onion’s main menu.
 

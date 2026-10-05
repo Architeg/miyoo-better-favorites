@@ -1,7 +1,7 @@
 <div align="center">
   <img src="App/BetterFavorites/icon.png" alt="Better Favorites icon" width="74" height="74">
-  <h1>Better Favorites</h1>
-  <p><em>Your Onion favorites, easier to browse.</em></p>
+  <h1>Miyoo Better Favorites</h1>
+  <p><em>An alternative Favorites app for Miyoo Mini and Mini Plus running Onion OS.</em></p>
 </div>
 
 <p align="center">
@@ -21,9 +21,17 @@
 <a id="why-better-favorites"></a>
 ## ⭐ Why Better Favorites?
 
-A growing favorites list is easier to browse with console groups, readable titles and saved preferences. Better Favorites brings those features to your existing Onion favorites on **Miyoo Mini and Mini Plus**.
+Favorites should help you find a game quickly. As the list grows across Game Boy, SNES, PlayStation and other systems, a single mixed list becomes harder to browse—and long titles can be difficult to read.
 
-The native C++/SDL2 app reads Onion's `Roms/favourite.json`. Onion still handles game launching, cores, saves, recent history and GameSwitcher.
+Better Favorites gives your existing list more structure:
+
+- **Find games by console.** Group favorites under system headings and jump between consoles, or keep a flat list.
+- **Read the title, not just the beginning.** Long selected titles scroll; numeric prefixes can be hidden without renaming your games.
+- **Browse in the order you prefer.** Choose sorting in Settings and move through longer lists a page at a time with L1/R1.
+- **Pick up where you left off.** Selection and scroll position are remembered. Optional automatic return brings you back after leaving GameSwitcher.
+- **Keep a familiar look.** Menus use your active Onion theme’s fonts, colors and assets.
+
+**Your current favorites are already there.** The app uses Onion’s existing favorites file; no rebuilding the list or moving ROMs. Onion continues to handle game launching, cores, saves, recent history and GameSwitcher.
 
 > **[Download Better Favorites](https://github.com/Architeg/miyoo-better-favorites/releases/download/v1.0.0-rc.7/better-favorites-1.0.0-rc.7.zip)** — one ZIP for Windows, Mac and Linux. [What’s new →](docs/release/notes-rc.7.md)
 

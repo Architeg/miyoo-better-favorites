@@ -27,7 +27,7 @@ def source_archive(repo, args, destination, epoch):
   if proc.wait()!=0:raise RuntimeError('Source archive failed')
  finally:proc.stdout.close()
 def main():
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',type=Path,required=True);p.add_argument('--legacy-toolchain',type=Path,required=True,help='Isolated official Go1.20.14 for Windows7/8/8.1 native installers');p.add_argument('--review-snapshot',action='store_true',help='Explicit uncommitted private review snapshot; identity and matching source inventory included');p.add_argument('--reuse-rc5-app',action='store_true',help='Retain the exact RC5 ARM bytes for this host-only fix');a=p.parse_args()
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',type=Path,required=True);p.add_argument('--legacy-toolchain',type=Path,required=True,help='Isolated official Go1.20.14 for Windows7/8/8.1 native installers');p.add_argument('--review-snapshot',action='store_true',help='Explicit uncommitted development snapshot; identity and matching source inventory included');p.add_argument('--reuse-rc5-app',action='store_true',help='Retain the exact RC5 ARM bytes for this host-only fix');a=p.parse_args()
  if not a.review_snapshot and command(['git','status','--porcelain','--untracked-files=normal']).strip():raise SystemExit('Commit reviewed source first; package requires a clean pinned checkout.')
  commit=command(['git','rev-parse','HEAD']).decode().strip();epoch=int(command(['git','show','-s','--format=%ct','HEAD']))
  if a.output.exists():raise SystemExit('Choose a fresh output directory; previous candidates are preserved.')
@@ -75,7 +75,7 @@ def main():
  if sha(adapter.read_bytes())!=spec['payload_sha256']:raise SystemExit('Adapter differs from accepted exact catalogue')
  for rel in ('integration/legacy/rc3-copied-package.json','integration/mainui-home/package.json','integration/mainui-home/legacy-package.json','integration/onion-return/legacy-hashes.json','integration/onion-return/hashes.json','integration/onion-return/runtime.patch','integration/onion-return/better_favorites_return.sh'):payload(rel,ROOT/rel)
  payload('integration/mainui-home/adapter.elf',adapter)
- release=dict(version=VERSION,app_version=app_version,app_source_commit=app_commit,app_sha256=sha(binary),source_commit=commit,source_snapshot_sha256=snapshot,review_snapshot=a.review_snapshot,dependencies=dependencies,toolchain='aemiii91/miyoomini-toolchain@sha256:a864876472a489f63d6223d2c8ad61e12ced679c0b177ae9429e51f3673ef4e7',gates='See docs/release/rc.7.md; not stable/hardware-qualified candidate')
+ release=dict(version=VERSION,app_version=app_version,app_source_commit=app_commit,app_sha256=sha(binary),source_commit=commit,source_snapshot_sha256=snapshot,review_snapshot=a.review_snapshot,dependencies=dependencies,toolchain='aemiii91/miyoomini-toolchain@sha256:a864876472a489f63d6223d2c8ad61e12ced679c0b177ae9429e51f3673ef4e7',gates='See docs/compatibility.md and docs/release/rc.7.md for tested targets and remaining qualification')
  data=(json.dumps(release,indent=2)+'\n').encode();write(base,'App/BetterFavorites/release.json',data);write(stage,'payload/App/BetterFavorites/release.json',data);inventory.append(dict(path='App/BetterFavorites/release.json',sha256=sha(data),mode=0o644))
  write(stage,'package.json',(json.dumps(dict(format=1,version=VERSION,commit=commit,source_snapshot_sha256=snapshot,review_snapshot=a.review_snapshot,files=inventory),indent=2)+'\n').encode())
  from host_packaging import build_hosts
@@ -93,7 +93,7 @@ def main():
     for source in ('integration/onion-return/hashes.json','integration/onion-return/manage.py'):
      data=data.replace(('](../'+source+')').encode(),('](https://github.com/Architeg/miyoo-better-favorites/blob/'+commit+'/'+source+')').encode())
    write(target,rel,data)
-  write(target,'README.txt',b'Better Favorites 1.0.0-rc.7 - private review candidate, not stable.\nStart with docs/install.md. Uninstall restores integrations and removes owned app/data automatically; portable card recovery is primary; computer archive is retained after uninstall.\nDesigned for Mini and Mini Plus; hardware tested on Mini Plus.\nUser-confirmed Windows7 SP1 x64/Windows10 x64 and Mac tests are recorded; exact host/tool and remaining gates are in docs/release/rc.7.md.\n')
+  write(target,'README.txt',b'Better Favorites 1.0.0-rc.7\nStart with docs/install.md. Uninstall restores integrations and removes owned app/data automatically; portable card recovery is primary; computer archive is retained after uninstall.\nDesigned for Mini and Mini Plus; hardware tested on Mini Plus.\nUser-confirmed Windows7 SP1 x64/Windows10 x64 and Mac tests are recorded; exact host/tool and remaining gates are in docs/release/rc.7.md.\n')
  # Supply pinned dependency source material, rather than promising a future URL.
  # No vendor MainUI, ROMs, private backups or development logs are in these trees.
  source_archive(sdl,['--prefix=sdl2-miyoo/','HEAD','LICENSE','Makefile','Makefile.mk','sdl2','swiftshader'],out/('sdl2-miyoo-'+SDL_COMMIT+'.tar.gz'),epoch)
@@ -144,7 +144,7 @@ def main():
  # notices flag uncertain prebuilt correspondence; stable publication is gated.
  for target in (stage,base):
   shutil.copytree(notices,target/'licenses')
-  write(target,'SOURCE.txt',('Matching project source: better-favorites-'+VERSION+'-source.tar.gz\nDependency source: sdl2-miyoo-'+SDL_COMMIT+'.tar.gz\nDistribute source/license companions with this private candidate. See docs/release/dependency-audit.md for component-specific evidence/remaining attribution questions. SDK headers/driver libraries are excluded from the dependency source companion.\n'+''.join('Supplemental upstream source: '+r['archive']+'\n' for r in supplemental)).encode())
+  write(target,'SOURCE.txt',('Matching project source: better-favorites-'+VERSION+'-source.tar.gz\nDependency source: sdl2-miyoo-'+SDL_COMMIT+'.tar.gz\nDistribute matching source/license companions with this package. See docs/release/dependency-audit.md for component-specific evidence/remaining attribution questions. SDK headers/driver libraries are excluded from the dependency source companion.\n'+''.join('Supplemental upstream source: '+r['archive']+'\n' for r in supplemental)).encode())
  for target in (stage,base):
   write(target,'SOURCE-INVENTORY.json',(out/'SOURCE-INVENTORY.json').read_bytes())
   entries=[p for p in sorted(target.rglob('*')) if p.is_file()]
@@ -174,3 +174,4 @@ def main():
  files=[p for p in out.iterdir() if p.is_file()];write(out,'SHA256SUMS', ''.join(sha(p.read_bytes())+'  '+p.name+'\n' for p in sorted(files)).encode())
  print(json.dumps(dict(output=str(out),commit=commit,app_sha256=sha(binary),archives=[p.name for p in files]),indent=2))
 if __name__=='__main__':main()
+

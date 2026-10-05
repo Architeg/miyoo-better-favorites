@@ -1,4 +1,6 @@
-# v1.0.0-rc.2 — private review candidate
+# v1.0.0-rc.2 — historical build
+
+> Historical engineering record. Use [current installation instructions](../install.md) and [release notes](notes-rc.7.md).
 
 Prepared 2026-10-04. RC1 artifacts/evidence/recovery originals are retained.
 [RC1 Mac/device acceptance](rc1-mac-acceptance.md) is distinct from RC2 acceptance.
@@ -58,3 +60,4 @@ operation to the existing offline installer. Local download/archive/tag fixtures
 and cross-builds are separate evidence. Public URLs are not offered; an actual
 published-asset roundtrip and native Windows7 TLS execution remain pending.
 The offline one-command entry scripts remain the supported route.
+

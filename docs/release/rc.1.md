@@ -1,5 +1,7 @@
 # v1.0.0-rc.1 review candidate
 
+> Historical engineering record. Use [current installation instructions](../install.md) and [release notes](notes-rc.7.md).
+
 Prepared from a pinned source commit; exact identities are in packaged
 `package.json`, app `release.json` and external `SHA256SUMS`. No stable tag/release,
 candidate deployment or change to the accepted mounted card is part of this pass.
@@ -71,3 +73,4 @@ package hashes. Mounted-card stock restoration is independently verified; device
 boot after uninstall remains pending. RC1 integrations-only uninstall retained the
 app/artifacts; the authorized subsequent clean baseline archived and removed them.
 [RC2](rc.2.md) corrects default complete removal and contains separate new gates.
+

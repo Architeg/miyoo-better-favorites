@@ -21,7 +21,7 @@ copies. The app's supplied icon is packaged separately from user theme resources
 <a id="distributed-dependencies"></a>
 ## Distributed dependencies
 
-The candidate includes the private app libraries below and native host installers.
+The package includes the bundled shared libraries below and native host installers.
 Archive versions identify the recorded **source**, not proven versions of every
 prebuilt binary. The common fork pin is
 `3c68ed01fee7feffd4ea338b1cc5018a455e2be9`.
@@ -63,3 +63,4 @@ The custom OSS SDL now reproduces the complete accepted ELF byte for byte. Actua
 The SwiftShader audit now maps known source-supported components, preserves all available third-party notice families and explicitly supplies missing LLVM root texts plus the Bison skeleton exception. No further specific missing notice was identified. Exact prebuilt LLVM revision/link inventory remains unverified; the unchanged libraries are not claimed byte-reproduced. [Component mapping and evidence limits](docs/release/swiftshader-attribution.md).
 
 Restricted MI SDK headers/driver binaries are excluded from the new dependency source companion, and are not bundled into the app. No original license/copyright text has been changed. Source, device acceptance and exact build reproducibility remain separate evidence.
+

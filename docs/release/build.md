@@ -15,8 +15,8 @@ runtime has its own BSD notice. Native user installation needs no Go/Python/WSL.
    This builds the ARM executable with version/source literals and audited adapter.
 4. `sh scripts/package.sh --output dist/<fresh-directory> --legacy-toolchain <Go1.20.14-root>` requires a clean pinned
    checkout. It pins Go1.26.2 for modern Windows x86/x64/ARM64, macOS ARM64/x64 and Linux
-   ARM64/x64, plus explicit isolated Go1.20.14 for legacy Windows x86/x64 and the
-   read-only x86 dispatcher. It verifies Linux static linkage and Monterey Mach-O minima. It writes one copy-to-card user ZIP, source companions, notices,
+   ARM64/x64, plus explicit isolated Go1.20.14 for legacy Windows x86/x64. Windows selection
+   uses the built-in PowerShell script, not a compiled dispatcher. It verifies Linux static linkage and Monterey Mach-O minima. It writes one copy-to-card user ZIP, source companions, notices,
    dependency inventory and SHA256SUMS. Reusing an output directory is refused.
 5. Extract and test these ZIPs with `BF_RELEASE_PACKAGE` set to the user ZIP's App/BetterFavorites/computer
    directory and `BF_FIXTURE_REPO` to the prepared audited private fixture checkout.
@@ -42,8 +42,8 @@ Do not alter audio/global system configuration to silence warnings.
 
 The package includes SDL/image/mixer/ttf/json-c/png/z and SwiftShader EGL/GLES
 private libraries. Firmware/Onion supplies libc/libstdc++/libgcc, MI driver libraries,
-freetype, bzip2 and libpadsp. Inherited runtime search paths are retained. Packaged normal flows have user evidence; separate app-only fresh closure and
-all new package variants still need exact-package qualification.
+freetype, bzip2 and libpadsp. Inherited runtime search paths are retained. Packaged normal flows have user evidence; the same full ZIP is used for all hosts.
+Test new package bytes separately from historical deployments.
 
 ### Canonical adapter ELF metadata
 
@@ -56,13 +56,12 @@ sections and all four generated MainUI SHA-256 values are **byte-identical** to
 the accepted deployment. This is metadata reproducibility, not a new redirect
 behavior or a replacement of accepted card files.
 
-## Private review snapshots / Windows 7
+## Developer snapshots / Windows 7
 
 Normal release packaging still requires a clean pinned checkout. An explicit
-`--review-snapshot` prepares uncommitted private review artifacts with base commit
+`--review-snapshot` prepares uncommitted development artifacts with base commit
 and exact source SHA inventory; its source companion contains those actual files.
-This does not pretend to be a new committed checkpoint. Default candidate revision
-is rc.4; BETTER_FAVORITES_RELEASE_VERSION can explicitly select another build ID.
+This does not pretend to be a new committed checkpoint. The committed package version is defined by `tools/package-release.py`; BETTER_FAVORITES_RELEASE_VERSION can explicitly select another build ID.
 
 `tools/build-windows7-test.py --toolchain <isolated official Go1.20.14> --output
 <fresh-directory>` copies installer Go sources into a temporary test-only module
@@ -90,3 +89,4 @@ before replacing its path. Both packages have the exact same payload/package.jso
 The detailed [dependency/source/notice audit](dependency-audit.md) separates known
 source versions from unidentified prebuilt correspondence. Contributor compilation
 and ordinary tests do not require a private card/firmware fixture.
+

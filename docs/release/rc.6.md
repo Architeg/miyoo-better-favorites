@@ -1,5 +1,7 @@
 # RC6 — directory metadata and Mac first-open correction
 
+> Historical engineering record. Use [current installation instructions](../install.md) and [release notes](notes-rc.7.md).
+
 Local follow-up review candidate; no stable release or follow-up device acceptance. Initial RC6 M1/Ventura acceptance is recorded below. Existing tags, release archives, rollback backups and mounted-card files are preserved.
 
 ## Actual RC5 result
@@ -44,3 +46,4 @@ Installation passed on M1/Ventura and Intel/Monterey per the user. Complete unin
 ## Superseding acceptance — 2026-10-05
 
 The user now confirms M1 install/complete uninstall and Windows install/complete uninstall without security warnings using the built-in selector; app behavior passed. Intel install failed on a surviving receipt and succeeded after manual deletion. Historical failures above remain evidence, not the current normal-flow status. Final focused receipt and Settings corrections are tracked separately in [RC7](rc.7.md), with hardware confirmation pending.
+

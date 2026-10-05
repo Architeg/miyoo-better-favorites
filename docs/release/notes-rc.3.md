@@ -1,5 +1,7 @@
 # Better Favorites v1.0.0-rc.3
 
+> Historical engineering record. Use [current installation instructions](../install.md) and [release notes](notes-rc.7.md).
+
 Your existing Onion favorites, easier to browse: console groups, display preferences, long-title scrolling, shoulder paging, theme-aware menus and safe favorites-record removal. Onion still handles games, saves, recent history and GameSwitcher.
 
 ## Downloads and quick start
@@ -17,3 +19,4 @@ Designed for Mini and Mini Plus; hardware tested on Mini Plus. Tested device: MY
 Audited system-file hashes are required for integrations. Linux desktop launch behavior varies; unsigned host tools may require a file-specific Open/Trust confirmation. Missing/conflicting recovery stops removal. Concrete dependency redistribution questions are recorded in the dependency audit; this is not stable v1.0.0.
 
 Report bugs with version/package hash, computer and Miyoo/Onion details, steps and a privacy-reviewed diagnostic export. No device Terminal commands are needed.
+

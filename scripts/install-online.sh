@@ -151,7 +151,7 @@ if [[ $authenticated -eq 1 ]]; then
   command -v gh >/dev/null || fail '--github-auth requires the GitHub CLI with repository access'
   gh release download "$tag" --repo "$REPOSITORY" --pattern SHA256SUMS --pattern "$archive" --dir "$work" || fail 'authenticated download failed'
 else
-  fetch "$RELEASE_ROOT/$tag/SHA256SUMS" "$work/SHA256SUMS" 1048576 || fail 'release unavailable; private repositories require --github-auth, or use the offline ZIP'
+  fetch "$RELEASE_ROOT/$tag/SHA256SUMS" "$work/SHA256SUMS" 1048576 || fail 'release unavailable; check your connection and release tag, or use the offline ZIP'
   fetch "$RELEASE_ROOT/$tag/$archive" "$work/$archive" "$MAX_ZIP_BYTES" || fail 'package download failed; use the offline ZIP if necessary'
 fi
 checksum_size=$(wc -c < "$work/SHA256SUMS" | tr -d '[:space:]')

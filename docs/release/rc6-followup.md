@@ -1,5 +1,7 @@
 # RC6 focused follow-up — evidence and entry comparison
 
+> Historical engineering record. Use [current installation instructions](../install.md) and [release notes](notes-rc.7.md).
+
 Local review; no tag change, publication, card deployment or stable qualification. The preparation report accompanies the new ZIP, checksums and matching source companions. The source inventory identifies its uncommitted snapshot and base commit separately.
 
 ## Actual outcomes
@@ -193,3 +195,4 @@ which component regenerated the different bytes in the earlier failed attempt.
 ## Superseding acceptance — 2026-10-05
 
 The user now confirms M1 install/complete uninstall and Windows install/complete uninstall without security warnings using the built-in selector; app behavior passed. Intel install failed on a surviving receipt and succeeded after manual deletion. Historical failures above remain evidence, not the current normal-flow status. Final focused receipt and Settings corrections are tracked separately in [RC7](rc.7.md), with hardware confirmation pending.
+

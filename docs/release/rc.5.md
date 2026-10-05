@@ -1,4 +1,6 @@
-# RC5 installation correction — private candidate
+# RC5 installation correction — historical build
+
+> Historical engineering record. Use [current installation instructions](../install.md) and [release notes](notes-rc.7.md).
 
 Identity: **1.0.0-rc.5**, one `better-favorites-1.0.0-rc.5.zip`. It keeps the
 copy-to-card → click-to-install workflow. No UI, audio, runtime or MainUI adapter
@@ -71,3 +73,4 @@ failure statuses, possible status-137 termination, controlled retry at the same
 verified cache path and tamper refusal. Existing application regressions and shell
 syntax checks passed. ARM build passed with the existing libbz2 linker warning and
 GCC ABI notes. No new device, Gatekeeper GUI, memory or performance claim is made.
+

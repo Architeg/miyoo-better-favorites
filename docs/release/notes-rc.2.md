@@ -1,5 +1,7 @@
 # Better Favorites v1.0.0-rc.2
 
+> Historical engineering record. Use [current installation instructions](../install.md) and [release notes](notes-rc.7.md).
+
 An easier way to browse your existing Onion favorites on Miyoo Mini and Mini Plus.
 
 This is a release candidate. The source checkpoint and draft release can be prepared now; binary publication remains pending the documented dependency/source-license audit. This draft does not describe a published stable v1.0.0.
@@ -58,3 +60,4 @@ Report bugs, theme/device results and feature suggestions through the repository
 Project sources are GPL-3.0-or-later. Third-party components retain their own licenses; see [third-party notices](../../THIRD_PARTY_NOTICES.md) and the [dependency audit](dependency-audit.md).
 
 Online bootstrap preparation is separate and is not an advertised installation route. Final tagged binaries require exact-package qualification; new source/version literals do not retroactively receive earlier device acceptance. No binary assets are published while the dependency gates remain open.
+

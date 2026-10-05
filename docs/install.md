@@ -4,7 +4,7 @@
 
 ## One ready-to-install download
 
-`better-favorites-<version>.zip` contains the app and offline computer tools. GitHub Source code and dependency/source companions are for developers. There is no separate app-only download. RC7 retains corrected Intel detection, bounded installer diagnostics and unchanged-tool publication avoidance, with focused receipt/Settings corrections. Earlier package bytes and acceptance remain recorded separately.
+`better-favorites-<version>.zip` contains the app and offline computer tools. GitHub Source code and dependency/source companions are for developers. There is no separate app-only download.
 
 ## Recommended: copy, then click
 
@@ -71,8 +71,7 @@ Prefer one command, or having trouble with the Mac first-open approvals? The
 [Terminal download route](online-install.md) downloads and verifies the same ZIP,
 detects the card, and opens the existing Install / Uninstall / Export diagnostics
 menu. No manual extraction or copying is needed. It retains the same portable
-recovery and does not disable security settings. The public command needs a public
-repository/release; private RC testing uses the documented authenticated route.
+recovery and does not disable security settings.
 
 ## Metadata created by Mac copying
 
@@ -90,10 +89,12 @@ Read [Mac first open](../packaging/Mac-first-open.html) before launching the uns
 
 Valid welcome-marker metadata remains recognized after the app dismisses first-run guidance, when verified package/recovery evidence authenticates the consumed marker. Unknown orphan sidecars remain protected. Updates also check that authenticated older backup artifacts can be archived and removed by complete uninstall before publishing changes. The Mac approval retry choices are R, S and 0; ordinary install/uninstall errors remain separate.
 
-The latest preceding candidate passed user-confirmed M1 and Windows install/complete uninstall. Intel install succeeded after manual receipt removal; RC7’s recovery-backed correction remains device-pending. [Current evidence](release/rc.7.md).
+Mac and Windows workflows have recorded user tests. See [compatibility](compatibility.md)
+for tested configurations and community testing opportunities.
 
 Updates preserve existing preference files, including malformed saved data, without rewriting them. Their exact snapshots are recorded in the new recovery journal so complete uninstall can safely archive them. Unknown payload bytes remain protected.
 
 ## Receipt ownership
 
 An installed Home receipt is generated state, not a stock file. Complete uninstall verifies its absence in both current and legacy app locations. A full reinstall can reconcile a stale receipt only with verified recovery and matching stock runtime/MainUI identities. Missing ownership evidence or foreign bytes are preserved and reported; there is no routine manual-deletion step. [RC7 evidence and limits](release/rc.7.md).
+

@@ -6,11 +6,7 @@ The normal copy-to-card installer remains available. This alternative downloads
 the **same ready-to-install ZIP**, checks its SHA-256, and opens the existing
 installer menu. You do not need to extract or copy the folder yourself.
 
-## Public download command
-
-**While this repository is private, the following public command cannot download
-it.** Use the authenticated route below for private testing. This command becomes
-usable when the repository and release are public; it does not change visibility.
+## Download and open the installer
 
 1. Power off the Miyoo and connect its SD card to your computer.
 2. Open Terminal and paste:
@@ -25,8 +21,8 @@ curl -fsSL https://raw.githubusercontent.com/Architeg/miyoo-better-favorites/mai
 5. After verified success, safely eject the card. Installation/restoration takes
    effect after booting the Miyoo.
 
-The current downloader selects **v1.0.0-rc.7** explicitly, because it is a prerelease.
-It does not use GitHub's latest-stable link or silently select a different build.
+The downloader currently selects **v1.0.0-rc.7** explicitly. Downloads and checksums
+come from the same release, so it never mixes package versions.
 
 ## If Mac security approvals were getting in the way
 
@@ -62,26 +58,6 @@ matching full-package release with `--tag vX.Y.Z`. Do not assume a new installer
 can remove every historical development build. No files are deleted by the
 downloader; complete removal and restoration belong to the verified backend.
 
-## Private prerelease testing
-
-The optional [GitHub CLI](https://cli.github.com/) must already be authenticated
-with access to this repository. The downloader never asks for a token or prints
-credentials. From an updated checkout:
-
-```bash
-bash scripts/install-online.sh --github-auth
-```
-
-Or download and run its readable script through that authenticated connection:
-
-```bash
-gh api repos/Architeg/miyoo-better-favorites/contents/scripts/install-online.sh -H 'Accept: application/vnd.github.raw+json' | bash -s -- --github-auth
-```
-
-The user ZIP and `SHA256SUMS` come from the same explicitly selected release.
-Private access is an optional development route, not a new prerequisite for the
-public installer or the offline package.
-
 ## Host requirements and checks
 
 - macOS Monterey (12) onward: Intel, native Apple Silicon and Rosetta entry.
@@ -111,3 +87,4 @@ Host probes are simulated in isolated test copies, including Intel with a missin
 optional translation key, native ARM and Rosetta. Production accepts no host or
 URL overrides. Fixture tests and Linux-container execution are separate from
 physical Mac/Linux installation and public-download acceptance.
+

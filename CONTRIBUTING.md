@@ -29,7 +29,7 @@ Check the [roadmap](docs/roadmap.md) before starting a substantial feature.
 
 Include:
 
-1. App version and candidate ZIP SHA-256, when available.
+1. App version and download ZIP SHA-256, when available.
 2. Miyoo model, firmware and Onion version; hardware revision only if known.
 3. Active theme; whether optional integrations are installed and enabled.
 4. Steps, expected behavior, actual behavior and whether it repeats.
@@ -80,6 +80,7 @@ sh tests/run-local-checks.sh
 (cd tools/host-dispatch && go test ./...)
 (cd tools/bootstrap && go test ./...)
 python3 tests/host_dispatch_test.py
+python3 tests/online_install_test.py -v
 ```
 
 The C++/Python suite exercises browser navigation/settings/state, removal, handoff,
@@ -120,6 +121,7 @@ and the [dependency audit](docs/release/dependency-audit.md).
 | `integration/onion-return/` | Optional runtime/session return hooks |
 | `integration/mainui-home/` | Optional exact-binary Home Favorites adapter and catalogue |
 | `tools/release-installer/`, `packaging/windows-select.ps1` | Installation/restoration/full removal and built-in Windows host selection |
+| `scripts/install-online.sh` | Optional Mac/Linux downloader; delegates card changes to the packaged installer |
 | `packaging/`, `tools/package-release.py` | Entry scripts, package inventory, native builds and source companions |
 | `tests/` | Host fixtures, lifecycle/navigation/storage tests and isolated ARM harnesses |
 | `docs/` | User guides, architecture, roadmap and evidence |
@@ -145,6 +147,17 @@ versions need an audited compatibility decision; never bypass an allowlist.
 <a id="send-a-focused-pull-request"></a>
 ## 🤝 Send a focused pull request
 
+1. **Fork** this repository on GitHub.
+2. Clone your fork and create a branch for the change.
+3. Make the change, run the relevant checks and push your branch to your fork.
+4. Open a pull request from that branch to **Architeg/miyoo-better-favorites → main**.
+5. Explain the change and test results. A maintainer reviews it before merging;
+   opening a pull request does not change the published app automatically.
+
+For a larger feature, open an issue first so we can agree on scope.
+[GitHub’s fork-and-pull-request guide](https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project).
+
+
 - Explain the user problem, scope, behavior change and regression risk.
 - List commands/results and distinguish simulation, host execution and hardware tests.
 - Preserve Onion's game/core/save/history/GameSwitcher ownership and working audio.
@@ -158,4 +171,5 @@ dependency/source obligations. Documentation and test reports are valuable PRs t
 
 ## Current qualification gaps
 
-Physical Linux install/uninstall and reader tests are pending; Docker tests do not qualify them. RC7's recovery-backed Intel cross-computer receipt correction and Settings submenu/badge fix need a targeted check. Keep accepted earlier package evidence separate from new bytes. [Candidate scope and checklist](docs/release/rc.7.md).
+Physical Linux install/uninstall and reader tests are pending; Docker tests do not qualify them. RC7's recovery-backed Intel cross-computer receipt correction and Settings submenu/badge fix need a targeted check. Keep accepted earlier package evidence separate from new bytes. [Release engineering notes and checklist](docs/release/rc.7.md).
+

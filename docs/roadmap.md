@@ -1,11 +1,16 @@
 # Development roadmap
 
-Authoritative product and delivery roadmap, updated 2026-10-02. Reconstructed from
-the user-supplied consolidated report and checked against implementation
-`cf8c840173b45e4d117f77e644f948346c212811` (`Add themed menus and safe favorite removal`).
-The report's intended behavior is requirements evidence; source inspection is
-implementation evidence. Neither is a substitute for recorded device tests.
-See [current checkpoint/status](development-status.md) for operational progress.
+Authoritative product and delivery roadmap, updated 2026-10-05.
+The specifications below preserve the agreed scope and decisions. Use
+[current status](development-status.md) for delivery/acceptance and
+[historical preparation](archive/release-preparation-history.md) for dated records.
+
+**Current delivery:** M1–M6 are implemented, M7/M8 provide compatibility,
+installation/recovery and documentation, and M9 has a published versioned package.
+Broader device/host testing continues. There is one full user ZIP at
+`App/BetterFavorites`; both installed integration switches start OFF. Global
+shortcuts remain deferred. Earlier “current/missing” notes below describe the
+milestone’s starting point; current status takes precedence.
 
 **Maintenance:** update this roadmap and development status whenever a milestone
 changes or hardware verification is received. Record the tested commit, device,
@@ -16,7 +21,7 @@ verification. Keep detailed milestone specifications here and concise status the
 
 The original primary goal is **Onion Home → Favorites → Better Favorites → Onion
 game launch**, using a stock-like native browser grouped by console. The current
-Apps/BetterFavoritesTest entry is a development entry, not completion of that goal.
+`Apps → BetterFavorites` entry remains available alongside the optional Home redirect.
 A direct Home shortcut is an alternative to investigate, not an agreed replacement
 for the normal Favorites tile requirement.
 
@@ -107,7 +112,7 @@ this does not imply exhaustive fault-injection or theme coverage.
 Final readability confirmation: supplied 2026-10-02 device photos show the deployed
 SELECT menu, removal modal, Settings, About and Help. This is screen-specific
 evidence, not an exhaustive theme/fault/lifecycle matrix. Photo identifiers are
-recorded in [status](development-status.md#accepted-checkpoint).
+recorded in [status](development-status.md#current-delivery).
 
 The supplied report and preceding device reports confirm the following major
 behaviors. This does not imply every failure case/device/theme/version was tested.
@@ -422,7 +427,7 @@ full performance certification or new hardware acceptance of the cache build.
   upgrade and uninstall the app with optional integrations separately controlled.
 - **Current/missing:** Docker builds the prepared checkout; `fetch-deps.sh` pins SDL
   source, but custom SDL/audio binary provenance and full reproduction are incomplete.
-  `scripts/build.sh`/`package.sh` and native Go installer now prepare rc.1; install/uninstall, recovery and license docs are present. Native Windows execution, final ZIP device roundtrip and dependency/source correspondence remain gates.
+  The build scripts and native Go installer produce one full ZIP. Install/uninstall, portable recovery, license/source companions and contributor docs are implemented. Broader native testing and exact prebuilt reproduction remain tracked work.
 - **Dependencies:** M6 integration design, M7 supported matrix, dependency/license
   decisions, version/layout/defaults and reproducible custom SDL2/audio procedure.
 - **Reuse/inspect:** existing toolchain/Makefile/fetch-deps, verified OSS/libpadsp SDL
@@ -546,71 +551,9 @@ Further visual polish is deferred after M1 absent a demonstrated usability probl
 No deferred choice may change the accepted mapping, data rules or Onion lifecycle
 without an explicit update to this authoritative roadmap and development status.
 
-## v1 release preparation update — 2026-10-03
 
-Accepted M6 checkpoint is committed. Public wording: **Designed for Mini and Mini
-Plus; hardware tested on Mini Plus.** Mini Plus MY354, firmware202306282128,
-Onionv4.3.1-1; revision unknown. [M6 evidence](m6-acceptance.md).
+## Current distribution workflow
 
-All global shortcuts are deferred entirely for v1.0; independent shortcut research
-is historical, not the next implementation. Existing Home tile/theme, Apps and
-X/Y remain. M7/M8 prioritize app-only ZIP, self-contained offline native host
-installer, verified uninstall/manual recovery, bounded diagnostics, contributor/
-release docs and license/source audit. Candidate version is **1.0.0-rc.1**.
-
-Host/emulated checks and accepted earlier deployment do not accept rebuilt rc.1.
-[Exact remaining gates](release/rc.1.md): native Windows/reader execution, final
-ZIP device install→OFF/ON→game/return→uninstall/stock→reinstall, prebuilt/source/
-license correspondence. Until these pass the candidate is private review material;
-M9 stable publication is pending. Screenshots/banner remain user-supplied future
-materials, not a packaging blocker. [Current status](development-status.md).
-
-## RC2 preparation update — 2026-10-04
-
-RC1 six packaged-install device checks passed per user on MacBook Air M1 / Ventura
-13.7.8, with hashes matching the actual RC1 artifact. Post-uninstall device boot is
-pending at that RC1 review; later Windows testing confirms stock boot and
-stock mounted-card hashes/integration removal are independently verified.
-The retained RC1 app/installation artifacts were archived and fully cleaned after
-stock verification. [Evidence](release/rc1-mac-acceptance.md).
-
-M7/M8 prepare a fresh RC2 review snapshot: exact supplied icon, limited wording/three
-headings, action-only host commands, complete verified default uninstall and separate
-Windows 7 x64/x86 Go 1.20.14 test bundle. No release toolchain downgrade. Native
-Windows/reader execution was pending at this preparation point. The later Windows
-acceptance update below records normal-flow passes; exact later dispatcher/ZIP and
-license closure remain gates. [RC2 gates](release/rc.2.md). No M9 publication or shortcut work yet.
-
-Host compatibility update: Windows7 through current releases, macOS Monterey+
-Intel/Apple Silicon, Linux x64/ARM64; one automatic-dispatch entry per platform.
-See [targets, minima, dispatch and pending native qualification](release/host-dispatch.md).
-Legacy builds remain isolated; every host uses the same payload/safety implementation.
-
-Windows acceptance update: user passed Windows7 SP1 x64 and Windows10 x64
-packaged installation/use/uninstallation and confirmed stock Onion boot. All five
-mounted system files equal verified stock originals; app/active integrations are
-absent. [Sanitized evidence and payload/dispatcher limits](release/windows-acceptance.md).
-Other targets, exact later dispatcher hashes and fault matrices remain separate gates.
-
-### RC2 documentation and bootstrap preparation — 2026-10-04
-
-Focused documentation presentation, current Windows evidence and the unchanged
-offline one-command/full-uninstall interface are consolidated. The online bootstrap
-is separate and has no advertised download URL or native Windows online acceptance.
-libpng/zlib source/notices narrow prior gaps; custom SDL link reproduction and
-extension/SwiftShader correspondence still block binary publication. RC2 source
-checkpoint/tag and a draft prerelease do not constitute stable v1.0.0 or final-byte
-hardware acceptance. [Details](release/rc.2.md), [audit](release/dependency-audit.md).
-
-
-### Copy-and-click release preparation — RC3
-
-RC2 remains immutable at its existing annotated tag. Follow-up RC3 implements the full-package copy → click workflow, both supported integrations with fresh switches OFF, off-card staging, portable recovery, complete uninstall and once-only guidance. Updates preserve browser/settings data. The app-only package remains separate; source archives are developer material. Host fixtures and cross-builds do not establish new device or graphical launcher acceptance. See [RC3's one fresh-user cycle](release/rc.3.md) and [component-specific dependency audit](release/dependency-audit.md). No shortcuts, profiling, new core feature or mounted-card deployment is part of this pass.
-
-### RC4 release preparation
-
-One user ZIP and `App/BetterFavorites` replace the live test identifier. Verified legacy migration and portable recovery are host-tested; renamed-package device acceptance remains pending. Shortcuts remain deferred. See [RC4](release/rc.4.md).
-
-### RC7 checkpoint — 2026-10-05
-
-M7/M8's preceding portable copy-and-click candidate passed user-confirmed M1 and Windows install/complete uninstall and app behavior. RC7 closes focused receipt bookkeeping, menu-session verification and Settings badge gaps. Intel cross-computer correction and final Settings changes await targeted hardware verification; physical Linux remains community-pending. Source/notices accompany the private prerelease; stable publication is not claimed. [Evidence and remaining checklist](release/rc.7.md). Shortcuts remain deferred.
+See [release notes](release/notes-rc.7.md), [copy-and-click install](install.md),
+[Mac/Linux Terminal download](online-install.md), and [complete uninstall](uninstall.md).
+Public user instructions do not require a checkout, developer tools or firmware fixtures.

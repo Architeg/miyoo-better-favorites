@@ -2,16 +2,18 @@
 
 ## Unreleased
 
+- Simplify public-facing installation, release notes and contribution steps; separate current guidance from historical engineering reports.
+
 - Add an optional Mac/Linux Terminal downloader for the same full RC7 ZIP, with SHA-256/archive checks, card detection and the existing Install / Uninstall / Export diagnostics menu.
 - Keep all installation, restoration and portable recovery logic in the existing packaged backend; no new bootstrap executable or Windows entry changes.
-- Document public versus authenticated private downloads and the browser-quarantine difference. Host fixtures pass; physical Mac/public-download qualification remains pending.
+- Document the download route and browser-quarantine difference. Host fixtures pass; physical Mac/public-download qualification remains pending.
 
 ## 1.0.0-rc.7
 
 - Normalize generated Home receipt recovery state and verify receipt absence on complete uninstall; reconcile obsolete receipts only with verified recovery and stock system identities.
 - Cache Home availability within a menu session, refresh before Home preference writes, and render separate B/START badges in both Settings descriptions.
 - Record accepted preceding Mac/Windows workflows; keep Intel correction, final Settings and physical Linux checks pending.
-- Publish one private candidate ZIP with matching source/license companions; preserve previous tags/packages.
+- Publish one install ZIP with matching source/license companions; preserve previous tags/packages.
 
 
 ## RC6 local review
@@ -52,7 +54,7 @@ Fix validated directory AppleDouble companions such as `._computer` across insta
 RC2 tag/bytes remain unchanged. RC3 host fixtures are not new hardware acceptance.
 
 
-## 1.0.0-rc.2 — prepared 2026-10-04, private review
+## 1.0.0-rc.2 — prepared 2026-10-04, engineering review
 
 - Limited How to Open headings and explicit GameSwitcher destinations; restore the
   exact supplied icon through Onion app configuration.
@@ -95,3 +97,4 @@ limits are recorded; no new release is published.
 - Reconcile audited older backup records from indexed recovery lineage, including empty interrupted-cleanup directories. Apply complete-cleanup preflight during updates.
 - Format Mac approval retry actions vertically with uppercase/lowercase choices; keep ordinary failures separate.
 - Latest follow-up installs passed on M1/Ventura and Intel/Monterey; uninstalls failed on old backup ownership. Latest Windows marker failure was preflight with no card writes, independently of older Defender evidence.
+

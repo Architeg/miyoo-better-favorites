@@ -1,5 +1,7 @@
 # RC4 final-review preparation
 
+> Historical engineering record. Use [current installation instructions](../install.md) and [release notes](notes-rc.7.md).
+
 New identity: **1.0.0-rc.4**. One user ZIP, `better-favorites-1.0.0-rc.4.zip`; canonical folder `App/BetterFavorites`. RC2 tag and prior artifacts remain unchanged. This is not stable publication.
 
 ## Changes
@@ -43,3 +45,4 @@ Its format is not independently verified. The two newly referenced screenshots
 were also unavailable; the error evidence is the user's report.
 
 [RC5 correction](rc.5.md) preserves RC4 artifacts and existing tags.
+

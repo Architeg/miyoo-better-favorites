@@ -1,5 +1,7 @@
 # RC3 copy-and-click preparation
 
+> Historical engineering record. Use [current installation instructions](../install.md) and [release notes](notes-rc.7.md).
+
 RC2 remains committed/tagged at `a31f9a2fff42d12b2a9f2cc16118f3b8a43eb94a`, with an unpublished asset-free draft. New RC3 packages have their own source commit and checksums; earlier device acceptance does not identify these bytes.
 
 ## Implementation
@@ -27,3 +29,4 @@ Fixtures cover layout/Unicode/overlap, copied inputs, package integrity, updated
 6. Reinstall from the same full ZIP. Verify normal Apps access and fresh OFF switches.
 
 No Miyoo Terminal, extra profiling or preview batch. [Concrete dependency questions](dependency-audit.md) affect binary publication; exact-byte reproduction alone is not a license requirement. Prepare stable identity/assets only after this cycle and genuine publication requirements are closed. No release publication or card write during preparation.
+

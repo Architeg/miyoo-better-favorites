@@ -5,7 +5,7 @@
 </div>
 
 <p align="center">
-  <a href="docs/release/rc.7.md"><img alt="Release candidate" src="https://img.shields.io/badge/status-RC7%20prerelease-f59e0b"></a>
+  <a href="https://github.com/Architeg/miyoo-better-favorites/releases/tag/v1.0.0-rc.7"><img alt="Download Better Favorites" src="https://img.shields.io/badge/download-Better%20Favorites-2563eb"></a>
   <a href="docs/compatibility.md"><img alt="Tested on Onion v4.3.1-1" src="https://img.shields.io/badge/tested%20Onion-v4.3.1--1-7c5cbf"></a>
   <a href="LICENSE"><img alt="GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-2563eb"></a>
 </p>
@@ -25,7 +25,7 @@ A growing favorites list is easier to browse with console groups, readable title
 
 The native C++/SDL2 app reads Onion's `Roms/favourite.json`. Onion still handles game launching, cores, saves, recent history and GameSwitcher.
 
-> **Release candidate:** [Download the ready-to-install RC7 ZIP](https://github.com/Architeg/miyoo-better-favorites/releases/download/v1.0.0-rc.7/better-favorites-1.0.0-rc.7.zip). Mac M1 and Windows installation, complete uninstall and app use passed on the preceding candidate. RC7 adds focused receipt and Settings fixes; those final changes await a targeted device check. [Release notes →](docs/release/rc.7.md)
+> **[Download Better Favorites](https://github.com/Architeg/miyoo-better-favorites/releases/download/v1.0.0-rc.7/better-favorites-1.0.0-rc.7.zip)** — one ZIP for Windows, Mac and Linux. [What’s new →](docs/release/notes-rc.7.md)
 
 <a id="features"></a>
 ## ✨ Features
@@ -61,9 +61,14 @@ Scripts select the computer-side executable; every computer installs the **same 
 <details>
 <summary><strong>Targets versus tested combinations</strong></summary>
 
-MacBook Air M1 / Ventura 13.7.8 and Windows 7 SP1 x64 / Windows 10 x64 have recorded packaged-install/device acceptance. The latest preceding candidate also passed M1 install/uninstall and Windows install/uninstall with the built-in selector and no reported security warning; the Windows version was not supplied for that latest run. Intel Mac installation succeeded after the user removed a stale receipt; RC7's automatic, recovery-backed correction awaits confirmation.
+Mac M1/Ventura and Windows installation, complete uninstall and device use have
+recorded user tests. Earlier Windows tests include Windows 7 SP1 x64 and Windows
+10 x64. Intel Mac installation has been tested; a reported cross-computer receipt
+conflict has a host-tested correction that still needs a repeat device check.
 
-Physical Linux testing remains **pending**; container fixtures are host checks. Other OS/architecture branches and Mini devices need community reports. [Evidence and requirements →](docs/compatibility.md)
+Linux has automated container tests; physical Linux testing is welcome. Other
+Onion versions, Mini devices and additional host configurations need community
+reports. [Full compatibility and evidence →](docs/compatibility.md)
 
 </details>
 
@@ -73,7 +78,7 @@ Physical Linux testing remains **pending**; container fixtures are host checks. 
 
 ## 📦 Install
 
-Use **[better-favorites-1.0.0-rc.7.zip](https://github.com/Architeg/miyoo-better-favorites/releases/download/v1.0.0-rc.7/better-favorites-1.0.0-rc.7.zip)**, the single package containing the app and offline computer tools. This private prerelease requires repository access.
+Use **[better-favorites-1.0.0-rc.7.zip](https://github.com/Architeg/miyoo-better-favorites/releases/download/v1.0.0-rc.7/better-favorites-1.0.0-rc.7.zip)**, the single package containing the app and offline computer tools.
 
 1. Download and extract the ready-to-install ZIP on your computer.
 2. **Power off** the Miyoo and connect its SD card.
@@ -107,11 +112,7 @@ Miyoo and connect its card first.
 curl -fsSL https://raw.githubusercontent.com/Architeg/miyoo-better-favorites/main/scripts/install-online.sh | bash
 ```
 
-**Private RC note:** this public command works once the repository/release is
-public. For testing now, use the [authenticated GitHub route](docs/online-install.md#private-prerelease-testing).
-
-Supports Intel/Apple Silicon Macs and Linux x64/ARM64. The downloader currently
-selects RC7 explicitly. It may avoid browser-quarantine approval prompts, but
+Supports Intel/Apple Silicon Macs and Linux x64/ARM64. The downloader selects the documented release explicitly. It may avoid browser-quarantine approval prompts, but
 it does not sign the tools or disable security checks. Installation, updates,
 preferences and portable recovery use the existing installer unchanged.
 [Full steps and uninstall command →](docs/online-install.md)
@@ -153,7 +154,7 @@ In menus, **A** activates and **B** goes back or cancels. MENU closes menus with
 | Replace stock Favorites | OFF | Use the Home tile when its integration is installed |
 | Automatic return | OFF | Return from GameSwitcher when its integration is installed |
 
-Preferences save immediately; a failed save retains the previous value. About pages explain integration availability separately from its ON/OFF switch.
+Preferences save immediately; a failed save retains the previous value. Select a setting to read its description; its About page explains how it works.
 
 <a id="remove-a-favorite"></a>
 ## 🗑️ Remove a favorite
@@ -178,15 +179,13 @@ Portable recovery is stored separately on the card, so uninstall can run on a di
 | Problem | Next step |
 | --- | --- |
 | Integration unavailable | Check installation and Onion compatibility in About |
-| Card path not found | Enter the actual SD drive/mount; attach the reader to Windows in Parallels |
+| Card path not found | Reconnect the card; in Parallels, attach the SD reader to Windows |
 | Installer reports a conflict | Preserve the message and recovery bundle; do not overwrite the unknown file |
 | Need help with a bug | Export diagnostics and attach the reviewed ZIP to an issue |
 
-With the powered-off card connected, use the platform script with `export-diagnostics`, for example:
-
-```powershell
-.\Install-Windows.cmd export-diagnostics
-```
+Power off the Miyoo and connect the card. Open the computer launcher inside
+**App/BetterFavorites** and choose **[3] Export diagnostics**. It saves a ZIP on
+your computer and prints its location. No manually entered command is needed.
 
 Review before sharing: errors may contain game filenames, theme paths and preferences. Detailed tracing is OFF by default. [Diagnostics and privacy →](docs/diagnostics.md)
 
@@ -203,4 +202,5 @@ Review before sharing: errors may contain game filenames, theme paths and prefer
 Thanks to [OnionUI](https://github.com/OnionUI/Onion), the [SDL/Miyoo fork contributors](https://github.com/Rparadise-Team/sdl2_miyoo_new), and the upstream library authors.
 
 Project sources are **[GPL-3.0-or-later](LICENSE)**. Dependencies retain their own licenses. [Third-party notices and provenance →](THIRD_PARTY_NOTICES.md)
+
 

@@ -1,8 +1,12 @@
-# RC7 — portable receipt ownership and prompt Settings return
+# Release engineering notes — v1.0.0-rc.7
 
-Private prerelease, not stable. One ready-to-install ZIP contains `App/BetterFavorites`; source/license companions are developer and attribution material, not alternative installers. Existing tags, previous packages, logs and verified backups remain unchanged. No card deployment is part of this checkpoint.
+[User-facing release notes](notes-rc.7.md) · [Install](../install.md)
 
-## Accepted preceding candidate
+This engineering record preserves the source changes, test evidence and known gaps.
+The one install ZIP contains `App/BetterFavorites`; source/license companions are
+for developers and attribution, not additional installation steps.
+
+## Recorded hardware evidence
 
 User-confirmed Mac M1 installation and complete uninstall passed. Windows installation and complete uninstall passed without security warnings using the built-in selector. App behavior otherwise passed. The tested preceding user ZIP is `better-favorites-1.0.0-rc.6.zip`, SHA-256 `73b9418114ab3955119d818f5fef5ea7bfbab79111d858da874ed3bd8477ca41`; ARM app SHA-256 `59e29da899280daf5361b1ce5ea09ff688176f8d9619b26c3cdc9039b959fb7b`. User confirmation is distinct from a full hash-bound log for each host run.
 
@@ -25,7 +29,7 @@ The accepted RC6 work includes inventory-bound Mac directory metadata, portable 
 
 ## Install / uninstall
 
-1. Download the single ready-to-install ZIP from this version's prerelease; read `Mac-first-open.html` on Mac.
+1. Download the single ready-to-install ZIP from this version's release; read `Mac-first-open.html` on Mac.
 2. Power off, mount the card and copy/merge `App/BetterFavorites` into its `App` folder.
 3. Open the platform launcher in that copied folder. Choose **1 Install / Update**, confirm power OFF, then safely eject and boot.
 4. Both supported patches are installed; **Replace stock Favorites** and **Automatic return** start OFF. Enable independently in Settings. OFF is not uninstall.
@@ -43,4 +47,5 @@ Remaining targeted checks:
 - Device: Back from both explanation pages returns promptly; ON and OFF Settings descriptions show B and START correctly; Home switch still revalidates.
 - Community: physical Linux x64/ARM64 install/uninstall and unverified host/device combinations.
 
-Dependency source/license companions and notices accompany the private binary candidate. Exact reconstruction of permissive prebuilts remains separate from supplied attribution; see [component audit](dependency-audit.md). No stable v1.0.0 acceptance is claimed.
+Dependency source/license companions and notices accompany the binary package. Exact reconstruction of permissive prebuilts remains separate from supplied attribution; see [component audit](dependency-audit.md).
+

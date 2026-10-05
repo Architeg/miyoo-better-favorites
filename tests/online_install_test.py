@@ -221,11 +221,12 @@ cp "$TEST_ASSETS/${url##*/}" "$dest"''')
         self.assertNotEqual(status, 0, out)
         self.assertIn("checksum mismatch", out)
 
-    def test_download_failure_explains_private_access(self):
+    def test_download_failure_offers_connection_or_offline_help(self):
         self.env["TEST_DOWNLOAD_FAIL"] = "1"
         status, out = self.run_entry()
         self.assertNotEqual(status, 0, out)
-        self.assertIn("--github-auth", out)
+        self.assertIn("check your connection and release tag", out)
+        self.assertIn("offline ZIP", out)
 
     def test_authenticated_private_release(self):
         # Use a readable argument parser, rather than shell positional assumptions.

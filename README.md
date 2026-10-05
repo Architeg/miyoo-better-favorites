@@ -10,7 +10,7 @@
 
 <p align="center">
   <img alt="C++" src="https://img.shields.io/badge/C%2B%2B-00599C?logo=cplusplus&logoColor=white" />
-  <a href="https://github.com/Architeg/miyoo-better-favorites/releases/tag/v1.0.0-rc.7"><img alt="Download Better Favorites" src="https://img.shields.io/badge/download-Better%20Favorites-2563eb"></a>
+  <a href="https://github.com/Architeg/miyoo-better-favorites/releases/tag/v1.0.0-rc.7"><img alt="Download Better Favorites" src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8FDownload-Better%20Favorites-2563eb"></a>
   <a href="docs/compatibility.md"><img alt="Tested on Onion v4.3.1-1" src="https://img.shields.io/badge/tested%20Onion-v4.3.1--1-7c5cbf"></a>
   <a href="LICENSE"><img alt="GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-2563eb"></a>
 <a href="https://github.com/Architeg/miyoo-better-favorites/stargazers">
@@ -36,27 +36,40 @@
 </p>
 
 <a id="why-better-favorites"></a>
-## ⭐ Why Better Favorites?
+## Why Better Favorites?
 
-**You saved those games to find them quickly—not to scroll through another crowded list.**
+**You saved those games to find them quickly - not to scroll through another crowded unorganized list.**
 
-As your favorites grow, games from different consoles get mixed together. Long names are cut off, numbered titles make browsing awkward, and finding your place again means more scrolling. You want to choose a game and play.
+As your favorites grow, games from different consoles get mixed together. Long names are cut off, numbered titles make browsing awkward, and finding your place again means more scrolling.
 
 Better Favorites turns that list into a browser built around how you use your Miyoo:
 
-- **No more hunting through a mixed list.** See favorites grouped by console, jump straight to a system, and use L1/R1 to move a page at a time. Prefer one list? Turn grouping off.
-- **No more guessing a cut-off title.** Long selected names scroll so you can read them.
-- **No need to rename numbered ROMs.** Hide numeric prefixes and sort by the title you recognize; your files and stored labels stay unchanged.
-- **No more finding your place from scratch.** Your selection and scroll position are remembered. Enable Automatic return to come back from GameSwitcher—even after switching games.
-- **Fewer trips through menus.** Optionally open Better Favorites from the existing Home Favorites tile. MENU opens GameSwitcher directly from the browser.
-- **Remove a favorite without removing the game.** A clear confirmation removes only the list entry. Your ROM, artwork, saves and recent history stay intact.
+- **Find your game without scrolling through a mixed list.** <br>
+  Favorites are grouped by system. Jump between consoles with ← / → and move a page at a time with L1/R1. Prefer a single list? Turn grouping off.
+
+- **No more guessing a cut-off title.** <br>
+  Long selected titles scroll automatically, so you can tell similar names and versions apart.
+
+- **Cleaner titles, without renaming your games.** <br>
+  Hide leading numbers and sort alphabetically by title. Your ROM filenames and saved favorites stay unchanged.
+
+- **Pick up exactly where you left off.** <br>
+  Your selection and scroll position are remembered. With Automatic return enabled, B/START in GameSwitcher brings you back - even after switching games.
+
+- **Open it just like stock Favorites.** <br>
+  Enable Replace stock Favorites once, then open Better Favorites directly from the familiar Home Favorites tile. No detour through Apps.
+
+- **Remove the favorite. Keep the game.**<br>
+  Remove an entry with a clear confirmation. Your ROM, artwork, saves and recent history stay untouched.
+
+... and more
 
 **Unlike setting up a separate collection, you start with the favorites you already have.** No rebuilding the list, moving ROMs or maintaining a second library. Better Favorites uses your active Onion theme, while Onion keeps handling launches, cores, saves and GameSwitcher.
 
 > **[Download Better Favorites](https://github.com/Architeg/miyoo-better-favorites/releases/download/v1.0.0-rc.7/better-favorites-1.0.0-rc.7.zip)** — one ZIP for Windows, Mac and Linux. [What’s new →](docs/release/notes-rc.7.md)
 
 <a id="features"></a>
-## ✨ Features
+## Features
 
 | Feature | What you get |
 | --- | --- |
@@ -72,16 +85,16 @@ Better Favorites turns that list into a browser built around how you use your Mi
 Installation, recovery and diagnostic export work offline with the supplied package. No Miyoo Terminal commands are needed.
 
 <a id="compatibility"></a>
-## 💻 Compatibility
+## Compatibility
 
 **Designed for Mini and Mini Plus; hardware tested on Mini Plus.**
 
-**Device tested:** Miyoo Mini Plus (MY354), firmware `202306282128`, Onion **v4.3.1-1**. Hardware revision is unknown; MY354 identifies the model/platform. Mini testing is welcome; Flip and other systems are not qualified for these integrations.
+**Device tested:** Miyoo Mini Plus (MY354), firmware `202306282128`, Onion **v4.3.1-1**. MY354 identifies the model/platform. Mini testing is welcome; Flip and other systems are not tested for these integrations.
 
-| Installation computer | Target |
+| Computer | Compatibility |
 | --- | --- |
-| 🪟 Windows | Windows 7 onward; legacy x86/x64 and modern x86/x64/ARM64 builds |
-| 🍎 macOS | Monterey onward; Intel and Apple Silicon |
+| ❖ Windows | Windows 7 onward; legacy x86/x64 and modern x86/x64/ARM64 builds |
+|  macOS | Monterey onward; Intel and Apple Silicon |
 | 🐧 Linux | x64 and ARM64; kernel requirements apply |
 
 Scripts select the computer-side executable; every computer installs the **same Miyoo files**. System patches accept only audited Onion files.

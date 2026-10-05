@@ -89,11 +89,3 @@ Host probes are simulated in isolated test copies, including Intel with a missin
 optional translation key, native ARM and Rosetta. Production accepts no host or
 URL overrides. Fixture tests and Linux-container execution are separate from
 physical Mac/Linux installation and public-download acceptance.
-
-
-## Recorded Mac launch acceptance
-
-On 2026-10-05, the user confirmed the public curl command launched successfully
-without security warnings on both Intel and M1 Macs. This confirms download and
-installer launch for those runs; it is not a new install/uninstall or device-cycle
-claim. Existing package acceptance is listed in [compatibility](compatibility.md).

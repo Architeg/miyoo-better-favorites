@@ -25,7 +25,7 @@ Use the [issue templates](https://github.com/Architeg/miyoo-better-favorites/iss
 Check the [roadmap](docs/roadmap.md) before starting a substantial feature.
 
 <a id="report-a-useful-bug"></a>
-## 🐛 Report a useful bug
+## Report a useful bug
 
 Include:
 
@@ -45,7 +45,7 @@ theme paths and preferences. Never upload ROMs, BIOS, saves, credentials, comple
 card images or private recovery originals. [Diagnostic contents/privacy](docs/diagnostics.md).
 
 <a id="get-the-source"></a>
-## 🧰 Get the source
+## Get the source
 
 ```sh
 git clone https://github.com/Architeg/miyoo-better-favorites.git
@@ -70,7 +70,7 @@ Linux/WSL2. That is a contributor option, **not** the user installation route.
 A container or cross-build does not qualify a native reader/filesystem.
 
 <a id="run-ordinary-checks-first"></a>
-## ✅ Run ordinary checks first
+## Run ordinary checks first
 
 These do not require a card or proprietary firmware fixtures:
 
@@ -90,7 +90,7 @@ Go tests skip exact vendor/package cases unless their fixture variables are supp
 The dispatch suite simulates host probes; it does not run every target OS.
 
 <a id="prepare-and-build-the-arm-app"></a>
-## 🔨 Prepare and build the ARM app
+## Prepare and build the ARM app
 
 Dependency preparation downloads the pinned SDL Miyoo fork and extracts headers;
 it writes only generated `third_party` directories. It is a developer network step.
@@ -112,7 +112,7 @@ silently substitute a different audio build. See [build/provenance](docs/release
 and the [dependency audit](docs/release/dependency-audit.md).
 
 <a id="source-map"></a>
-## 🗂️ Source map
+## Source map
 
 | Location | Responsibility |
 | --- | --- |
@@ -127,7 +127,7 @@ and the [dependency audit](docs/release/dependency-audit.md).
 | `docs/` | User guides, architecture, roadmap and evidence |
 
 <a id="integration-and-hardware-qualification"></a>
-## 🧪 Integration and hardware qualification
+## Integration and hardware qualification
 
 Ordinary contributions do not need private firmware. Exact MainUI patch output,
 displaced instructions and runtime hashes use legally obtained, read-only audited
@@ -145,7 +145,7 @@ Record package/tool/deployed hashes, device/host/theme and missing evidence. New
 versions need an audited compatibility decision; never bypass an allowlist.
 
 <a id="send-a-focused-pull-request"></a>
-## 🤝 Send a focused pull request
+## Send a focused pull request
 
 1. **Fork** this repository on GitHub.
 2. Clone your fork and create a branch for the change.

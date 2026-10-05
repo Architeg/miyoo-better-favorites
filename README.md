@@ -1,14 +1,27 @@
+<!-- Logo-->
+
 <div align="center">
-  <img src="App/BetterFavorites/icon.png" alt="Better Favorites icon" width="74" height="74">
+  <img src="logo.png" alt="Better Favorites icon" width="74" height="74">
   <h1>Miyoo Better Favorites</h1>
   <p><em>An alternative Favorites app for Miyoo Mini and Mini Plus running Onion OS.</em></p>
 </div>
 
+<!-- Badges-->
+
 <p align="center">
+  <img alt="C++" src="https://img.shields.io/badge/C%2B%2B-00599C?logo=cplusplus&logoColor=white" />
   <a href="https://github.com/Architeg/miyoo-better-favorites/releases/tag/v1.0.0-rc.7"><img alt="Download Better Favorites" src="https://img.shields.io/badge/download-Better%20Favorites-2563eb"></a>
   <a href="docs/compatibility.md"><img alt="Tested on Onion v4.3.1-1" src="https://img.shields.io/badge/tested%20Onion-v4.3.1--1-7c5cbf"></a>
   <a href="LICENSE"><img alt="GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-2563eb"></a>
+<a href="https://github.com/Architeg/miyoo-better-favorites/stargazers">
+  <img alt="GitHub stars" src="https://img.shields.io/github/stars/Architeg/miyoo-better-favorites?label=Stars&style=flat" />
+</a>
+<a href="#support-miyoo-better-favorites">
+  <img alt="Support" src="https://img.shields.io/badge/%E2%AD%90%20Support-Miyoo%20Better%20Favorites-2563eb" />
+</a>
 </p>
+
+<!-- Quick Links-->
 
 <p align="center">
   <a href="#install">Install</a> · <a href="#controls">Controls</a> ·
@@ -16,7 +29,11 @@
   <a href="CONTRIBUTING.md">Contribute</a>
 </p>
 
-<!-- Insert the supplied banner and real before/after GIF when ready. No broken placeholders. -->
+<!-- Banner-->
+
+<p align="center">
+  <img src="banner.jpg" alt="Banner image" width="840"/>
+</p>
 
 <a id="why-better-favorites"></a>
 ## ⭐ Why Better Favorites?
@@ -206,6 +223,9 @@ Review before sharing: errors may contain game filenames, theme paths and prefer
 [Report a bug or suggest a feature](https://github.com/Architeg/miyoo-better-favorites/issues/new/choose), share a theme/device test, or [give the project a star](https://github.com/Architeg/miyoo-better-favorites/stargazers). You can contribute without writing code.
 
 **[Contributing](CONTRIBUTING.md)** · [Development](docs/development.md) · [Roadmap](docs/roadmap.md) · [Changelog](CHANGELOG.md)
+
+<a id="support-miyoo-better-favorites"></a>
+## ⭐ Support Miyoo Better Favorites
 
 <a id="credits-and-license"></a>
 ## 📜 Credits and license

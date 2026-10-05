@@ -53,3 +53,11 @@ Intel Mac installation failed on `home-integration.conf` after Windows uninstall
 RC7 tests shared-backend full uninstall → package copy → install and recovery-backed obsolete-receipt reconciliation. The Intel sequence and final Settings Back/B/START correction remain hardware-pending. Physical Linux readers remain community-test targets. Historical RC4–RC6 failures are retained in release records, not the current normal-flow status. See [RC7](release/rc.7.md).
 
 [Dependency audit](release/dependency-audit.md) distinguishes supplied notices/source from exact prebuilt reproduction. No measured cache speedup or gameplay ON/OFF memory result is claimed. [Profiling evidence](m5-profiling.md).
+
+## Mac Terminal download route
+
+The recommended Mac command was user-tested on Intel and M1 Macs on 2026-10-05:
+download and installer launch succeeded with no reported security warnings.
+The OS versions were not restated for these runs. This evidence is separate from
+recorded package install/uninstall and device checks above. Physical Linux online
+installation and a Windows online download route are not qualified by this test.

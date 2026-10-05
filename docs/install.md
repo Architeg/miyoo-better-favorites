@@ -6,7 +6,25 @@
 
 `better-favorites-<version>.zip` contains the app and offline computer tools. GitHub Source code and dependency/source companions are for developers. There is no separate app-only download.
 
-## Recommended: copy, then click
+## Mac: Terminal download (recommended)
+
+1. Power off the Miyoo and connect its SD card.
+2. Press **⌘ Space**, type **Terminal**, and press Enter.
+3. Paste:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Architeg/miyoo-better-favorites/main/scripts/install-online.sh | bash
+```
+
+4. Confirm the detected card and choose **[1] Install / Update**.
+5. Wait for verified success, safely eject, insert the card and boot.
+
+The same verified package and installer are used; no manual extraction or copying
+is needed. Intel and Apple Silicon are detected automatically. To update,
+uninstall completely or export diagnostics, run the command again and choose the
+appropriate menu option. [Full download and recovery details](online-install.md).
+
+## Windows / Linux, or offline Mac: copy, then click
 
 1. Extract the ready-to-install ZIP on your computer.
 2. Power off the Miyoo, remove its card and connect it to the computer.
@@ -26,7 +44,7 @@ Both supported integrations are installed by default; their app switches remain 
 
 Portable verified recovery lives in the card's hidden `.tmp_update/config` directory, outside the app. Keep it. Optional computer copies are additional protection, not an uninstall dependency. Installation and restoration take effect after reboot.
 
-## First opening
+## First opening with the offline ZIP
 
 See [Mac/Windows file-specific security approval](security-opening.md). Approving the Mac script does not approve its child. The launcher retains an identifiable, byte-verified host helper for approval and retry. No quarantine attributes or global protection settings are changed. Linux uses its desktop's **Allow launching/Trust** step; if unavailable, use the shell command below.
 
@@ -40,6 +58,9 @@ Open **Apps → Better Favorites**. A one-time theme-aware notice explains actua
 Turning a switch OFF disables its behavior. Complete uninstall restores the original system files. Apps access and stock X/Y shortcuts remain unchanged.
 
 ## Update without losing preferences
+
+With the Terminal download route, run the same command and choose Install / Update.
+For the offline ZIP, follow the steps below.
 
 Copy the **contents** of the new `BetterFavorites` folder into the existing folder and replace supplied files. Keep files already there that the package does not supply. On macOS, do not choose whole-folder Replace; open both folders and copy their contents or use Merge.
 
@@ -55,7 +76,7 @@ Open the same copied launcher and choose **[3] Export diagnostics**. The card is
 
 ## Advanced/support commands
 
-Run these in the copied app folder if a support person asks you to. Normal installation requires no manually opened terminal.
+Run these in the copied app folder if a support person asks you to. The copy-and-click route opens its terminal automatically; these are not the Mac download command.
 
 | Platform | Install | Complete uninstall |
 | --- | --- | --- |
@@ -65,9 +86,9 @@ Run these in the copied app folder if a support person asks you to. Normal insta
 
 Use `export-diagnostics` instead of `install` to export logs on the computer. Fully specified `--sd-root`, `--powered-off`, `--package`, `--recovery` and `--archive` backend interfaces remain for automation. `remove-integrations` is an advanced operation, not the default uninstall.
 
-## Alternative: Terminal download on Mac or Linux
+## Terminal download details
 
-Prefer one command, or having trouble with the Mac first-open approvals? The
+The recommended Mac route and optional Linux
 [Terminal download route](online-install.md) downloads and verifies the same ZIP,
 detects the card, and opens the existing Install / Uninstall / Export diagnostics
 menu. No manual extraction or copying is needed. It retains the same portable

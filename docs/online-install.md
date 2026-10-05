@@ -1,15 +1,17 @@
-# Alternative: install from Terminal on Mac or Linux
+# Install from Terminal on Mac or Linux
 
 [Install guide](install.md) · [Uninstall](uninstall.md) · [README](../README.md)
 
-The normal copy-to-card installer remains available. This alternative downloads
+This is the recommended Mac installation route and an optional Linux route.
+The offline copy-to-card installer remains available. This command downloads
 the **same ready-to-install ZIP**, checks its SHA-256, and opens the existing
 installer menu. You do not need to extract or copy the folder yourself.
 
 ## Download and open the installer
 
 1. Power off the Miyoo and connect its SD card to your computer.
-2. Open Terminal and paste:
+2. On Mac, press **⌘ Space**, type **Terminal**, and press Enter. On Linux, open
+   your terminal. Paste:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Architeg/miyoo-better-favorites/main/scripts/install-online.sh | bash
@@ -88,3 +90,10 @@ optional translation key, native ARM and Rosetta. Production accepts no host or
 URL overrides. Fixture tests and Linux-container execution are separate from
 physical Mac/Linux installation and public-download acceptance.
 
+
+## Recorded Mac launch acceptance
+
+On 2026-10-05, the user confirmed the public curl command launched successfully
+without security warnings on both Intel and M1 Macs. This confirms download and
+installer launch for those runs; it is not a new install/uninstall or device-cycle
+claim. Existing package acceptance is listed in [compatibility](compatibility.md).

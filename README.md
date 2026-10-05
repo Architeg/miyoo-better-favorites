@@ -73,49 +73,67 @@ reports. [Full compatibility and evidence →](docs/compatibility.md)
 </details>
 
 <a id="install"></a>
-
-**Mac: before opening the installer, read [Mac first open](packaging/Mac-first-open.html).** The ZIP includes this offline HTML guide at its root and inside the app. The unsigned script and compiled helper may require separate approvals.
-
 ## 📦 Install
 
-Use **[better-favorites-1.0.0-rc.7.zip](https://github.com/Architeg/miyoo-better-favorites/releases/download/v1.0.0-rc.7/better-favorites-1.0.0-rc.7.zip)**, the single package containing the app and offline computer tools.
+**Power off the Miyoo and connect its SD card** before either method.
 
-1. Download and extract the ready-to-install ZIP on your computer.
-2. **Power off** the Miyoo and connect its SD card.
-3. Copy the supplied **App/BetterFavorites** folder into the card's **App** folder.
-4. Inside that copied folder, open **Install-Windows.cmd**, **Install-macOS.command**, or **Install-Linux.desktop** for your computer.
-5. Choose **[1] Install / Update**, confirm the Miyoo is off, keep the card connected, and wait for verified success.
-6. Safely eject, insert the card and boot.
+### 🍎 Mac: one Terminal command (recommended)
 
-The tool identifies the card automatically and prepares both supported integrations. Their app switches start **OFF**; switching OFF does not uninstall either patch. No terminal commands, card-path entry, developer tools or Miyoo Terminal are needed. On Linux, your desktop may require **Allow launching**; unsigned tools may need a file-specific Open confirmation. [Simple platform steps →](docs/install.md)
-
-**Need a report?** Open the same copied launcher and choose **[3] Export diagnostics**. It prints a fresh archive path on your computer; review before sharing.
-
-**Recovery:** Deleting the app folder does not undo installed patches. Keep recovery files; use **Install / Update** for authenticated repair or **Uninstall completely** for verified restoration and cleanup. Do not manually edit system files to bypass a conflict.
-
-**Updating?** Merge the new folder's contents into the existing folder. Replace supplied files, but keep preferences/state; do not delete or replace the entire existing app folder.
-
-**GitHub “Source code” archives are for developers**, not ready-to-install apps. Dependency/source companions are attribution and development material, not alternative installers.
-
-### First opening on Mac or Windows
-
-These tools are unsigned/not notarized. On Mac, approve the launcher file if requested; the separate **BetterFavorites-Installer** may also need file-specific **Open Anyway**. The terminal retains its verified path and offers retry after approval. Windows reputation warnings may offer **More info → Run anyway**; this option is not present for every security policy. Stop for malware/damaged-file warnings. Read the bundled **Mac-first-open.html** before opening a blocked file. [Offline guide](packaging/Mac-first-open.html) · [Platform-specific opening guide →](docs/security-opening.md)
-
-### Alternative: one Terminal command on Mac or Linux
-
-If you prefer a command, or the Mac first-open approvals are getting in the way,
-this route downloads and verifies the **same ZIP**, detects your connected card,
-and opens the usual Install / Uninstall / Export diagnostics menu. Power off the
-Miyoo and connect its card first.
+Press **⌘ Space**, type **Terminal**, and press Enter. Paste:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/Architeg/miyoo-better-favorites/main/scripts/install-online.sh | bash
 ```
 
-Supports Intel/Apple Silicon Macs and Linux x64/ARM64. The downloader selects the documented release explicitly. It may avoid browser-quarantine approval prompts, but
-it does not sign the tools or disable security checks. Installation, updates,
-preferences and portable recovery use the existing installer unchanged.
-[Full steps and uninstall command →](docs/online-install.md)
+Confirm the detected card and choose **[1] Install / Update**. The script downloads
+and verifies the same release ZIP, selects Intel or Apple Silicon automatically,
+and opens the installer. No manual extraction or copying is needed.
+Wait for verified success, safely eject, insert the card and boot.
+
+This route was reported to launch successfully without security warnings on
+Intel and M1 Macs. It uses the existing installer and does not disable security
+protections. [Full Terminal steps →](docs/online-install.md)
+
+### 🪟 Windows / 🐧 Linux: download and open
+
+Use **[better-favorites-1.0.0-rc.7.zip](https://github.com/Architeg/miyoo-better-favorites/releases/download/v1.0.0-rc.7/better-favorites-1.0.0-rc.7.zip)**, the single package containing the app and offline computer tools.
+
+1. Download and extract the ready-to-install ZIP on your computer.
+2. Copy the supplied **App/BetterFavorites** folder into the card's **App** folder.
+3. Inside that copied folder, double-click **Install-Windows.cmd** on Windows,
+   or open **Install-Linux.desktop** on Linux.
+4. Choose **[1] Install / Update**, confirm the Miyoo is off, keep the card connected, and wait for verified success.
+5. Safely eject, insert the card and boot.
+
+Linux users can also use the Terminal command above; physical Linux testing is
+welcome. On Linux, your desktop may require **Allow launching**.
+Mac users who prefer an offline ZIP can follow the same copy steps and open
+**Install-macOS.command**; see [Mac first open](packaging/Mac-first-open.html)
+if approval is requested. [Platform steps →](docs/install.md)
+
+### Updates, removal and help
+
+Both methods identify the card and prepare the same supported integrations.
+Their switches start **OFF**; enable them in **Y → Settings**.
+
+Run the Terminal command again or open the installed computer launcher to choose
+**[2] Uninstall completely** or **[3] Export diagnostics**. Diagnostics are saved
+on your computer; review them before sharing.
+
+**Updating?** With the Terminal route, run the same command and choose Install /
+Update. With the ZIP, merge its folder contents into the existing app folder;
+replace supplied files and keep preferences/state. Do not replace the entire
+existing folder.
+
+**Recovery:** deleting the app folder does not undo patches. Keep recovery files;
+use Install / Update for verified repair or Uninstall completely for restoration
+and cleanup. [Uninstall and recovery →](docs/uninstall.md)
+
+**GitHub “Source code” archives are for developers**, not ready-to-install apps.
+Source/license companions are not extra installation steps.
+
+For the offline ZIP, unsigned tools may need file-specific approval.
+[Mac/Windows opening help →](docs/security-opening.md)
 
 <a id="first-launch"></a>
 ## 🚀 First launch

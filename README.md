@@ -21,17 +21,20 @@
 <a id="why-better-favorites"></a>
 ## ⭐ Why Better Favorites?
 
-Favorites should help you find a game quickly. As the list grows across Game Boy, SNES, PlayStation and other systems, a single mixed list becomes harder to browse—and long titles can be difficult to read.
+**You saved those games to find them quickly—not to scroll through another crowded list.**
 
-Better Favorites gives your existing list more structure:
+As your favorites grow, games from different consoles get mixed together. Long names are cut off, numbered titles make browsing awkward, and finding your place again means more scrolling. You want to choose a game and play.
 
-- **Find games by console.** Group favorites under system headings and jump between consoles, or keep a flat list.
-- **Read the title, not just the beginning.** Long selected titles scroll; numeric prefixes can be hidden without renaming your games.
-- **Browse in the order you prefer.** Choose sorting in Settings and move through longer lists a page at a time with L1/R1.
-- **Pick up where you left off.** Selection and scroll position are remembered. Optional automatic return brings you back after leaving GameSwitcher.
-- **Keep a familiar look.** Menus use your active Onion theme’s fonts, colors and assets.
+Better Favorites turns that list into a browser built around how you use your Miyoo:
 
-**Your current favorites are already there.** The app uses Onion’s existing favorites file; no rebuilding the list or moving ROMs. Onion continues to handle game launching, cores, saves, recent history and GameSwitcher.
+- **No more hunting through a mixed list.** See favorites grouped by console, jump straight to a system, and use L1/R1 to move a page at a time. Prefer one list? Turn grouping off.
+- **No more guessing a cut-off title.** Long selected names scroll so you can read them.
+- **No need to rename numbered ROMs.** Hide numeric prefixes and sort by the title you recognize; your files and stored labels stay unchanged.
+- **No more finding your place from scratch.** Your selection and scroll position are remembered. Enable Automatic return to come back from GameSwitcher—even after switching games.
+- **Fewer trips through menus.** Optionally open Better Favorites from the existing Home Favorites tile. MENU opens GameSwitcher directly from the browser.
+- **Remove a favorite without removing the game.** A clear confirmation removes only the list entry. Your ROM, artwork, saves and recent history stay intact.
+
+**Unlike setting up a separate collection, you start with the favorites you already have.** No rebuilding the list, moving ROMs or maintaining a second library. Better Favorites uses your active Onion theme, while Onion keeps handling launches, cores, saves and GameSwitcher.
 
 > **[Download Better Favorites](https://github.com/Architeg/miyoo-better-favorites/releases/download/v1.0.0-rc.7/better-favorites-1.0.0-rc.7.zip)** — one ZIP for Windows, Mac and Linux. [What’s new →](docs/release/notes-rc.7.md)
 

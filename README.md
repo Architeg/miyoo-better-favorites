@@ -224,7 +224,6 @@ your computer and prints its location. No manually entered command is needed.
 
 Review before sharing: errors may contain game filenames, theme paths and preferences. Detailed tracing is OFF by default. [Diagnostics and privacy →](docs/diagnostics.md)
 
-<a id="contribute-and-learn-more"></a>
 <a id="support-miyoo-better-favorites"></a>
 ## ⭐ Support Miyoo Better Favorites
 
@@ -233,11 +232,14 @@ If you enjoy Better Favorites and it makes finding and playing your games easier
 [![GitHub Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-support-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/Architeg)  
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-support-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/architeg)
 
-Bug reports, feature ideas and device/theme testing are welcome too.
+<a id="contribute-and-learn-more"></a>
+## Contribute
+
+Bug reports, feature ideas and device/theme testing are welcome too!
 
 [Report a bug or suggest a feature](https://github.com/Architeg/miyoo-better-favorites/issues/new/choose), share a theme/device test, or log file. You can contribute without writing code.
 
-**[How to Contribute →](CONTRIBUTING.md)** · [Development](docs/development.md) · [Roadmap](docs/roadmap.md) · [Changelog](CHANGELOG.md)
+**[→ How to Contribute](CONTRIBUTING.md)** · [Development](docs/development.md) · [Roadmap](docs/roadmap.md) · [Changelog](CHANGELOG.md)
 
 <a id="credits-and-license"></a>
 ## Credits and license

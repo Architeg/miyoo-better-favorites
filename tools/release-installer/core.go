@@ -66,11 +66,12 @@ type Saved struct {
 	Integration bool   `json:"integration"`
 }
 type Recovery struct {
-	Format   int           `json:"format"`
-	Version  string        `json:"version"`
-	Commit   string        `json:"commit"`
-	Files    []Saved       `json:"files"`
-	Previous *Installation `json:"previous,omitempty"`
+	Format    int               `json:"format"`
+	Version   string            `json:"version"`
+	Commit    string            `json:"commit"`
+	Files     []Saved           `json:"files"`
+	Previous  *Installation     `json:"previous,omitempty"`
+	Lifecycle map[string]string `json:"lifecycle,omitempty"`
 }
 
 func digest(b []byte) string { h := sha256.Sum256(b); return hex.EncodeToString(h[:]) }
@@ -178,6 +179,7 @@ func mkdirParents(root, rel string) error {
 	return os.MkdirAll(filepath.Join(root, filepath.FromSlash(parent)), 0700)
 }
 func writeNew(root, rel string, data []byte, mode os.FileMode) error {
+	reportPreparation(root)
 	if e := mkdirParents(root, rel); e != nil {
 		return e
 	}
@@ -235,8 +237,11 @@ func stage(p string, data []byte, mode os.FileMode) (string, error) {
 		return "", e
 	}
 	d, e := regular(name)
-	if e != nil || !bytes.Equal(d, data) {
-		return "", fmt.Errorf("stage verification failed: %s", p)
+	if e != nil {
+		return "", fmt.Errorf("stage verification failed: destination %s; temporary %s: %w", p, name, e)
+	}
+	if !bytes.Equal(d, data) {
+		return "", fmt.Errorf("stage verification failed: destination %s; temporary %s: byte mismatch (expected %s, observed %s)", p, name, digest(data), digest(d))
 	}
 	ok = true
 	return name, nil
@@ -246,6 +251,9 @@ func stage(p string, data []byte, mode os.FileMode) (string, error) {
 // they are not atomic compare-and-swap and do not eliminate concurrent writers.
 // Fault hooks are test arguments, never production environment switches.
 func transact(root string, changes []change, hook func(string, string) error) (err error) {
+	if len(changes) > 0 {
+		reportPreparation(root)
+	}
 	stages := map[string]string{}
 	published := []change{}
 	defer func() {
@@ -253,6 +261,7 @@ func transact(root string, changes []change, hook func(string, string) error) (e
 			os.Remove(p)
 		}
 		if err == nil {
+			reportTransaction(root, len(published), false, nil)
 			return
 		}
 		var conflicts []string
@@ -294,6 +303,7 @@ func transact(root string, changes []change, hook func(string, string) error) (e
 				conflicts = append(conflicts, c.Path)
 			}
 		}
+		reportTransaction(root, len(published), true, conflicts)
 		err = fmt.Errorf("%w; preserved rollback conflicts: %v", err, conflicts)
 	}()
 	for _, c := range changes {
@@ -308,6 +318,16 @@ func transact(root string, changes []change, hook func(string, string) error) (e
 		p, e := join(root, c.Path)
 		if e != nil {
 			return e
+		}
+		if unchangedRecordedInput(c) {
+			cur, e := snapshot(p)
+			if e != nil {
+				return fmt.Errorf("unchanged recorded input unreadable: %s: %w", c.Path, e)
+			}
+			if !same(cur, c.After) {
+				return fmt.Errorf("unchanged recorded input changed: %s", c.Path)
+			}
+			continue
 		}
 		if c.After != nil {
 			temp, e := stage(p, c.After, c.Mode)
@@ -335,12 +355,22 @@ func transact(root string, changes []change, hook func(string, string) error) (e
 			}
 		}
 		cur, e = snapshot(p)
-		if e != nil || !same(cur, c.Before) {
+		if e != nil {
+			return fmt.Errorf("late input read failed: %s: %w", c.Path, e)
+		}
+		if !same(cur, c.Before) {
 			return fmt.Errorf("late conflict preserved: %s", c.Path)
+		}
+		if unchangedRecordedInput(c) {
+			continue
 		}
 		// Register before mutation: even an OS error with partially applied publication
 		// is inspected and rolled back ONLY if our exact output is present.
 		published = append(published, c)
+		if len(published) == 1 && operationLog != nil {
+			operationLog.detail("State: publication started; completion/rollback not yet verified")
+		}
+		traceIntegrationMetadata(root, c.Path, "before publication")
 		if c.After == nil {
 			if cur != nil {
 				e = os.Remove(p)
@@ -351,6 +381,7 @@ func transact(root string, changes []change, hook func(string, string) error) (e
 		if e != nil {
 			return e
 		}
+		traceIntegrationMetadata(root, c.Path, "after publication")
 		if e = flushDirectory(filepath.Dir(p)); e != nil {
 			return e
 		}
@@ -360,11 +391,46 @@ func transact(root string, changes []change, hook func(string, string) error) (e
 			}
 		}
 		cur, e = snapshot(p)
-		if e != nil || !same(cur, c.After) {
+		if e != nil {
+			return fmt.Errorf("publication readback failed: %s: %w", c.Path, e)
+		}
+		if !same(cur, c.After) {
 			return fmt.Errorf("publication verification failed: %s", c.Path)
 		}
 	}
+	// Antivirus or another writer can still remove an already-present tool later.
+	// Refuse completion and roll back this invocation's publications if it does.
+	for _, c := range changes {
+		if unchangedRecordedInput(c) {
+			b, e := read(root, c.Path)
+			if e != nil {
+				return fmt.Errorf("unchanged recorded input disappeared during installation: %s: %w", c.Path, e)
+			}
+			if !same(b, c.After) {
+				return fmt.Errorf("unchanged recorded input changed during installation: %s", c.Path)
+			}
+		}
+	}
 	return nil
+}
+
+// Journaling an existing preference must not rewrite it. The same guarded
+// no-publication path verifies its identity throughout the transaction.
+func unchangedRecordedInput(c change) bool {
+	if unchangedComputerTool(c) {
+		return true
+	}
+	if c.Integration || c.After == nil || !same(c.Before, c.After) {
+		return false
+	}
+	switch c.Path {
+	case app + "settings.conf", app + "browser-preferences.conf", app + "browser-state", app + "home-entry.conf":
+		return true
+	}
+	return false
+}
+func unchangedComputerTool(c change) bool {
+	return !c.Integration && c.After != nil && same(c.Before, c.After) && strings.HasPrefix(c.Path, app) && allowedTransportPath(strings.TrimPrefix(c.Path, app))
 }
 func loadPackage(dir string) (Package, HomeSpec, ReturnSpec, error) {
 	var pkg Package
@@ -377,7 +443,7 @@ func loadPackage(dir string) (Package, HomeSpec, ReturnSpec, error) {
 	if e = json.Unmarshal(d, &pkg); e != nil {
 		return pkg, home, ret, e
 	}
-	if pkg.Format != 1 || (pkg.Version != "1.0.0-rc.1" && pkg.Version != "1.0.0-rc.2" && pkg.Version != "1.0.0-rc.3" && pkg.Version != "1.0.0-rc.4" && pkg.Version != "1.0.0-rc.5") || len(pkg.Commit) != 40 {
+	if pkg.Format != 1 || (pkg.Version != "1.0.0-rc.1" && pkg.Version != "1.0.0-rc.2" && pkg.Version != "1.0.0-rc.3" && pkg.Version != "1.0.0-rc.4" && pkg.Version != "1.0.0-rc.5" && pkg.Version != "1.0.0-rc.6") || len(pkg.Commit) != 40 {
 		return pkg, home, ret, fmt.Errorf("unsupported package")
 	}
 	seen := map[string]bool{}
@@ -472,6 +538,10 @@ func add(root string, out *[]change, rel string, after, stock []byte, mode os.Fi
 	return nil
 }
 func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package, error) {
+	// Authenticate every computer input before recovery or executable publication.
+	if _, e := transportFiles(dir); e != nil {
+		return nil, Package{}, e
+	}
 	pkg, h, r, e := loadPackage(dir)
 	if e != nil {
 		return nil, pkg, e
@@ -507,10 +577,41 @@ func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package,
 	if e != nil {
 		return nil, pkg, e
 	}
+	// Preserve even malformed saved preferences, while recording their exact
+	// bytes so a future complete uninstall can archive them safely.
+	var preferenceChanges []change
+	preferenceHashes := map[string]string{}
+	for _, n := range []string{"settings.conf", "browser-preferences.conf", "browser-state", "home-entry.conf"} {
+		p := app + n
+		b, err := optional(root, p)
+		if err != nil {
+			return nil, pkg, err
+		}
+		if b == nil {
+			continue
+		}
+		path, err := join(root, p)
+		if err != nil {
+			return nil, pkg, err
+		}
+		info, err := os.Lstat(path)
+		if err != nil || !info.Mode().IsRegular() {
+			return nil, pkg, fmt.Errorf("unsafe preference: %s", p)
+		}
+		preferenceChanges = append(preferenceChanges, change{p, b, b, info.Mode().Perm(), nil, false})
+		preferenceHashes[p] = digest(b)
+	}
+	if old, err := activeRecovery(root); err == nil {
+		if _, err = cleanupPlan(root, old, dir, preferenceHashes); err != nil {
+			return nil, pkg, fmt.Errorf("update cannot guarantee complete uninstall: %w", err)
+		}
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return nil, pkg, err
+	}
 	if e = validateAppInput(root, dir, pkg); e != nil {
 		return nil, pkg, e
 	}
-	changes := migration
+	changes := append(migration, preferenceChanges...)
 	runtime, e := read(root, system+"runtime.sh")
 	if e != nil {
 		return nil, pkg, e
@@ -675,6 +776,13 @@ func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package,
 				return nil, pkg, fmt.Errorf("home catalogue conflict")
 			}
 		}
+		obsoleteReceipt, err := authenticateObsoleteReceipt(root, dir)
+		if err != nil {
+			return nil, pkg, err
+		}
+		if obsoleteReceipt {
+			installed = false
+		}
 		if backupRel == "" {
 			backupRel = system + "config/better-favorites-home-backup-" + time.Now().UTC().Format("20060102T150405.000000000Z")
 		}
@@ -717,8 +825,16 @@ func prepareInstall(root, dir string, homeOn, returnOn bool) ([]change, Package,
 			markerPath = legacyApp + "home-integration.conf"
 		}
 		marker, e := optional(root, markerPath)
-		if e != nil || installed && !bytes.Equal(marker, receipt(expectedHome)) || !installed && marker != nil {
-			return nil, pkg, fmt.Errorf("home receipt conflict")
+		if e != nil {
+			return nil, pkg, fmt.Errorf("home receipt preserved: %s: %w", markerPath, e)
+		}
+		if installed && marker == nil {
+			if e = authenticateMissingReceipt(root, markerPath, prior, expectedHome, r.Original); e != nil {
+				return nil, pkg, e
+			}
+			reportDetail("Authenticated missing app receipt will be restored: %s (existing installation; welcome unchanged)", markerPath)
+		} else if installed && !bytes.Equal(marker, receipt(expectedHome)) || !installed && marker != nil && !obsoleteReceipt {
+			return nil, pkg, fmt.Errorf("home receipt conflict: %s", markerPath)
 		}
 		if e = add(root, &changes, app+"home-integration.conf", receipt(h), nil, 0600, true); e != nil {
 			return nil, pkg, e
@@ -783,6 +899,14 @@ func installRank(p string) int {
 	return 5
 }
 func saveRecovery(root, host string, changes []change, pkg Package, previous *Installation) (string, error) {
+	// An installed receipt is generated state, never a stock restoration file.
+	// Normalize even older/migration callers before either recovery copy is written.
+	for i := range changes {
+		if homeReceiptPath(changes[i].Path) {
+			changes[i].Stock = nil
+			changes[i].Integration = true
+		}
+	}
 	if e := outsideCard(root, host); e != nil {
 		return "", e
 	}
@@ -796,7 +920,14 @@ func saveRecovery(root, host string, changes []change, pkg Package, previous *In
 	if e := os.Mkdir(host, 0700); e != nil {
 		return "", e
 	}
-	recovery := Recovery{Format: 1, Version: pkg.Version, Commit: pkg.Commit, Previous: previous}
+	ownership, err := migrationOwnership(root)
+	if err != nil {
+		return "", err
+	}
+	recovery := Recovery{Format: 1, Version: pkg.Version, Commit: pkg.Commit, Previous: previous, Lifecycle: map[string]string{}}
+	for p := range lifecycleMissing(ownership) {
+		recovery.Lifecycle[p] = digest([]byte("BetterFavoritesWelcome1\n"))
+	}
 	var sums strings.Builder
 	for _, c := range changes {
 		stock := c.Stock
@@ -864,6 +995,9 @@ func saveRecovery(root, host string, changes []change, pkg Package, previous *In
 	return cardRel, nil
 }
 func install(root, dir, recovery string, homeOn, returnOn bool, hook func(string, string) error) error {
+	finish := beginOperation("install")
+	defer finish()
+	progressPhase("Verifying package")
 	priorIndex, e := optional(root, installationIndex)
 	if e != nil {
 		return e
@@ -877,17 +1011,19 @@ func install(root, dir, recovery string, homeOn, returnOn bool, hook func(string
 		return e
 	}
 	// Backup verification must complete for EVERY affected file before mutation.
+	progressPhase("Preparing recovery")
 	mirror, e := saveRecovery(root, recovery, changes, pkg, previous)
 	if e != nil {
 		return e
 	}
-	fmt.Println("Verified recovery:", recovery, "; card mirror:", mirror)
+	reportDetail("Verified recovery: %s; card mirror: %s", recovery, mirror)
 	// The verified pending pointer is durable before system publication. An
 	// interrupted/rolled-back attempt remains in this installation's lineage.
 	journal, e := read(root, mirror+"/recovery.json")
 	if e != nil {
 		return e
 	}
+	progressPhase("Installing")
 	pending := encode(Installation{Format: 1, Recovery: mirror, SHA: digest(journal), Pending: true})
 	if e = transact(root, []change{{installationIndex, priorIndex, pending, 0600, nil, true}}, nil); e != nil {
 		return fmt.Errorf("no system publication; recovery index failed: %w", e)
@@ -895,6 +1031,7 @@ func install(root, dir, recovery string, homeOn, returnOn bool, hook func(string
 	if e = transact(root, changes, hook); e != nil {
 		return fmt.Errorf("install incomplete; verified portable recovery retained: %w", e)
 	}
+	progressPhase("Verifying")
 	complete := encode(Installation{Format: 1, Recovery: mirror, SHA: digest(journal)})
 	if e = transact(root, []change{{installationIndex, pending, complete, 0600, nil, true}}, nil); e != nil {
 		return fmt.Errorf("installation applied but completion marker failed: %w", e)
@@ -902,6 +1039,7 @@ func install(root, dir, recovery string, homeOn, returnOn bool, hook func(string
 	if e = removeEmptyLegacy(root); e != nil {
 		return e
 	}
+	finish()
 	fmt.Println("Install verified. Saved preferences unchanged. Optional integrations take effect after reboot.")
 	return nil
 }
@@ -920,7 +1058,7 @@ func prepareRestore(root, recovery, dir string, interrupted bool) ([]change, err
 	var changes []change
 	seen := map[string]bool{}
 	for _, s := range r.Files {
-		if !s.Integration {
+		if !s.Integration && !homeReceiptPath(s.Path) {
 			continue
 		}
 		if seen[s.Path] || !allowedRestorePath(s.Path) || s.Mode > 0777 {

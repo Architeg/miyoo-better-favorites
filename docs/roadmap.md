@@ -610,3 +610,7 @@ RC2 remains immutable at its existing annotated tag. Follow-up RC3 implements th
 ### RC4 release preparation
 
 One user ZIP and `App/BetterFavorites` replace the live test identifier. Verified legacy migration and portable recovery are host-tested; renamed-package device acceptance remains pending. Shortcuts remain deferred. See [RC4](release/rc.4.md).
+
+### RC7 checkpoint — 2026-10-05
+
+M7/M8's preceding portable copy-and-click candidate passed user-confirmed M1 and Windows install/complete uninstall and app behavior. RC7 closes focused receipt bookkeeping, menu-session verification and Settings badge gaps. Intel cross-computer correction and final Settings changes await targeted hardware verification; physical Linux remains community-pending. Source/notices accompany the private prerelease; stable publication is not claimed. [Evidence and remaining checklist](release/rc.7.md). Shortcuts remain deferred.

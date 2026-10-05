@@ -80,6 +80,11 @@ func loadRecovery(path string) (Recovery, error) {
 			}
 		}
 	}
+	for p, h := range r.Lifecycle {
+		if (p != app+"welcome-pending" && p != legacyApp+"welcome-pending") || h != digest([]byte("BetterFavoritesWelcome1\n")) {
+			return r, fmt.Errorf("invalid lifecycle ownership: %s", p)
+		}
+	}
 	// Metadata archived by a migration remains tied to authenticated sibling
 	// records; accepting a metadata pathname alone would weaken recovery checks.
 	dirs := map[string]bool{}
@@ -104,6 +109,9 @@ func loadRecovery(path string) (Recovery, error) {
 				return r, err
 			}
 			if err = validateMetadata(v.Path, b, dirs, func(target string) error {
+				if dirs[target] || r.Lifecycle[target] != "" {
+					return nil
+				} // directory ownership comes from verified descendant records
 				for _, peer := range r.Files {
 					if peer.Path == target && !metadataName(peer.Path) {
 						return nil
@@ -160,12 +168,19 @@ func ownedTree(root, rel string, check func(string, []byte) error, missingRecord
 	}
 	var out, metadata []change
 	knownDirs := map[string]bool{}
+	recordedDirs := map[string]bool{}
+	if len(missingRecorded) > 1 {
+		for d := range missingRecorded[1] {
+			knownDirs[d] = true
+		}
+	}
 	missing := map[string]bool{}
 	if len(missingRecorded) > 0 {
 		missing = missingRecorded[0]
 		for target := range missing {
 			for d := filepath.ToSlash(filepath.Dir(target)); d == rel || strings.HasPrefix(d, rel+"/"); d = filepath.ToSlash(filepath.Dir(d)) {
 				knownDirs[d] = true
+				recordedDirs[d] = true
 			}
 		}
 	}
@@ -213,6 +228,18 @@ func ownedTree(root, rel string, check func(string, []byte) error, missingRecord
 	}
 	for _, c := range metadata {
 		if e = validateMetadata(c.Path, c.Before, knownDirs, func(target string) error {
+			// join rejects symlinks/reparse points before any directory or file access.
+			p, err := join(root, target)
+			if err != nil {
+				return err
+			}
+			st, err := os.Lstat(p)
+			if err == nil && st.IsDir() && knownDirs[target] {
+				return nil
+			}
+			if errors.Is(err, os.ErrNotExist) && recordedDirs[target] {
+				return nil
+			}
 			b, err := read(root, target)
 			if errors.Is(err, os.ErrNotExist) && missing[target] {
 				return nil
@@ -228,7 +255,7 @@ func ownedTree(root, rel string, check func(string, []byte) error, missingRecord
 	}
 	return out, nil
 }
-func cleanupPlan(root, recovery, dir string) ([]change, error) {
+func cleanupPlan(root, recovery, dir string, prospectivePreferences ...map[string]string) ([]change, error) {
 	r, e := loadRecovery(recovery)
 	if e != nil {
 		return nil, e
@@ -240,6 +267,45 @@ func cleanupPlan(root, recovery, dir string) ([]change, error) {
 	saved := map[string]Saved{}
 	for _, s := range r.Files {
 		saved[s.Path] = s
+	}
+	// Merge only audited backup paths from the verified indexed lineage. Older
+	// backups may survive a rolled-back install without appearing in the latest
+	// journal; their original bytes and ownership must still be checked.
+	mirrors, err := ownedRecoveryMirrors(root, recovery)
+	if err != nil {
+		return nil, err
+	}
+	for rel := range mirrors {
+		prior, err := loadRecovery(filepath.Join(root, filepath.FromSlash(rel)))
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range prior.Files {
+			if !v.Integration || !strings.Contains(v.Path, "-backup") {
+				continue
+			}
+			if _, exists := saved[v.Path]; exists {
+				continue
+			}
+			want := ""
+			if v.Path == returnBackup+"runtime.sh" {
+				want = ret.Original
+			}
+			for _, n := range names {
+				if strings.HasPrefix(v.Path, system+"config/better-favorites-home-backup-") && filepath.Base(v.Path) == n && len(strings.Split(v.Path, "/")) == 4 {
+					want = home.Original[n]
+				}
+			}
+			if want == "" || v.After != want {
+				return nil, fmt.Errorf("unauthenticated older backup preserved: %s", v.Path)
+			}
+			saved[v.Path] = v
+			r.Files = append(r.Files, v)
+		}
+	}
+	ownership, err := migrationOwnership(root)
+	if err != nil {
+		return nil, err
 	}
 	var out []change
 	seen := map[string]bool{}
@@ -297,13 +363,22 @@ func cleanupPlan(root, recovery, dir string) ([]change, error) {
 	}
 	// Only a verified journal may authenticate metadata whose payload was already
 	// removed by partial cleanup. Present payloads still undergo normal hash checks.
-	recorded := map[string]bool{}
+	recorded := recordedMissing(ownership)
 	for p, v := range saved {
 		if strings.HasPrefix(p, app) && !metadataName(p) && v.After != "absent" {
 			recorded[p] = true
 		}
 	}
 	appFiles, e := ownedTree(root, strings.TrimSuffix(app, "/"), func(p string, b []byte) error {
+		// During update only, exact snapshots of the four existing preference files
+		// will be recorded in the new journal. This does not allow unrecorded bytes
+		// during uninstall, nor grant ownership to other names or sidecars.
+		if len(prospectivePreferences) != 0 && prospectivePreferences[0][p] == digest(b) {
+			switch strings.TrimPrefix(p, app) {
+			case "settings.conf", "browser-preferences.conf", "browser-state", "home-entry.conf":
+				return nil
+			}
+		}
 		if s, ok := saved[p]; ok && digest(b) == s.After {
 			return nil
 		}
@@ -315,7 +390,7 @@ func cleanupPlan(root, recovery, dir string) ([]change, error) {
 			return nil
 		}
 		return fmt.Errorf("unknown/modified app file preserved: %s", p)
-	}, recorded)
+	}, recorded, expectedDirs)
 	if e != nil {
 		return nil, e
 	}
@@ -342,6 +417,9 @@ func cleanupPlan(root, recovery, dir string) ([]change, error) {
 			return nil, e
 		}
 		if b == nil {
+			if strings.Contains(p, "-backup") {
+				add([]change{{p, nil, nil, os.FileMode(s.Mode), nil, false}})
+			}
 			continue
 		}
 		if !cleanupOwned(root, recovery, s, b) {
@@ -564,6 +642,36 @@ func cleanupPlan(root, recovery, dir string) ([]change, error) {
 		add([]change{{sidecar, b, nil, 0600, nil, false}})
 	}
 
+	// Directory ownership is established above from the selected recovery and
+	// verified original-backup manifests. Never derive it from a sidecar name.
+	directoryOwners := map[string]bool{}
+	for d := range dirs {
+		directoryOwners[d] = true
+	}
+	for d := range ownMirrors {
+		directoryOwners[d] = true
+	}
+	for d := range directoryOwners {
+		if _, err := join(root, d); err != nil {
+			return nil, err
+		}
+		sidecar := filepath.ToSlash(filepath.Join(filepath.Dir(d), "._"+filepath.Base(d)))
+		if seen[sidecar] {
+			continue
+		}
+		b, err := optional(root, sidecar)
+		if err != nil {
+			return nil, err
+		}
+		if b == nil {
+			continue
+		}
+		if !appleDouble(b) {
+			return nil, fmt.Errorf("ambiguous directory metadata preserved: %s", sidecar)
+		}
+		add([]change{{sidecar, b, nil, 0600, nil, false}})
+	}
+
 	for _, parent := range []string{system + "config", system + "script", system + "logs"} {
 		path, e := join(root, parent)
 		if e != nil {
@@ -660,7 +768,7 @@ func archiveUninstall(root, recovery, host string, changes []change) error {
 			return fmt.Errorf("archive verification failed: %s", p)
 		}
 	}
-	fmt.Println("Verified computer recovery/archive:", host)
+	reportDetail("Verified computer recovery/archive: %s", host)
 	return nil
 }
 func verifyStock(root, dir string) error {
@@ -683,6 +791,9 @@ func verifyStock(root, dir string) error {
 	return nil
 }
 func completeUninstall(root, recovery, dir, host string, hook func(string, string) error) error {
+	finish := beginOperation("uninstall")
+	defer finish()
+	progressPhase("Verifying recovery")
 	// Preflight all restoration and cleanup before any card mutation.
 	restoreChanges, e := prepareRestore(root, recovery, dir, true)
 	if e != nil {
@@ -693,12 +804,15 @@ func completeUninstall(root, recovery, dir, host string, hook func(string, strin
 		return e
 	}
 	all := append(append([]change{}, restoreChanges...), cleanup...)
+	progressPhase("Preparing recovery")
 	if e = archiveUninstall(root, recovery, host, all); e != nil {
 		return e
 	}
+	progressPhase("Restoring originals")
 	if e = transact(root, restoreChanges, hook); e != nil {
 		return fmt.Errorf("uninstall incomplete; restoration: %w", e)
 	}
+	progressPhase("Verifying")
 	if e = verifyRestored(root, recovery, dir); e != nil {
 		return fmt.Errorf("uninstall incomplete: %w", e)
 	}
@@ -716,6 +830,11 @@ func completeUninstall(root, recovery, dir, host string, hook func(string, strin
 		changedByRestore[c.Path] = c.After
 	}
 	for _, c := range after {
+		// Fresh cleanupPlan has revalidated metadata structure and its authenticated
+		// companion. Restore may legitimately change these incidental bytes.
+		if metadataName(c.Path) {
+			continue
+		}
 		expected, ok := before[c.Path]
 		if output, own := changedByRestore[c.Path]; own {
 			expected = output
@@ -727,13 +846,14 @@ func completeUninstall(root, recovery, dir, host string, hook func(string, strin
 	}
 	var artifacts, mirrors []change
 	for _, c := range after {
-		if strings.Contains(c.Path, "/better-favorites-recovery-") || c.Path == installationIndex {
+		if strings.Contains(c.Path, "/better-favorites-recovery-") || strings.Contains(metadataTarget(c.Path), "/better-favorites-recovery-") || c.Path == installationIndex || metadataTarget(c.Path) == installationIndex {
 			mirrors = append(mirrors, c)
 		} else {
 			artifacts = append(artifacts, c)
 		}
 	}
-	if e = transact(root, artifacts, hook); e != nil {
+	progressPhase("Removing app files")
+	if e = cleanupWithMetadata(root, artifacts, host, "artifacts", hook); e != nil {
 		return fmt.Errorf("uninstall incomplete; cleanup files retained/rolled back: %w", e)
 	}
 	// Remove empty owned directories only. No RemoveAll; a newly inserted file is preserved.
@@ -762,10 +882,11 @@ func completeUninstall(root, recovery, dir, host string, hook func(string, strin
 		}
 	}
 	// Verify restoration again before the final recovery cleanup. Host archive already verifies every recovery file.
+	progressPhase("Verifying")
 	if e = verifyRestored(root, recovery, dir); e != nil {
 		return e
 	}
-	if e = transact(root, mirrors, hook); e != nil {
+	if e = cleanupWithMetadata(root, mirrors, host, "recovery", hook); e != nil {
 		return fmt.Errorf("uninstall incomplete; portable recovery retained/rolled back: %w", e)
 	}
 
@@ -802,7 +923,8 @@ func completeUninstall(root, recovery, dir, host string, hook func(string, strin
 	if e = writeNew(host, "uninstall-result.json", encode(map[string]any{"complete": true, "removed": paths, "stock_verified": true}), 0600); e != nil {
 		return fmt.Errorf("cleanup verified but result record failed: %w", e)
 	}
-	fmt.Println("Complete uninstall verified. App, preferences, app logs and owned installation artifacts removed. Stock integrations restored. Computer recovery/archive retained. Game data and shared resources unchanged.")
+	finish()
+	fmt.Println("\nUninstall complete. Stock integrations restored.\nOwned app files removed; game data unchanged.\nVerified computer recovery archive retained:", host)
 	return nil
 }
 func discoverRecovery(root, dir string) (string, error) {

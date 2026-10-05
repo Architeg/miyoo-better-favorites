@@ -40,8 +40,7 @@ Include:
 MY354 identifies a model/platform, not a hardware revision. Unknown information is
 better than a guess. A successful build is not a device test.
 
-Export diagnostics with the normal installer script and powered-off card; no Miyoo
-Terminal is needed. **Inspect before uploading.** Reports can include game filenames,
+With the Miyoo powered off and card connected, open its `App/BetterFavorites` computer launcher and choose **[3] Export diagnostics**. The resulting computer archive path is printed; no Miyoo Terminal is needed. **Inspect before uploading.** Reports can include game filenames,
 theme paths and preferences. Never upload ROMs, BIOS, saves, credentials, complete
 card images or private recovery originals. [Diagnostic contents/privacy](docs/diagnostics.md).
 
@@ -60,7 +59,7 @@ cd miyoo-better-favorites
 | --- | --- |
 | Ordinary browser/core checks | Git, POSIX shell, C++17 compiler, Python (3.11 recommended) |
 | Installer tests | Go 1.26.2; standard library only, no external modules |
-| Windows legacy/dispatcher qualification | Isolated official Go 1.20.14; keep normal Go/module unchanged |
+| Windows legacy installer qualification | Isolated official Go 1.20.14; keep normal Go/module unchanged |
 | ARM app build | Docker and the existing pinned Miyoo toolchain image; prepared dependency headers |
 | Optional SDL resource checks | Existing SDL2/freetype/libpng development tools; see detailed guide |
 
@@ -120,7 +119,7 @@ and the [dependency audit](docs/release/dependency-audit.md).
 | `App/BetterFavorites/` | Onion app config, icon and outer handoff launcher |
 | `integration/onion-return/` | Optional runtime/session return hooks |
 | `integration/mainui-home/` | Optional exact-binary Home Favorites adapter and catalogue |
-| `tools/release-installer/`, `tools/host-dispatch/` | Installation/restoration/full removal and Windows host selection |
+| `tools/release-installer/`, `packaging/windows-select.ps1` | Installation/restoration/full removal and built-in Windows host selection |
 | `packaging/`, `tools/package-release.py` | Entry scripts, package inventory, native builds and source companions |
 | `tests/` | Host fixtures, lifecycle/navigation/storage tests and isolated ARM harnesses |
 | `docs/` | User guides, architecture, roadmap and evidence |
@@ -156,3 +155,7 @@ versions need an audited compatibility decision; never bypass an allowlist.
 
 Project code is GPL-3.0-or-later. Preserve upstream notices and identify any new
 dependency/source obligations. Documentation and test reports are valuable PRs too.
+
+## Current qualification gaps
+
+Physical Linux install/uninstall and reader tests are pending; Docker tests do not qualify them. RC7's recovery-backed Intel cross-computer receipt correction and Settings submenu/badge fix need a targeted check. Keep accepted earlier package evidence separate from new bytes. [Candidate scope and checklist](docs/release/rc.7.md).

@@ -3,7 +3,9 @@
 ## Export a report
 
 Power off the Miyoo, connect its card and open the copied App/BetterFavorites folder.
-Use the same entry script as installation:
+Open the same computer launcher as installation and choose **[3] Export diagnostics**. The card is identified automatically and the new archive location is printed.
+
+For support, run the following commands **inside the card’s `App/BetterFavorites` folder**:
 
 | Platform | Export |
 | --- | --- |
@@ -19,7 +21,7 @@ No Miyoo Terminal, Wi-Fi, SSH or developer tools are needed.
 ## Contents and privacy
 
 Exports include bounded app log tails, allowlisted app settings/status, version/source
-metadata, MainUI/runtime/helper hashes, active-theme identifier and missing evidence.
+metadata, MainUI/runtime/helper hashes, active-theme identifier and missing evidence. At most two recent computer-side installer logs are included, each limited to its final 128 KiB; only timestamped installer log files are eligible, and links are refused.
 **Inspect the ZIP before sharing.** Error logs may include game filenames; preferences
 and theme paths can be personal. Favorites/history contents, ROMs, saves, credentials
 and serials are not collected. Do not upload private recovery originals or card images.

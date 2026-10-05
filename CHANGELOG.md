@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.0.0-rc.7
+
+- Normalize generated Home receipt recovery state and verify receipt absence on complete uninstall; reconcile obsolete receipts only with verified recovery and stock system identities.
+- Cache Home availability within a menu session, refresh before Home preference writes, and render separate B/START badges in both Settings descriptions.
+- Record accepted preceding Mac/Windows workflows; keep Intel correction, final Settings and physical Linux checks pending.
+- Publish one private candidate ZIP with matching source/license companions; preserve previous tags/packages.
+
+
+## RC6 local review
+
+- Follow-up: fix Intel Monterey detection without optional CPU-key dependence; retain native/Rosetta conflict checks.
+- Add concise phase/elapsed progress and menu diagnostic export with two bounded installer log tails.
+- Avoid redundant publication of identical copied computer tools; preserve early/late integrity checks, recovery and guarded rollback.
+- Apply only the requested onboarding wording and remove redundant available-status text.
+- Record M1/Ventura acceptance separately from Intel failure and Windows Defender interruption. No confirmed false-positive or new Windows acceptance claim.
+
+Fix validated directory AppleDouble companions such as `._computer` across install/recovery/uninstall. Add offline two-stage Mac approval instructions and transaction-aware error logs. Host components only; Miyoo app and integration bytes unchanged. Finder and device acceptance pending.
+
 ## 1.0.0-rc.5 — preparation, not published
 
 - Validate Mac AppleDouble/Finder metadata in authenticated project locations across install, migration, update and full uninstall. Keep payload and unknown-file safeguards.
@@ -64,3 +82,10 @@ Documentation review: user/contributor guides and notices rewritten against the
 implementation; Windows7 SP1 x64 and Windows10 x64 normal install/uninstall plus
 stock boot accepted. Exact exported RC2 payload and later-host-dispatch evidence
 limits are recorded; no new release is published.
+
+### RC6 lifecycle follow-up (local review)
+
+- Authenticate Mac metadata for a legitimately consumed welcome marker through verified recovery ownership; preserve malformed metadata, unrelated orphans and links.
+- Reconcile audited older backup records from indexed recovery lineage, including empty interrupted-cleanup directories. Apply complete-cleanup preflight during updates.
+- Format Mac approval retry actions vertically with uppercase/lowercase choices; keep ordinary failures separate.
+- Latest follow-up installs passed on M1/Ventura and Intel/Monterey; uninstalls failed on old backup ownership. Latest Windows marker failure was preflight with no card writes, independently of older Defender evidence.

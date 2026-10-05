@@ -77,10 +77,11 @@ static SDL_Surface* render(const char* root,MenuPage page,bool longTitle,bool er
             AppSettings options;options.homeIntegrationStatus=status;options.homeIntegrationAvailable=status==HomeIntegrationStatus::Available;options.replaceStockFavorites=on;
             underlay();renderer.draw(screen,MenuPage::Settings,4,true,false,false,game,5000,"",options);
             underlay();renderer.draw(screen,MenuPage::HomeInfo,0,true,false,false,game,5000,"",options);
+            underlay();renderer.draw(screen,MenuPage::Welcome,0,true,on,options.homeIntegrationAvailable,game,5000,"",options);
         }
         AppSettings flatOptions;flatOptions.groupByConsole=false;
         underlay();renderer.draw(screen,MenuPage::Help,0,true,true,true,game,5000,"",flatOptions);
-        for(const auto& testPage:{MenuPage::Settings,MenuPage::ReturnInfo,MenuPage::HomeInfo}){
+        for(const auto& testPage:{MenuPage::Settings,MenuPage::ReturnInfo,MenuPage::HomeInfo,MenuPage::Welcome}){
             underlay();renderer.draw(screen,testPage,1,true,false,false,game,5000);
         }
         Theme icons=theme;icons.hideIcons=false;
@@ -123,7 +124,7 @@ int main(int argc,char** argv){
            render(argv[2],MenuPage::RemoveConfirm,true,true,trace),render(argv[1],MenuPage::RemoveConfirm,true,true,trace)},output+"/removal-sheet.png");
     }
     for(const auto* fixture:{argv[1],argv[2],argv[3]}){
-        for(const auto pageKind:{MenuPage::Settings,MenuPage::ReturnInfo,MenuPage::HomeInfo}){auto* page=render(fixture,pageKind,false,false,trace);SDL_FreeSurface(page);}
+        for(const auto pageKind:{MenuPage::Settings,MenuPage::ReturnInfo,MenuPage::HomeInfo,MenuPage::Welcome}){auto* page=render(fixture,pageKind,false,false,trace);SDL_FreeSurface(page);}
         auto* page=render(fixture,MenuPage::RemoveConfirm,true,true,trace);SDL_FreeSurface(page);
         page=render(fixture,MenuPage::Help,true,false,trace);SDL_FreeSurface(page);
     }

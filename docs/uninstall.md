@@ -28,3 +28,9 @@ computer archive and removed with those folders, regardless of the uninstalling
 computer's OS. Unrelated hidden files, malformed/orphan sidecars and links remain
 protected: uninstall reports failure rather than complete removal. Shared folders
 and their Finder metadata are not cleaned. No whole-card metadata cleanup is used.
+
+Verified older backups in this installation's indexed recovery lineage are included in the archive and cleanup, even if omitted from the newest change journal. Names or timestamps alone never authenticate a backup. Mac metadata belonging to an authenticated, app-consumed welcome marker is retained as evidence until complete cleanup; malformed or unrelated metadata still stops removal. A failed uninstall remains incomplete until restoration and cleanup both verify.
+
+## Receipt ownership
+
+An installed Home receipt is generated state, not a stock file. Complete uninstall verifies its absence in both current and legacy app locations. A full reinstall can reconcile a stale receipt only with verified recovery and matching stock runtime/MainUI identities. Missing ownership evidence or foreign bytes are preserved and reported; there is no routine manual-deletion step. [RC7 evidence and limits](release/rc.7.md).

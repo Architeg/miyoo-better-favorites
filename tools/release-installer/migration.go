@@ -85,6 +85,9 @@ func migrationOwnership(root string) (map[string]map[string]bool, error) {
 		if e != nil {
 			return nil, e
 		}
+		for p, h := range r.Lifecycle {
+			add(p, h)
+		}
 		for _, s := range r.Files {
 			add(s.Path, s.After)
 			add(s.Path, s.Before)
@@ -113,6 +116,12 @@ func prepareMigration(root, dir string) ([]change, error) {
 			return nil, e
 		}
 	}
+	inventoryDirs := map[string]bool{}
+	for p := range own {
+		for d := filepath.ToSlash(filepath.Dir(p)); strings.HasPrefix(d, strings.TrimSuffix(legacyApp, "/")); d = filepath.ToSlash(filepath.Dir(d)) {
+			inventoryDirs[d] = true
+		}
+	}
 	files, e := ownedTree(root, strings.TrimSuffix(legacyApp, "/"), func(p string, b []byte) error {
 		n := strings.TrimPrefix(p, legacyApp)
 		if !allowedRecoveryApp(p) && !personalFile(n, b) {
@@ -125,11 +134,14 @@ func prepareMigration(root, dir string) ([]change, error) {
 			return fmt.Errorf("legacy receipt conflict")
 		}
 		return nil
-	})
+	}, recordedMissing(own), inventoryDirs)
 	if e != nil {
 		return nil, e
 	}
 	expected := map[string]bool{strings.TrimSuffix(legacyApp, "/"): true}
+	for d := range inventoryDirs {
+		expected[d] = true
+	}
 	for _, f := range files {
 		for d := filepath.ToSlash(filepath.Dir(f.Path)); strings.HasPrefix(d, strings.TrimSuffix(legacyApp, "/")); d = filepath.ToSlash(filepath.Dir(d)) {
 			expected[d] = true
@@ -252,13 +264,25 @@ func legacyCleanup(root, recovery string) ([]change, error) {
 			own[s.Path][s.Before] = true
 		}
 	}
+	// A power loss may leave only directory metadata after its last payload file
+	// was removed. Only authenticated journal paths permit that missing target.
+	recorded := map[string]bool{}
+	for p, hashes := range own {
+		if strings.HasPrefix(p, legacyApp) && !metadataName(p) {
+			for h := range hashes {
+				if h != "absent" {
+					recorded[p] = true
+				}
+			}
+		}
+	}
 	return ownedTree(root, strings.TrimSuffix(legacyApp, "/"), func(p string, b []byte) error {
 		n := strings.TrimPrefix(p, legacyApp)
 		if own[p][digest(b)] || personalFile(n, b) {
 			return nil
 		}
 		return fmt.Errorf("unknown or changed legacy file preserved: %s", p)
-	})
+	}, recorded)
 }
 
 // A known extracted RC3 package never reached installation on the reported Mac.

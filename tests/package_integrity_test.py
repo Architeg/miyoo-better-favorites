@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sha=lambda b:hashlib.sha256(b).hexdigest()
 def main():
  p=argparse.ArgumentParser();p.add_argument('--release',type=Path,required=True);a=p.parse_args()
- users=list(a.release.glob('*.zip'));assert len(users)==1 and users[0].name=='better-favorites-1.0.0-rc.5.zip',users
+ users=list(a.release.glob('*.zip'));assert len(users)==1 and users[0].name=='better-favorites-1.0.0-rc.7.zip',users
  for line in (a.release/'SHA256SUMS').read_text().splitlines():h,n=line.split('  ',1);assert sha((a.release/n).read_bytes())==h,n
  with zipfile.ZipFile(users[0]) as z:
   assert z.testzip() is None;names=set(z.namelist());prefix='App/BetterFavorites/';computer=prefix+'computer/'
@@ -14,12 +14,16 @@ def main():
   for line in z.read('SHA256SUMS').decode().splitlines():h,n=line.split('  ',1);assert sha(z.read(n))==h,n
   manifest=json.loads(z.read(computer+'transport.json'))
   for f in manifest['files']:assert sha(z.read(prefix+f['path']))==f['sha256'],f['path']
+  assert not any(Path(n).name=='better-favorites-dispatch-windows-386.exe' for n in names)
+  assert computer+'HOST-SHA256SUMS' in names
   package=json.loads(z.read(computer+'package.json'))
   for f in package['files']:assert sha(z.read(computer+'payload/'+f['path']))==f['sha256'],f['path']
   assert z.read(prefix+'icon.png')==(ROOT/'icon.png').read_bytes()
   for n in ['settings.conf','browser-state','browser-preferences.conf','home-entry.conf','home-diagnostics.conf','better-favorites.log','welcome-pending']:assert prefix+n not in names,n
   arm=z.read(prefix+'better-favorites');assert arm[:7]==b'\x7fELF\x01\x01\x01' and arm[18:20]==b'\x28\x00'
-  assert package['commit'].encode() in arm and package['version'].encode() in arm
+  release=json.loads(z.read(prefix+'release.json'))
+  assert release['app_source_commit'].encode() in arm and release['app_version'].encode() in arm and sha(arm)==release['app_sha256']
+  assert z.read('Mac-first-open.html')==z.read(prefix+'Mac-first-open.html')==(ROOT/'packaging/Mac-first-open.html').read_bytes()
   for n in ['better-favorites','launch.sh','Install-macOS.command','Install-Linux.sh','Install-Linux.desktop']:assert z.getinfo(prefix+n).external_attr>>16 & stat.S_IXUSR,n
   for entry in json.loads((ROOT/'docs/release/dependency-hashes.json').read_text()):assert sha(z.read(prefix+entry['file']))==entry['sha256'],entry['file']
   for entry in json.loads((ROOT/'third_party/notices/SwiftShader-supplemental.json').read_text()):assert sha(z.read('licenses/'+entry['file']))==entry['sha256'] and sha(z.read(computer+'licenses/'+entry['file']))==entry['sha256']

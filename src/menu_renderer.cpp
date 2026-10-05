@@ -509,7 +509,7 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
 #ifdef BETTER_FAVORITES_MENU_RENDER_TESTING
         assert(y<=rowsBottom && descriptionPanel.y+descriptionPanel.h==bottom);
 #endif
-        const std::string descriptions[]={returnOn?"[B]/[START] return to Better Favorites from GameSwitcher.":"[B]/[START] return to the main menu from GameSwitcher.",
+        const std::string descriptions[]={returnOn?"[B] / [START] return to Better Favorites from GameSwitcher.":"[B] / [START] return to the main menu from GameSwitcher.",
             settings.groupByConsole?"Group games under console headings.":"Flat list. Console jumps are disabled.",
             settings.showNumericPrefixes?"Show numeric prefixes in displayed titles.":"Hide leading numeric prefixes. Sorting is unchanged.",
             settings.sortMode==SortMode::OriginalLabel?"Sort by literal stored labels.":"Sort titles without leading numeric prefixes.",
@@ -520,6 +520,15 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
         const auto description=inlineFlow(font,descriptions[selected],600,[&](const std::string& key){return controlLabel(key);});
 #ifdef BETTER_FAVORITES_MENU_RENDER_TESTING
         assert(description.lines<=2 && description.lines*description.lineHeight+16<=panelHeight);
+        if(selected==0) {
+            int b=0,start=0;
+            for(const auto& word:description.words) {
+                if(word.badge==controlLabel("B")) ++b;
+                if(word.badge==controlLabel("START")) ++start;
+                assert(word.suffix.find("[START]")==std::string::npos);
+            }
+            assert(b==1 && start==1); // Actual Settings ON and OFF flow, not About.
+        }
 #endif
         const int descriptionHeight=description.lines*description.lineHeight;
         const int descriptionY=descriptionPanel.y+(descriptionPanel.h-descriptionHeight)/2;
@@ -554,25 +563,26 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
         const auto font=descriptionFont_?descriptionFont_:resources_.bodyFont;
         struct Block {std::string value;bool heading;};
         const std::vector<Block> blocks=page==MenuPage::Welcome?std::vector<Block>{
-            {"Open Apps > Better Favorites at any time.",false},
-            {settings.homeIntegrationAvailable?"Home replacement: available. Enable Replace stock Favorites in Settings to use the Home Favorites tile.":"Home replacement: unavailable on this installation. Apps access remains available.",false},
-            {available?"Automatic return: available. Enable it in Settings for [B]/[START] to return to Better Favorites from GameSwitcher.":"Automatic return: unavailable on this installation. Onion keeps its ordinary menu return.",false},
+            {"Stock Favorites replacement",true},
+            {settings.homeIntegrationAvailable?"Enable 'Replace stock Favorites' in Settings to open Better Favorites from the Home Favorites tile.":"Home replacement is unavailable on this installation. Use Apps.",false},
+            {"Automatic return",true},
+            {available?"Enable 'Automatic return' in Settings to return to Better Favorites when you leave GameSwitcher with [B] or [START].":"Automatic return is unavailable on this installation. Onion keeps its ordinary menu return.",false},
             {"Both switches start OFF. Installation does not enable them.",false}
         }:page==MenuPage::HomeInfo?std::vector<Block>{
-            {settings.homeIntegrationAvailable?"Home access: Available":settings.homeIntegrationStatus==HomeIntegrationStatus::NotInstalled?"Home access: Not installed":"Home access: Unavailable on this system",false},
+            {settings.homeIntegrationAvailable?"":settings.homeIntegrationStatus==HomeIntegrationStatus::NotInstalled?"Home access: Not installed":"Home access: Unavailable on this system",false},
             {"From Home",true},{"Enable Replace stock Favorites, then choose Favorites on Home.",false},
             {"From Apps",true},{"Open Apps > Better Favorites.",false},
             {"Going Back",true},{"[B] returns to Home when opened from Home.",false},
             {"Turning a switch OFF disables its behavior. Complete uninstall restores the original system files.",false}}:std::vector<Block>{
-            {available?"Integration: available":"Integration: unavailable (optional patch required)",false},
-            {"When enabled",true},{"[B]/[START] return to Better Favorites from GameSwitcher.",false},
+            {available?"":"Integration: unavailable (optional patch required)",false},
+            {"When enabled",true},{"[B] / [START] return to Better Favorites from GameSwitcher.",false},
             {"[A]: resume the game. Switching games keeps the session.",false},
-            {"When disabled",true},{"[B]/[START] return to the main menu from GameSwitcher.",false},
+            {"When disabled",true},{"[B] / [START] return to the main menu from GameSwitcher.",false},
             {"Direct game exit ends the return session.",false}};
         struct Positioned {TextFlow flow;TTF_Font* font;int y,page;bool heading;};
         std::vector<Positioned> laidOut;int y=header+8,pageIndex=0;
         for(std::size_t i=0;i<blocks.size();++i){
-            const auto& block=blocks[i];auto* face=block.heading?(returnHeadingFont_?returnHeadingFont_:sectionHeadingFont_):font;
+            const auto& block=blocks[i];if(block.value.empty())continue;auto* face=block.heading?(returnHeadingFont_?returnHeadingFont_:sectionHeadingFont_):font;
             if(block.heading)y+=12;
             auto flow=inlineFlow(face,block.value,600,[&](const std::string& key){return controlLabel(key);});
             const int height=flow.lines*flow.lineHeight;
@@ -581,6 +591,15 @@ void MenuRenderer::draw(SDL_Surface* screen,MenuPage page,std::size_t selected,b
             if(y+keep>bottom-4){++pageIndex;y=header+8;}
             laidOut.push_back({flow,face,y,pageIndex,block.heading});y+=height+(block.heading?2:8);
         }
+#ifdef BETTER_FAVORITES_MENU_RENDER_TESTING
+        // Check the actual About layout, not a separate sample row or Welcome.
+        int startBadges=0;
+        for(const auto& block:laidOut)for(const auto& word:block.flow.words){
+            assert(word.suffix.find("[START]")==std::string::npos);
+            if(word.text=="[START]"){assert(word.badge==controlLabel("START"));assert(word.badge);++startBadges;}
+        }
+        if(page==MenuPage::ReturnInfo)assert(startBadges==2);
+#endif
         pages_=pageIndex+1;page_=std::min(page_,pages_-1);
         for(const auto& block:laidOut)if(block.page==page_){
             const auto ink=block.heading?SDL_Color{255,255,255,255}:secondaryInk(screen,{margin,block.y,600,block.flow.lines*block.flow.lineHeight},section,list);

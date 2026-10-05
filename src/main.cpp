@@ -667,6 +667,7 @@ int main(int argc, char* argv[])
     menuPhase.end();
     BrowserTitles browserTitles(listFont);
     MenuState menu;
+    HomeStatusSession homeStatusSession;
     const std::string welcomePath=homePreferencePath.substr(0,homePreferencePath.find_last_of('/'))+"/welcome-pending";
     if(pendingWelcome(welcomePath)) {
         appSettings.homeIntegrationStatus=homeEntryStatus("/mnt/SDCARD",homePreferencePath.substr(0,homePreferencePath.find_last_of('/')));
@@ -754,8 +755,12 @@ int main(int argc, char* argv[])
                 if (action == MenuAction::PageUp) menuRenderer.movePage(-1);
                 if (action == MenuAction::PageDown) menuRenderer.movePage(1);
                 if (menu.page() != previousPage) menuRenderer.resetPage();
-                if (menu.page()==MenuPage::Settings && previousPage!=MenuPage::Settings) {
-                    appSettings.homeIntegrationStatus=homeEntryStatus("/mnt/SDCARD",homePreferencePath.substr(0,homePreferencePath.find_last_of('/')));
+                auto verifyHomeStatus=[&] {
+                    return homeEntryStatus("/mnt/SDCARD",homePreferencePath.substr(0,homePreferencePath.find_last_of('/')));
+                };
+                if (!menu.open()) homeStatusSession.close();
+                if (menu.page()==MenuPage::Settings) {
+                    appSettings.homeIntegrationStatus=homeStatusSession.get(verifyHomeStatus,action==MenuAction::ToggleHome);
                     appSettings.homeIntegrationAvailable=appSettings.homeIntegrationStatus==HomeIntegrationStatus::Available;
                 }
                 // Observe even open/close events batched into a single SDL frame.
@@ -775,7 +780,9 @@ int main(int argc, char* argv[])
                         << (appSettings.automaticReturn ? "on" : "off") << std::endl;
                 }
                 if(action==MenuAction::ToggleHome){
-                    if(!setHomeEntryPreference(homePreferencePath,!appSettings.replaceStockFavorites,appSettings,settingsError))reportError(settingsError);
+                    if(!appSettings.homeIntegrationAvailable && !appSettings.replaceStockFavorites)
+                        reportError("Home integration is unavailable. Nothing changed.");
+                    else if(!setHomeEntryPreference(homePreferencePath,!appSettings.replaceStockFavorites,appSettings,settingsError))reportError(settingsError);
                     else std::cerr<<"Replace stock Favorites: "<<(appSettings.replaceStockFavorites?"on":"off")<<std::endl;
                 }
                 if(action==MenuAction::ToggleGrouping||action==MenuAction::TogglePrefixes||action==MenuAction::CycleSorting){

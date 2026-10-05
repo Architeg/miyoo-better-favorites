@@ -110,7 +110,7 @@ func allowedTransportPath(p string) bool {
 		return false
 	}
 	switch p {
-	case "Install-Windows.cmd", "Install-macOS.command", "Install-Linux.sh", "Install-Linux.desktop":
+	case "Install-Windows.cmd", "Install-macOS.command", "Install-Linux.sh", "Install-Linux.desktop", "Mac-first-open.html":
 		return true
 	}
 	return strings.HasPrefix(p, "computer/")
@@ -140,8 +140,11 @@ func transportFiles(dir string) ([]PayloadFile, error) {
 		}
 		seen[f.Path] = true
 		d, e := transportData(dir, f.Path)
-		if e != nil || digest(d) != f.SHA {
-			return nil, fmt.Errorf("computer package checksum mismatch: %s", f.Path)
+		if e != nil {
+			return nil, fmt.Errorf("computer package read/verification failed: %s: %w", f.Path, e)
+		}
+		if digest(d) != f.SHA {
+			return nil, fmt.Errorf("computer package checksum mismatch: %s (expected %s, observed %s)", f.Path, f.SHA, digest(d))
 		}
 	}
 	for _, p := range []string{"Install-Windows.cmd", "Install-macOS.command", "Install-Linux.sh", "Install-Linux.desktop", "computer/package.json", "computer/HOST-BUILDS.json"} {
@@ -285,13 +288,21 @@ func validateAppInput(root, dir string, pkg Package) error {
 			return nil
 		}
 		return fmt.Errorf("unknown/modified app input preserved: %s", p)
-	})
+	}, recordedMissing(own), expectedDirs)
 	return e
 }
 func verifyRestored(root, recovery, dir string) error {
 	r, e := loadRecovery(recovery)
 	if e != nil {
 		return e
+	}
+	// A completed restoration cannot retain either app's installed receipt,
+	// including legacy journals whose receipt incorrectly lacked Integration.
+	for _, marker := range []string{app + "home-integration.conf", legacyApp + "home-integration.conf"} {
+		b, err := optional(root, marker)
+		if err != nil || b != nil {
+			return fmt.Errorf("stock restoration not verified; installed receipt preserved: %s", marker)
+		}
 	}
 	for _, s := range r.Files {
 		if !s.Integration || (s.Path != system+"runtime.sh" && !strings.HasPrefix(s.Path, system+"bin/") && s.Path != system+"script/better_favorites_return.sh" && s.Path != app+"home-integration.conf") {
@@ -312,6 +323,7 @@ func launchFromCard(source string, args []string) error {
 	if e != nil {
 		return e
 	}
+	reportCard(root)
 	dir := filepath.Join(source, "computer")
 	// Top launchers are in the app. Their manifest entries use card-files/ in
 	// the private staging layout; read them via a dedicated source verifier.
@@ -383,6 +395,7 @@ func runStagedCard(args []string) error {
 		return fmt.Errorf("invalid staged invocation")
 	}
 	root, dir := args[0], args[1]
+	reportCard(root)
 	if e := validateCard(root); e != nil {
 		return e
 	}
@@ -407,7 +420,7 @@ func runStagedCard(args []string) error {
 		action = args[2]
 		more = args[3:]
 	} else {
-		fmt.Println("Better Favorites\n1 Install / Update\n2 Uninstall completely\n0 Cancel")
+		installerMenu()
 		s, e := ask("Choose: ")
 		if e != nil {
 			return e
@@ -419,9 +432,15 @@ func runStagedCard(args []string) error {
 			action = "install"
 		case "2":
 			action = "uninstall"
+		case "3":
+			action = "export-diagnostics"
 		default:
 			return fmt.Errorf("invalid choice")
 		}
+	}
+	if operationLog != nil {
+		operationLog.action = action
+		operationLog.detail("Action: %s", action)
 	}
 	// Explicit support arguments remain available; their existing safety checks
 	// and powered-off confirmation apply. The simple menu never asks for a path.
@@ -464,6 +483,9 @@ func runStagedCard(args []string) error {
 		}
 		return install(root, dir, filepath.Join(dir, "transaction-recovery"), both, both, nil)
 	}
+	finish := beginOperation("uninstall")
+	defer finish()
+	progressPhase("Verifying recovery")
 	recovery, e := discoverRecovery(root, dir)
 	if e != nil {
 		return fmt.Errorf("cannot uninstall: %w; keep card recovery and see docs/recovery.md", e)

@@ -5,7 +5,7 @@
 </div>
 
 <p align="center">
-  <a href="docs/release/rc.5.md"><img alt="Release candidate" src="https://img.shields.io/badge/status-RC5%20candidate-f59e0b"></a>
+  <a href="docs/release/rc.7.md"><img alt="Release candidate" src="https://img.shields.io/badge/status-RC7%20prerelease-f59e0b"></a>
   <a href="docs/compatibility.md"><img alt="Tested on Onion v4.3.1-1" src="https://img.shields.io/badge/tested%20Onion-v4.3.1--1-7c5cbf"></a>
   <a href="LICENSE"><img alt="GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-2563eb"></a>
 </p>
@@ -25,7 +25,7 @@ A growing favorites list is easier to browse with console groups, readable title
 
 The native C++/SDL2 app reads Onion's `Roms/favourite.json`. Onion still handles game launching, cores, saves, recent history and GameSwitcher.
 
-> **Release status:** RC5 is a local installation-fix candidate. No public binary asset is available yet. Earlier hardware acceptance remains recorded; RC4 approval succeeded but installation failed on metadata; the corrected package needs device acceptance. [Current status →](docs/release/rc.5.md)
+> **Release candidate:** [Download the ready-to-install RC7 ZIP](https://github.com/Architeg/miyoo-better-favorites/releases/download/v1.0.0-rc.7/better-favorites-1.0.0-rc.7.zip). Mac M1 and Windows installation, complete uninstall and app use passed on the preceding candidate. RC7 adds focused receipt and Settings fixes; those final changes await a targeted device check. [Release notes →](docs/release/rc.7.md)
 
 <a id="features"></a>
 ## ✨ Features
@@ -61,25 +61,32 @@ Scripts select the computer-side executable; every computer installs the **same 
 <details>
 <summary><strong>Targets versus tested combinations</strong></summary>
 
-Mac installation/device checks passed on M1 / Ventura 13.7.8 with RC1. Windows 7 SP1 x64 and Windows 10 x64 normal-flow acceptance are recorded in the supplied report; its diagnostic export identifies the RC2 Miyoo payload, not the host executable. Linux roundtrips passed in Docker.
+MacBook Air M1 / Ventura 13.7.8 and Windows 7 SP1 x64 / Windows 10 x64 have recorded packaged-install/device acceptance. The latest preceding candidate also passed M1 install/uninstall and Windows install/uninstall with the built-in selector and no reported security warning; the Windows version was not supplied for that latest run. Intel Mac installation succeeded after the user removed a stale receipt; RC7's automatic, recovery-backed correction awaits confirmation.
 
-Physical Intel/Monterey, other Windows versions/architectures, Linux SD readers and Mini hardware remain unverified. [Requirements and evidence →](docs/compatibility.md)
+Physical Linux testing remains **pending**; container fixtures are host checks. Other OS/architecture branches and Mini devices need community reports. [Evidence and requirements →](docs/compatibility.md)
 
 </details>
 
 <a id="install"></a>
+
+**Mac: before opening the installer, read [Mac first open](packaging/Mac-first-open.html).** The ZIP includes this offline HTML guide at its root and inside the app. The unsigned script and compiled helper may require separate approvals.
+
 ## 📦 Install
 
-Use **`better-favorites-<version>.zip`**, the one ready-to-install package containing the app and computer tools. No public download link is advertised before its asset exists.
+Use **[better-favorites-1.0.0-rc.7.zip](https://github.com/Architeg/miyoo-better-favorites/releases/download/v1.0.0-rc.7/better-favorites-1.0.0-rc.7.zip)**, the single package containing the app and offline computer tools. This private prerelease requires repository access.
 
 1. Download and extract the ready-to-install ZIP on your computer.
 2. **Power off** the Miyoo and connect its SD card.
 3. Copy the supplied **App/BetterFavorites** folder into the card's **App** folder.
 4. Inside that copied folder, open **Install-Windows.cmd**, **Install-macOS.command**, or **Install-Linux.desktop** for your computer.
-5. Choose **Install / Update**, confirm the Miyoo is off, and wait for success.
+5. Choose **[1] Install / Update**, confirm the Miyoo is off, keep the card connected, and wait for verified success.
 6. Safely eject, insert the card and boot.
 
-The tool identifies the card automatically and prepares both supported integrations. Their app switches start **OFF**. No terminal commands, card-path entry, developer tools or Miyoo Terminal are needed. On Linux, your desktop may require **Allow launching**; unsigned tools may need a file-specific Open confirmation. [Simple platform steps →](docs/install.md)
+The tool identifies the card automatically and prepares both supported integrations. Their app switches start **OFF**; switching OFF does not uninstall either patch. No terminal commands, card-path entry, developer tools or Miyoo Terminal are needed. On Linux, your desktop may require **Allow launching**; unsigned tools may need a file-specific Open confirmation. [Simple platform steps →](docs/install.md)
+
+**Need a report?** Open the same copied launcher and choose **[3] Export diagnostics**. It prints a fresh archive path on your computer; review before sharing.
+
+**Recovery:** Deleting the app folder does not undo installed patches. Keep recovery files; use **Install / Update** for authenticated repair or **Uninstall completely** for verified restoration and cleanup. Do not manually edit system files to bypass a conflict.
 
 **Updating?** Merge the new folder's contents into the existing folder. Replace supplied files, but keep preferences/state; do not delete or replace the entire existing app folder.
 
@@ -87,7 +94,7 @@ The tool identifies the card automatically and prepares both supported integrati
 
 ### First opening on Mac or Windows
 
-These tools are unsigned/not notarized. On Mac, approve the launcher file if requested; the separate **BetterFavorites-Installer** may also need file-specific **Open Anyway**. The terminal retains its verified path and offers retry after approval. Windows reputation warnings may offer **More info → Run anyway**; this option is not present for every security policy. Stop for malware/damaged-file warnings. [Platform-specific opening guide →](docs/security-opening.md)
+These tools are unsigned/not notarized. On Mac, approve the launcher file if requested; the separate **BetterFavorites-Installer** may also need file-specific **Open Anyway**. The terminal retains its verified path and offers retry after approval. Windows reputation warnings may offer **More info → Run anyway**; this option is not present for every security policy. Stop for malware/damaged-file warnings. Read the bundled **Mac-first-open.html** before opening a blocked file. [Offline guide](packaging/Mac-first-open.html) · [Platform-specific opening guide →](docs/security-opening.md)
 
 <a id="first-launch"></a>
 ## 🚀 First launch

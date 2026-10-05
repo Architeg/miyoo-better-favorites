@@ -74,6 +74,10 @@ func TestLegacyPackageMigration(t *testing.T) {
 					t.Fatal(e)
 				}
 			}
+			if scenario == "copied-only" {
+				mustWrite(t, card, legacyApp+"._computer", directoryMetadata(t))
+			}
+
 			if scenario == "metadata" {
 				mustWrite(t, card, legacyApp+"._launch.sh", macMetadata(t))
 				mustWrite(t, card, legacyApp+".DS_Store", finderMetadata(t))
@@ -200,6 +204,10 @@ func TestLegacyPackageMigration(t *testing.T) {
 			recovery, e := activeRecovery(card)
 			if e != nil {
 				t.Fatal(e)
+			}
+			if scenario == "copied-only" {
+				// Model an interrupted cleanup leaving the directory sidecar alone.
+				mustWrite(t, card, legacyApp+"._computer", directoryMetadata(t))
 			}
 			if e = completeUninstall(card, recovery, dir, filepath.Join(t.TempDir(), "other-computer-archive"), nil); e != nil {
 				t.Fatal(e)

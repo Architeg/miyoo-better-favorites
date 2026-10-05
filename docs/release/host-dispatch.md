@@ -8,7 +8,7 @@ share the same restoration/hash/ownership/full-uninstall implementation.
 | Target | Native packaged executables | Minimum runtime / prerequisites |
 | --- | --- | --- |
 | Windows 7 / 8 / 8.1 | legacy x86, x64 — official Go 1.20.14 | NT 6.1–6.3, SSE2 for x86; local writable SD drive; native Windows system DLLs |
-| Windows 10 through current releases | modern x86, x64, ARM64 — Go 1.26.2 | Windows 10 build 10240 or later; ARM64 requires native Windows ARM64 and x86 bootstrap emulation |
+| Windows 10 through current releases | modern x86, x64, ARM64 — Go 1.26.2 | Windows 10 build 10240 or later; ARM64 requires native Windows ARM64 |
 | macOS Monterey onward | native Intel x64 and Apple Silicon ARM64 — Go 1.26.2 | macOS 12+, /bin/sh, system uname/sw_vers/sysctl; locally mounted writable SD filesystem |
 | Linux x64 | amd64 baseline v1 — Go 1.26.2 | kernel 3.2+, POSIX sh and uname, futex/epoll, normal device randomness, executable private computer temporary directory |
 | Linux ARM64 | little-endian ARMv8.0 — Go 1.26.2 | kernel 3.7+ (AArch64 kernel availability), otherwise same requirements |
@@ -40,16 +40,22 @@ restores and verifies stock before full owned-file removal; computer-side verifi
 recovery remains outside SD. Foreign changes fail without claiming completion.
 Both integrations are installed by default on supported cards; saved switches default OFF.
 
-Windows cmd invokes a read-only Go1.20.14 x86 bootstrap. RtlGetVersion obtains the
-actual NT version, unaffected by compatibility-limited GetVersionEx. On systems
-providing IsWow64Process2 it reads the native machine; older x86/x64 Windows uses
-GetNativeSystemInfo. Caller bitness and PROCESSOR_ARCHITECTURE environment values
-are not used, so a 32-bit shell on x64 chooses the x64 executable. Windows7/8/8.1
-select legacy; Windows10/11 select modern. Unknown versions/native machines/probe
-failures and missing backends fail before launching the card-writing installer.
-The bootstrap forwards argument boundaries, streams and the actual child exit code;
-there is no daemon, polling or diagnostic writer. Future unrecognized NT major/minor
-versions fail clearly and require qualification instead of a speculative selection.
+Windows cmd uses built-in PowerShell/WMI to select the existing native helper.
+Windows 7/8/8.1 use legacy x86/x64 builds; supported Windows 10+ uses modern
+x86/x64/ARM64. Native processor identity, not shell bitness, selects architecture;
+Sysnative selects native PowerShell when called from a 32-bit shell on x64.
+Native PowerShell pointer size distinguishes a 32-bit Windows installation on an
+x64-capable processor from a 64-bit Windows installation.
+Unknown versions, ambiguous probes, links and missing/changed helpers fail before
+card writes. The generated literal command has no script-policy override or
+encoded/downloaded code. Its readable source is `packaging/windows-select.ps1`.
+
+The copied batch and selected helper run off-card, with byte verification against
+`HOST-SHA256SUMS`. The helper uses the same transaction backend and receives the
+original app path. Ordinary child exit status is retained. No compiled dispatcher
+is packaged. Selector tests executed in Linux PowerShell plus source checks are
+not native Windows or antivirus acceptance; Win7's bundled PowerShell still needs
+physical qualification of this new entry.
 
 Mac checks sw_vers >=12, uname and native/translated sysctl results. A translated
 x86_64 process on Apple Silicon selects arm64, including when its emulated CPU
@@ -68,8 +74,7 @@ accepted in production; tests substitute probes only in temporary copies.
   execution. A Docker or QEMU run is not native-machine acceptance of both Linux
   architectures. Actual Rosetta x86_64 entry on this M1/Ventura13.7.8 selects/executes the native
   ARM64 backend (read-only status fixture); this is not a separate Intel Mac or
-  Monterey execution test. Native Monterey, Intel Mac, both Linux hardware
-  architectures are pending. User-confirmed Windows7 SP1 x64 / Windows10 x64
+  Monterey execution test. Later Intel/Monterey installation is user-confirmed after receipt removal; RC7’s receipt correction and both physical Linux architectures remain pending. User-confirmed Windows7 SP1 x64 / Windows10 x64
   install/uninstall and stock device boot are recorded separately in
   [Windows evidence](windows-acceptance.md); exact later dispatcher hashes are not
   present in the export. Other Windows versions/architectures remain unqualified.
@@ -85,7 +90,7 @@ accepted in production; tests substitute probes only in temporary copies.
 Keep BetterFavorites-Windows7-Test.zip and extract via Explorer to
 C:\BetterFavorites-Test. Its top-level folder is BetterFavorites-Test, with the
 complete identical installer payload/manifests/checksums. The promised short alias
-Install-Windows7.cmd calls the same Windows entry script/dispatcher; no separate
+Install-Windows7.cmd calls the same Windows entry script; no separate
 safety implementation. From bundled PowerShell in that folder:
 
 ```

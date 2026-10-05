@@ -37,7 +37,7 @@ prebuilt binary. The common fork pin is
 | [libpng](http://www.libpng.org/pub/png/libpng.html) | PNG support | Binary reports 1.6.37; exact build correspondence unresolved | libpng preserved upstream license | `licenses/libpng-1.6.37-LICENSE.txt`; pinned upstream source companion; exact byte reproduction is separate |
 | [zlib](https://zlib.net/) | Compression support | Binary reports 1.2.11; exact build correspondence unresolved | zlib preserved upstream license | `licenses/zlib-1.2.11-README.txt`; pinned upstream source companion; exact byte reproduction is separate |
 | [Go runtime / standard library](https://go.dev/) — modern | Windows/macOS/Linux host tools | Go 1.26.2; no external Go modules | BSD-3-Clause | `licenses/Go-LICENSE`; repository notice `third_party/notices/Go-BSD.txt` |
-| [Go runtime / standard library](https://go.dev/) — legacy | Windows 7/8/8.1 tools and x86 dispatcher | Official Go 1.20.14, isolated from normal module/toolchain | BSD-3-Clause | Same preserved Go notice; toolchain identity in `HOST-BUILDS.json` |
+| [Go runtime / standard library](https://go.dev/) — legacy | Windows 7/8/8.1 native installer tools | Official Go 1.20.14, isolated from normal module/toolchain | BSD-3-Clause | Same preserved Go notice; toolchain identity in `HOST-BUILDS.json` |
 
 `licenses/` refers to the generated package directory. Wildcards above identify
 its upstream notice families; [exact locations and audit notes](docs/release/dependency-audit.md)

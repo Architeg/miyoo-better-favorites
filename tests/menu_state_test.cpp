@@ -1,4 +1,5 @@
 #include "menu_state.h"
+#include "home_entry_settings.h"
 #include "navigation.h"
 #include "ui_rows.h"
 #include <cassert>
@@ -8,6 +9,22 @@ int main() {
     assert(welcome.handle(MenuKey::A,true,true)==MenuAction::None && welcome.open());
     assert(welcome.handle(MenuKey::Down,false,true)==MenuAction::PageDown);
     welcome.handle(MenuKey::A,false,true);assert(!welcome.open());
+    {
+        MenuState session; HomeStatusSession cache; int hashes=0;
+        auto verify=[&]{++hashes;return HomeIntegrationStatus::Available;};
+        auto press=[&](MenuKey k){
+            auto action=session.handle(k,false,true);
+            if(!session.open())cache.close();
+            if(session.page()==MenuPage::Settings)cache.get(verify,action==MenuAction::ToggleHome);
+        };
+        press(MenuKey::Y);assert(hashes==1);
+        for(int i=0;i<5;++i)press(MenuKey::Down);
+        press(MenuKey::A);assert(session.page()==MenuPage::ReturnInfo);
+        press(MenuKey::B);assert(hashes==1);
+        press(MenuKey::Down);press(MenuKey::A);press(MenuKey::B);assert(hashes==1);
+        press(MenuKey::Up);press(MenuKey::Up);press(MenuKey::A);assert(hashes==2);
+        press(MenuKey::Menu);press(MenuKey::Y);assert(hashes==3);
+    }
     MenuState menu;
     auto key = [&](MenuKey k, bool favorite = true, bool repeat = false) { return menu.handle(k, repeat, favorite); };
     key(MenuKey::Select, true, true); assert(!menu.open());

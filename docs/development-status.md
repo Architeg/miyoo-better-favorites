@@ -4,7 +4,12 @@ Renamed canonical app to `App/BetterFavorites`, retained legacy recovery compati
 
 # Development status
 
-Updated 2026-10-04. [Authoritative roadmap](roadmap.md); update both documents when
+## Current candidate
+
+RC7 supersedes historical RC3–RC6 preparation below. The preceding candidate passed user-confirmed M1 and Windows install/complete uninstall and app use. Intel installation required manual receipt removal; the recovery-backed correction and Settings submenu/badge fix are host-verified, device-pending. Physical Linux acceptance is open. [Current scope, evidence and exact limits](release/rc.7.md). No card deployment in this publication step.
+
+
+Updated 2026-10-05. [Authoritative roadmap](roadmap.md); update both documents when
 milestones or hardware acceptance change.
 
 ## Accepted checkpoint

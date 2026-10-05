@@ -43,13 +43,11 @@ def build_hosts(stage,legacy_toolchain,out):
   subprocess.run(['go','build','-trimpath','-buildvcs=false','-ldflags=-s -w','-o',str((stage/name).resolve()),'.'],cwd=ROOT/'tools/release-installer',env=env,check=True)
   info=inspect_linux(stage/name) if goos=='linux' else inspect_mac(stage/name) if goos=='darwin' else {"format":"PE"}
   records.append(dict(file=name,os=goos,arch=arch,toolchain='go1.26.2',minimum=('Windows10' if goos=='windows' else 'macOS12' if goos=='darwin' else 'kernel3.2 (ARM64 3.7)'),**info))
- bootstrap='better-favorites-dispatch-windows-386.exe'
- env=dict(os.environ,GOROOT=str(legacy),GOOS='windows',GOARCH='386',GO386='sse2',CGO_ENABLED='0',GOWORK='off',GOTOOLCHAIN='local',GOPROXY='off',GOSUMDB='off')
- subprocess.run([str(oldgo),'build','-trimpath','-buildvcs=false','-ldflags=-s -w','-o',str((stage/bootstrap).resolve()),'.'],cwd=ROOT/'tools/host-dispatch',env=env,check=True)
- records.append(dict(file=bootstrap,os='windows',arch='386',toolchain='go1.20.14',role='read-only native OS/architecture dispatcher; x86 execution support required'))
+ subprocess.run(['python3',str(ROOT/'tools/generate-windows-entry.py'),'--check'],check=True)
  for name in ('Install-Windows.cmd','Install-macOS.command','Install-Linux.sh'):
   shutil.copy2(ROOT/'packaging'/name,stage/name)
   if not name.endswith('.cmd'):(stage/name).chmod(0o755)
  for record in records:record['sha256']=hashlib.sha256((stage/record['file']).read_bytes()).hexdigest()
+ (stage/'HOST-SHA256SUMS').write_text(''.join(record['sha256']+'  '+record['file']+'\n' for record in records))
  (stage/'HOST-BUILDS.json').write_text(json.dumps(dict(format=1,normal_toolchain=version,legacy_toolchain='go1.20.14',payload='One package.json and payload/ tree for every host; no host-specific Miyoo paths',execution='Cross-build/dependency metadata, not native acceptance',files=records),indent=2)+'\n')
  return records

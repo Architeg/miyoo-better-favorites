@@ -37,7 +37,7 @@ def main():
     time.sleep(.1)
    assert result.read_text()==str(script), 'desktop path/quoting failed'
   source=package/'App/BetterFavorites';computer=source/'computer';p=json.loads((computer/'package.json').read_text());h=json.loads((computer/'payload/integration/mainui-home/package.json').read_text());r=json.loads((computer/'payload/integration/onion-return/hashes.json').read_text())
-  assert p['version']=='1.0.0-rc.5';assert (source/'Install-Windows.cmd').is_file();assert (source/'Install-Linux.desktop').is_file()
+  assert p['version']=='1.0.0-rc.7';assert (source/'Install-Windows.cmd').is_file();assert (source/'Install-Linux.desktop').is_file()
   card=t/'SD card 日本語';app=card/'App/BetterFavorites'
   for name in ('App','.tmp_update/bin','.tmp_update/config','.tmp_update/script','.tmp_update/onionVersion','Roms','Saves','Themes'):(card/name).mkdir(parents=True,exist_ok=True)
   (card/'.tmp_update/onionVersion/version.txt').write_text('v4.3.1-1\n')
@@ -55,6 +55,7 @@ def main():
    # Real Mac-generated sidecar encoding travels to every tested host.
    fixtures=Path(__file__).resolve().parents[1]/'tools/release-installer/testdata'
    (app/'._Install-Linux.desktop').write_bytes((fixtures/'macos-appledouble.bin').read_bytes())
+   (app/'._computer').write_bytes((fixtures/'macos-directory-appledouble.bin').read_bytes())
    for d in (app,app/'computer',app/'computer/payload/App/BetterFavorites'):
     (d/'.DS_Store').write_bytes((fixtures/'finder-empty.bin').read_bytes())
    # Host executable bits on SD input are not needed by the click staging route.
@@ -69,8 +70,25 @@ def main():
   def stock():
    for n,v in h['originals'].items():assert sha(card/'.tmp_update/bin'/n)==v,n
    assert sha(card/'.tmp_update/runtime.sh')==r['original_sha256']
+  # Accepted earlier *entry style*, corrected current backend and full current
+  # payload: execute the extracted host wrapper directly, then use copied-card
+  # entry below. Both call the same transaction/recovery implementation.
+  stock()
+  standalone=computer/('Install-macOS.command' if host=='Darwin' else 'Install-Linux.sh')
+  recovery=t/'direct-recovery'
+  controlled=subprocess.run(['/bin/sh',str(standalone),'install','--sd-root',str(card),'--package',str(computer),'--recovery',str(recovery),'--powered-off'],env=env,capture_output=True,text=True,timeout=180)
+  assert controlled.returncode==0,(controlled.stdout,controlled.stderr)
+  for n,v in h['patched'].items():assert sha(card/'.tmp_update/bin'/n)==v
+  assert sha(card/'.tmp_update/runtime.sh')==r['patched_sha256']
+  controlled=subprocess.run(['/bin/sh',str(standalone),'uninstall','--sd-root',str(card),'--package',str(computer),'--recovery',str(recovery),'--archive',str(t/'direct-archive'),'--powered-off'],env=env,capture_output=True,text=True,timeout=180)
+  assert controlled.returncode==0,(controlled.stdout,controlled.stderr)
+  assert not app.exists();stock();unchanged()
   copy();stock();run('0\n');assert not (card/'.tmp_update/config/better-favorites-installation.json').exists()
-  run('1\ny\n')
+  result=run('1\ny\n');assert 'Installing Better Favorites' in result.stdout and 'Preparing recovery' in result.stdout
+  result=run('3\n');assert '[3] Export diagnostics' in result.stdout
+  exports=list(Path(env['HOME']).glob('better-favorites-diagnostics-*.zip'));assert len(exports)==1
+  with zipfile.ZipFile(exports[0]) as z:
+   assert 'report.json' in z.namelist() and any(n.startswith('installer/session-') for n in z.namelist())
   for n,v in h['patched'].items():assert sha(card/'.tmp_update/bin'/n)==v
   assert sha(card/'.tmp_update/runtime.sh')==r['patched_sha256']
   assert not (app/'settings.conf').exists() and not (app/'home-entry.conf').exists()
@@ -80,6 +98,7 @@ def main():
    if s['stock_sha256']!='absent':assert sha(card/index['recovery']/'files'/s['path'])==s['stock_sha256']
   prefs={'settings.conf':b'BetterFavoritesSettings1\n1\n'+b'0'*32+b'\n','home-entry.conf':b'BetterFavoritesHome1\n1\n','browser-preferences.conf':b'BetterFavoritesBrowserPreferences1\n0\n0\n1\n','browser-state':b'BetterFavoritesBrowserState1\n0\n'}
   for n,b in prefs.items():(app/n).write_bytes(b)
+  (app/'._welcome-pending').write_bytes((Path(__file__).resolve().parents[1]/'tools/release-installer/testdata/macos-appledouble.bin').read_bytes())
   (app/'welcome-pending').unlink();copy();run('1\ny\n')
   for n,b in prefs.items():assert (app/n).read_bytes()==b,n
   assert not (app/'welcome-pending').exists()

@@ -151,3 +151,17 @@ func validateMetadata(p string, b []byte, dirs map[string]bool, target func(stri
 	}
 	return nil
 }
+
+// Only the welcome marker has a defined app-consumed lifecycle. Exact prior
+// bytes from a verified recovery chain authenticate its now-orphaned sidecar.
+// Rotated logs and arbitrary absent files do not gain ownership from their names.
+func lifecycleMissing(own map[string]map[string]bool) map[string]bool {
+	out := map[string]bool{}
+	for _, prefix := range []string{app, legacyApp} {
+		p := prefix + "welcome-pending"
+		if own[p][digest([]byte("BetterFavoritesWelcome1\n"))] {
+			out[p] = true
+		}
+	}
+	return out
+}

@@ -112,10 +112,13 @@ func export(root, dir, out string) error {
 			return e
 		}
 	}
+	if e = exportInstallerLogs(root, write, missing); e != nil {
+		return e
+	}
 	if e = write("missing.json", encode(missing)); e != nil {
 		return e
 	}
-	if e = write("PRIVACY.txt", []byte("Review before sharing. Only allowlisted logs/configuration and hashes are collected. No ROM/history contents, credentials, serials or live process samples. Error logs may contain game filenames. Unknown model/firmware are not inferred.\n")); e != nil {
+	if e = write("PRIVACY.txt", []byte("Review before sharing. Only allowlisted logs/configuration and hashes are collected. No ROM/history contents, credentials, serials or live process samples. Error logs may contain game filenames and computer/card paths. At most two computer-side installer logs (128 KiB each) are included; no Defender store or recovery originals are collected. Unknown model/firmware are not inferred.\n")); e != nil {
 		return e
 	}
 	if e = z.Close(); e != nil {
@@ -167,7 +170,7 @@ func run(args []string) error {
 		return strings.Trim(strings.TrimSpace(answer), "\""), nil
 	}
 	if len(args) == 0 {
-		fmt.Println("Better Favorites — offline card tool\n1 Install / Update\n2 Uninstall completely\n0 Cancel")
+		installerMenu()
 		a, e := ask("Action: ")
 		if e != nil {
 			return e
@@ -175,7 +178,7 @@ func run(args []string) error {
 		if a == "0" || a == "" {
 			return nil
 		}
-		action := map[string]string{"1": "install", "2": "uninstall"}[a]
+		action := map[string]string{"1": "install", "2": "uninstall", "3": "export-diagnostics"}[a]
 		if action == "" {
 			return fmt.Errorf("invalid action")
 		}
@@ -227,6 +230,10 @@ func run(args []string) error {
 	}
 
 	var e error
+	if operationLog != nil {
+		operationLog.action = action
+	}
+	reportCard(*root)
 	*root, e = filepath.Abs(*root)
 	if e != nil {
 		return e
@@ -310,8 +317,17 @@ func run(args []string) error {
 	}
 }
 func main() {
+	presentation = newPresentation(os.Stdout)
+	defer presentation.stop()
+	operationLog = &operationReport{}
+	defer func() {
+		if operationLog.log != nil {
+			operationLog.log.Close()
+		}
+	}()
 	if e := run(os.Args[1:]); e != nil {
-		fmt.Fprintln(os.Stderr, e)
+		presentation.stop()
+		operationLog.failure(os.Stderr, e)
 		var child *exec.ExitError
 		if errors.As(e, &child) && (child.ExitCode() > 0 || runtime.GOOS == "windows") {
 			os.Exit(child.ExitCode())

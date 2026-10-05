@@ -106,7 +106,7 @@ func TestCapturedSupportTarget(t *testing.T) {
 }
 
 func TestTransportManifestRefusal(t *testing.T) {
-	for _, kind := range []string{"valid", "duplicate", "traversal", "mode", "checksum", "incomplete"} {
+	for _, kind := range []string{"valid", "duplicate", "traversal", "mode", "checksum", "incomplete", "unreadable"} {
 		t.Run(kind, func(t *testing.T) {
 			source := t.TempDir()
 			dir := filepath.Join(source, "computer")
@@ -118,6 +118,8 @@ func TestTransportManifestRefusal(t *testing.T) {
 				m.Files = append(m.Files, PayloadFile{p, digest(b), 0644})
 			}
 			switch kind {
+			case "unreadable":
+				os.Remove(filepath.Join(source, "computer/a"))
 			case "duplicate":
 				m.Files = append(m.Files, m.Files[0])
 			case "traversal":
@@ -132,6 +134,9 @@ func TestTransportManifestRefusal(t *testing.T) {
 			b, _ := json.Marshal(m)
 			mustWrite(t, dir, "transport.json", b)
 			_, e := transportFiles(dir)
+			if kind == "unreadable" && (!errors.Is(e, os.ErrNotExist) || !strings.Contains(e.Error(), "computer/a")) {
+				t.Fatal("underlying read error lost", e)
+			}
 			if (e == nil) != (kind == "valid") {
 				t.Fatal(kind, e)
 			}

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Better Favorites — Mac first open</title>
+<style>body{font:18px/1.55 system-ui,sans-serif;max-width:780px;margin:40px auto;padding:0 24px;color:CanvasText;background:Canvas}h1,h2{line-height:1.2}li{margin:.65em 0}code{overflow-wrap:anywhere}aside{border:1px solid;padding:12px 20px}a{color:LinkText}</style>
+<h1>Better Favorites: Mac first open</h1>
+<p>This guide works offline. Read it before opening the installer.</p>
+<p>macOS may ask you to approve this unsigned installer. Download it only from the official Better Favorites release. Follow the file-specific approval steps below.</p>
+<aside><strong>There may be two separate approvals:</strong> first <code>Install-macOS.command</code>, then the compiled <code>BetterFavorites-Installer</code> helper. Approving the first does not approve the second. A new helper version may need approval again.</aside>
+<h2>1. Prepare</h2>
+<ol><li>Power off the Miyoo and mount its SD card on the Mac. Keep it powered off until installation finishes.</li><li>Extract the package and copy its <code>App/BetterFavorites</code> folder into the card’s <code>App</code> folder. Keep recovery backups.</li><li>Open <code>Install-macOS.command</code> inside the copied folder. If an unsigned/unidentified-developer warning blocks it, follow step 2.</li></ol>
+<h2>2. Approve the script, if blocked</h2>
+<ul><li><strong>Monterey:</strong> Apple menu → System Preferences → Security &amp; Privacy → General.</li><li><strong>Ventura and later:</strong> Apple menu → System Settings → Privacy &amp; Security. Scroll to the Security section.</li></ul>
+<p>Find the message for the file you just tried to open. Choose <strong>Open Anyway</strong>, authenticate if asked, and confirm Open. This option appears after a blocked attempt and may be time-limited. If absent, try opening the file once more and revisit the settings page. A managed Mac may not allow exceptions.</p>
+<h2>3. Approve the helper separately, if blocked</h2>
+<p>Terminal may open successfully while macOS blocks <code>BetterFavorites-Installer</code>. Use the same settings page to approve that specific file. The terminal shows its exact retained path; use Finder → Go → Go to Folder to locate it if needed.</p>
+<p>Leave Terminal open. After approval, enter <strong>r</strong> to retry. You may enter <strong>s</strong> to open System Settings/Preferences. The helper stays at a stable path on your Mac and its bytes are checked before every retry. The installer does not remove quarantine.</p>
+<h2>4. Install or uninstall</h2>
+<p>Choose <strong>1 — Install / Update</strong> or <strong>2 — Uninstall completely</strong>. Confirm the powered-off card when asked. Optional integrations remain separate from their default-OFF app preferences. A successful complete uninstall restores verified originals and removes owned app files; it retains a recovery archive on your computer.</p>
+<p>Keep the card connected while progress reports the actual work. Wait for verified success before safely ejecting the card in Finder.</p>
+<p>To report a problem, reopen the same launcher and choose <strong>3 — Export diagnostics</strong>. It prints a fresh archive path on your computer. Review the archive before sharing; it includes bounded installer log tails and may contain personal file paths.</p>
+<h2>If something fails</h2>
+<p><strong>Deleting the app folder does not restore system patches.</strong> Keep the card’s recovery files. Re-copy the current package and choose <strong>Uninstall completely</strong> for verified restoration and cleanup, or <strong>Install / Update</strong> for authenticated repair. A missing app receipt can be repaired only when the surviving journal, originals and installed system files agree. Unknown changes are preserved; share the actual reason and log instead of editing system files manually.</p>
+<p><strong>“Installation failed” is not a security prompt.</strong> Read the reported change state and next action. The detailed log is normally in <code>~/BetterFavorites-Logs/</code>. Preserve unknown files and recovery backups; do not delete files merely to bypass validation. If restoration is unresolved, keep the Miyoo powered off and use the package’s recovery guide.</p>
+<p>Status 137 means a possible SIGKILL termination; it does not prove Gatekeeper was responsible or establish the card’s state. Only use the approval steps when macOS actually displays an unsigned/unidentified-developer warning.</p>
+<p><strong>Stop for malware, damaged-file, or organization-policy warnings.</strong> Do not override them using these instructions. Do not disable Gatekeeper or other protections. Checksums help detect changed downloads; they are not a security audit.</p>
+<p>Online reference: <a href="https://support.apple.com/en-us/102445">Apple: opening apps safely</a>. No internet connection is needed to use this guide or the packaged installer.</p>
+</html>

@@ -1,7 +1,11 @@
 #!/bin/sh
 # Read-only host checks precede installer execution and all SD writes.
 set -eu
-fail() { echo "Unsupported or ambiguous macOS host: $*" >&2; exit 2; }
+fail() {
+ printf 'Cannot identify this Mac: %s\n' "$*" >&2
+ printf 'Detection: macOS=%s; machine=%s; arm64=%s; translated=%s\n' "${version:-unknown}" "${machine:-unknown}" "${arm:-unknown}" "${translated:-unknown}" >&2
+ exit 2
+}
 cd "$(dirname "$0")" || exit 2
 [ "$(/usr/bin/uname -s)" = Darwin ] || fail "requires macOS"
 version=$(/usr/bin/sw_vers -productVersion) || fail "version unavailable"
@@ -11,13 +15,17 @@ major=${version%%.*}
 machine=$(/usr/bin/uname -m) || fail "architecture unavailable"
 arm=$(/usr/sbin/sysctl -n hw.optional.arm64 2>/dev/null) || arm=absent
 translated=$(/usr/sbin/sysctl -n sysctl.proc_translated 2>/dev/null) || translated=0
-case "$arm:$machine:$translated" in
- 1:arm64:0|1:x86_64:1|0:x86_64:1|absent:x86_64:1) arch=arm64;;
- 0:x86_64:0) arch=amd64;;
- absent:x86_64:0)
-  [ "$(/usr/sbin/sysctl -n hw.cputype 2>/dev/null)" = 16777223 ] || fail "native architecture unavailable"
-  arch=amd64;;
- *) fail "inconsistent architecture/translation ($arm/$machine/$translated)";;
+# uname identifies the running ABI; a positive translation flag establishes
+# Apple Silicon under Rosetta. Missing optional Intel sysctl keys are normal.
+case "$arm:$translated" in
+ 0:0|1:0|absent:0|0:1|1:1|absent:1) :;;
+ *) fail "invalid optional architecture evidence";;
+esac
+case "$machine:$translated" in
+ arm64:0) [ "$arm" != 0 ] || fail "conflicting native ARM evidence"; arch=arm64;;
+ x86_64:1) arch=arm64;;
+ x86_64:0) [ "$arm" != 1 ] || fail "Apple Silicon reported without a translation flag"; arch=amd64;;
+ *) fail "unsupported or conflicting architecture evidence";;
 esac
 tool="./better-favorites-installer-darwin-$arch"
 if [ -d computer ]; then
@@ -48,6 +56,9 @@ if [ -d computer ]; then
   actual=$(/usr/bin/shasum -a 256 "$approved") || exit 2
   [ "${actual%% *}" = "$hash" ] || fail "cached installer changed; preserved for inspection"
  }
+ approval_actions() {
+  printf '\nThe verified installer is retained.\n\n[R] Retry\n[S] Open Settings\n[0] Close\n\nChoose: '
+ }
  while :; do
   verify
   set +e
@@ -57,24 +68,37 @@ if [ -d computer ]; then
   [ "$result" -ne 0 ] || break
   case "$result" in
    137)
-    printf '\nInstaller terminated with status 137 (possible SIGKILL).\n'
-    printf 'This alone does not establish that macOS security blocked it.\n'
-    printf 'If macOS displayed an approval warning, approve only this verified file:\n%s\n' "$approved"
-    printf 'Monterey: System Preferences > Security & Privacy > General.\n'
-    printf 'Newer macOS: System Settings > Privacy & Security.\n'
-    printf 'Do not override malware/damaged-file or managed-policy warnings.\n'
-    printf 'The verified file is retained. After approval, type r to retry; anything else closes: '
+    printf '\nInstaller could not start\n\n'
+    printf 'If macOS showed an unsigned-developer approval warning:\n'
+    if [ "$major" -eq 12 ]; then
+     printf '  1. Open System Preferences > Security & Privacy > General.\n'
+    else
+     printf '  1. Open System Settings > Privacy & Security.\n'
+    fi
+    printf '  2. Choose Open Anyway for BetterFavorites-Installer.\n'
+    printf '  3. Return here and choose Retry.\n\n'
+    printf 'Stop for malware, damaged-file or managed-policy warnings.\n'
+    printf '\nDetails\nStatus: 137 (possible SIGKILL; does not establish a security block).\n'
+    printf 'The helper may have started before termination. Card state is unknown.\n'
+    printf 'Verified helper: %s\n' "$approved"
+    printf 'Installer logs, if started: ~/BetterFavorites-Logs/\n'
+    approval_actions
     ;;
    *)
     case "${1:-menu}" in install) operation=Installation;; uninstall) operation=Uninstall;; *) operation=Operation;; esac
     printf '\n%s failed (status %s).\n' "$operation" "$result"
-    printf 'The installer reason is shown above. Resolve that reported problem before trying again.\n'
+    printf 'See the installer message and detailed log above. Resolve that reported problem before trying again.\n'
     printf 'Files reported as unknown or modified are preserved; use verified recovery if restoration is required.\n'
     break
     ;;
   esac
   read -r answer || answer=
-  [ "$answer" = r ] || break
+  while [ "$answer" = s ] || [ "$answer" = S ]; do
+   /usr/bin/open -b com.apple.systempreferences || printf 'Open System Preferences/Settings from the Apple menu.\n'
+   approval_actions
+   read -r answer || answer=
+  done
+  [ "$answer" = r ] || [ "$answer" = R ] || break
  done
  if [ "$#" -eq 0 ]; then printf "\nPress Enter to close. "; read -r answer || :; fi
  exit "$result"

@@ -4,6 +4,8 @@ Use the expected package and verify its checksums. These executables are not sig
 
 ## macOS Monterey and newer
 
+**Before opening the script:** read the [offline Mac first-open guide](../packaging/Mac-first-open.html), included at ZIP root and in the app folder. Two files can require separate approval. macOS may ask you to approve this unsigned installer. Download it only from the official Better Favorites release. Checksums detect byte changes; they are not a security audit.
+
 1. Open `Install-macOS.command` from the copied app folder. For an unidentified developer warning, use the file-specific approval offered by macOS.
 2. Monterey: **System Preferences → Security & Privacy → General → Open Anyway**. Newer macOS: **System Settings → Privacy & Security → Open Anyway**. Recent versions may require this Settings route instead of Control-click Open.
 3. The script can open Terminal while its separate executable is still blocked. Follow the terminal's exact **BetterFavorites-Installer** path and approve that file separately. You can locate it in Finder with Go → Go to Folder. Keep the terminal open, then type **r** to retry after approval. Every retry rechecks bytes.
@@ -26,3 +28,13 @@ Use the desktop's **Allow launching/Trust** for `Install-Linux.desktop`. If your
 ## Observed Mac failure (2026-10-04)
 
 The supplied Keka/Finder screenshots show the script's approval followed by a blocked generic `installer` executable. The installation menu was not reached. Read-only inspection found quarantine on both card files; the ARM64 Mac tool was linker ad-hoc signed with no TeamIdentifier. No valid signing identities were available. RC4 fixes retention/naming and eliminates the second temporary executable dispatch; it does not claim notarization or fresh-download GUI acceptance.
+
+## RC6 findings
+
+RC5 reached installation but rejected valid directory metadata (`._computer`); this is not a security failure or a successful device installation. RC6 corrects inventory-owned directory companions and records transaction-based change state in errors. Detailed bounded logs are saved on the computer under `~/BetterFavorites-Logs/`; log failures remain best-effort. No valid Developer ID identity was found; notarization tooling alone is insufficient. [Evidence and remaining gates](release/rc.6.md).
+
+## RC6 follow-up
+
+Intel Monterey no longer requires optional CPU keys: the native ABI and Rosetta evidence select the executable, with contradictions rejected. The short possible-termination instructions precede a separate Details section. Ordinary installer errors remain outside security retry.
+
+The user reported a Defender Bearfoos-family detection affecting the RC6 Windows dispatcher and its staging file. Do not treat it as an unsigned reputation prompt or assume a false positive. No exclusions, protection disablement or blind restoration are recommended. The original distributed executable and evidence remain preserved. No submission is planned as part of this work. The new package omits the compiled dispatcher and uses built-in Windows selection; this is not antivirus acceptance. The exact quarantined bytes and detection suffix remain unverified. [Evidence and comparison](release/rc6-followup.md).

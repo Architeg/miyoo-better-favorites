@@ -236,7 +236,7 @@ If you enjoy Better Favorites and it makes finding and playing your games easier
 
 Bug reports, feature ideas and device/theme testing are welcome too.
 
-[Report a bug or suggest a feature](https://github.com/Architeg/miyoo-better-favorites/issues/new/choose), share a theme/device test, log file or [give the project a star](https://github.com/Architeg/miyoo-better-favorites/stargazers). You can contribute without writing code.
+[Report a bug or suggest a feature](https://github.com/Architeg/miyoo-better-favorites/issues/new/choose), share a theme/device test, or log file. You can contribute without writing code.
 
 **[How to Contribute →](CONTRIBUTING.md)** · [Development](docs/development.md) · [Roadmap](docs/roadmap.md) · [Changelog](CHANGELOG.md)
 

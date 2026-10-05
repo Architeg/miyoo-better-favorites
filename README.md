@@ -17,7 +17,7 @@
   <img alt="GitHub stars" src="https://img.shields.io/github/stars/Architeg/miyoo-better-favorites?label=Stars&style=flat" />
 </a>
 <a href="#support-miyoo-better-favorites">
-  <img alt="Support" src="https://img.shields.io/badge/%E2%AD%90%20Support-Miyoo%20Better%20Favorites-2563eb" />
+  <img alt="Support" src="https://img.shields.io/badge/%E2%AD%90%20Support-Better%20Favorites-2563eb" />
 </a>
 </p>
 
@@ -218,14 +218,19 @@ your computer and prints its location. No manually entered command is needed.
 Review before sharing: errors may contain game filenames, theme paths and preferences. Detailed tracing is OFF by default. [Diagnostics and privacy →](docs/diagnostics.md)
 
 <a id="contribute-and-learn-more"></a>
-## 🤝 Help improve Better Favorites
+<a id="support-miyoo-better-favorites"></a>
+## ⭐ Support Miyoo Better Favorites
+
+If Better Favorites makes finding and playing your games easier, you can [share it](https://twitter.com/intent/tweet?url=https%3A%2F%2Fgithub.com%2FArchiteg%2Fmiyoo-better-favorites&text=Miyoo%20Better%20Favorites%20%E2%80%94%20An%20alternative%20Favorites%20app%20for%20Miyoo%20Mini%20and%20Mini%20Plus%20running%20Onion%20OS.), [give it a star](https://github.com/Architeg/miyoo-better-favorites/stargazers), or support its development:
+
+[![GitHub Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-support-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/Architeg)  
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-support-FF5E5B?logo=kofi&logoColor=white)](https://ko-fi.com/architeg)
+
+Bug reports, feature ideas and device/theme testing are welcome too.
 
 [Report a bug or suggest a feature](https://github.com/Architeg/miyoo-better-favorites/issues/new/choose), share a theme/device test, or [give the project a star](https://github.com/Architeg/miyoo-better-favorites/stargazers). You can contribute without writing code.
 
-**[Contributing](CONTRIBUTING.md)** · [Development](docs/development.md) · [Roadmap](docs/roadmap.md) · [Changelog](CHANGELOG.md)
-
-<a id="support-miyoo-better-favorites"></a>
-## ⭐ Support Miyoo Better Favorites
+**[How to Contribute →](CONTRIBUTING.md)** · [Development](docs/development.md) · [Roadmap](docs/roadmap.md) · [Changelog](CHANGELOG.md)
 
 <a id="credits-and-license"></a>
 ## 📜 Credits and license

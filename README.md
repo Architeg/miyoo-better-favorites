@@ -11,6 +11,12 @@
 <p align="center">
   <img alt="C++" src="https://img.shields.io/badge/C%2B%2B-00599C?logo=cplusplus&logoColor=white" />
   <a href="https://github.com/Architeg/miyoo-better-favorites/releases/tag/v1.0.0-rc.7"><img alt="Download Better Favorites" src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8FDownload-Better%20Favorites-2563eb"></a>
+  <a href="https://github.com/Architeg/miyoo-better-favorites/releases">
+  <img
+    alt="GitHub release downloads"
+    src="https://img.shields.io/github/downloads/Architeg/miyoo-better-favorites/total?label=Downloads&style=flat"
+  />
+  </a>
   <a href="docs/compatibility.md"><img alt="Tested on Onion v4.3.1-1" src="https://img.shields.io/badge/Required%20Onion-v4.3.1--1-7c5cbf"></a>
   <a href="LICENSE"><img alt="GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-2563eb"></a>
 <a href="https://github.com/Architeg/miyoo-better-favorites/stargazers">

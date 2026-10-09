@@ -18,7 +18,6 @@
   />
   </a>
   <a href="docs/compatibility.md"><img alt="Tested on Onion v4.3.1-1" src="https://img.shields.io/badge/Required%20Onion-v4.3.1--1-7c5cbf"></a>
-  <a href="LICENSE"><img alt="GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-2563eb"></a>
 <a href="https://github.com/Architeg/miyoo-better-favorites/stargazers">
   <img alt="GitHub stars" src="https://img.shields.io/github/stars/Architeg/miyoo-better-favorites?label=Stars&style=flat" />
 </a>
